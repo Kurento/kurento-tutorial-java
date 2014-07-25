@@ -3,11 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.kurento.kmf</groupId>
-	<artifactId>kmf-tutorial</artifactId>
 	<version>4.3.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>Kurento Media Framework examples</name>
-	<description>Sample projects</description>
+	<artifactId>kmf-webrtc-group</artifactId>
+	<packaging>jar</packaging>
+
+	<name>KMF Demo - WebRTC call many to many</name>
+	<description>WebRTC call many to many</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
 
@@ -39,12 +40,4 @@
 			<organizationUrl>http://www.kurento.org</organizationUrl>
 		</developer>
 	</developers>
-
-	<modules>
-		<module>kmf-webrtc-loopback</module>
-		<module>kmf-webrtc-call</module>
-		<module>kmf-webrtc-call-advanced</module>
-		<module>kmf-webrtc-group</module>
-		<module>kmf-webrtc-group-advanced</module>
-	</modules>
 </project>
