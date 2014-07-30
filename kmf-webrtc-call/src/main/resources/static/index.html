@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<META http-equiv="Cache-Control" content="no-cache">
+<META http-equiv="Pragma" content="no-cache">
+<META http-equiv="Expires" content="0">
+<title>Kurento Demo: Video Call 1 to 1 with WebRTC</title>
+</head>
+<body>
+	<h1>Kurento Demo: Video Call 1 to 1 with WebRTC</h1>
+	<p>Instructions:</p>
+	<ol>
+		<li>Open this page with a browser compliant with WebRTC (Chrome,
+			Firefox).</li>
+		<li>Type a nick in the field <i>Name</i> and click on <i>Register</i>.
+		</li>
+		<li>In a different machine (or a different tab in the same
+			machine) follow the same procedure to register another user.</li>
+		<li>Type the name of the user to be called in the field <i>Peer</i>
+			and click <i>Call</i>.
+		</li>
+		<li>Grant the access to the camera and microphone for both users.
+			After the SDP negotiation the communication should start.</li>
+		<li>The called user should accept the incomming call (confirm
+			dialog).</li>
+		<li>Click on <i>Stop</i> to finish the communication.
+		</li>
+	</ol>
+	<label for="name">Name</label>
+	<input id="name" type="text" name="name">
+	<input id="register" type="button" value="Register"
+		onclick="register()">
+	<br>
+
+	<label for="peer">Peer</label>
+	<input id="peer" type="text" name="peer">
+	<input id="call" type="button" value="Call" onclick="call()">
+	<input id="call" type="button" value="Stop" onclick="stop()">
+	<br>
+
+	<div style="float: left; margin: 5px;">
+		<h2>Local stream</h2>
+		<video id="videoInput" autoplay controls width="480px" height="360px"></video>
+	</div>
+	<div style="float: left; margin: 5px;">
+		<h2>Remote stream</h2>
+		<video id="videoOutput" autoplay controls width="480px" height="360px"></video>
+	</div>
+
+	<div id="console" style="clear: both;"></div>
+
+	<script
+		src="https://rawgit.com/GoogleChrome/webrtc/master/samples/web/js/adapter.js"></script>
+	<script src="js/console.js"></script>
+	<script src="js/kws-utils.js"></script>
+	<script src="js/index.js"></script>
+</body>
+</html>
