@@ -23,14 +23,14 @@ import com.kurento.kmf.media.factory.KmfMediaApi;
 import com.kurento.kmf.media.factory.MediaPipelineFactory;
 
 /**
- * WebRTC demo (main).
+ * Loopback video call (main).
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 4.3.1
  */
 @ComponentScan
 @EnableAutoConfiguration
-public class WebRtcApp {
+public class LoopbackApp {
 
 	@Bean
 	MediaPipelineFactory mediaPipelineFactory() {
@@ -38,7 +38,7 @@ public class WebRtcApp {
 	}
 
 	public static void main(String[] args) throws Exception {
-		SpringApplication application = new SpringApplication(WebRtcApp.class);
+		SpringApplication application = new SpringApplication(LoopbackApp.class);
 		application.run(args);
 	}
 }

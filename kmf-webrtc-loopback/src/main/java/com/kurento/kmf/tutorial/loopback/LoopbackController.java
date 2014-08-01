@@ -31,25 +31,23 @@ import com.kurento.kmf.media.WebRtcEndpoint;
 import com.kurento.kmf.media.factory.MediaPipelineFactory;
 
 /**
- * WebRTC handler (application logic).
+ * Loopback video call handler (application logic).
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 4.3.1
  */
 @RestController
-public class WebRtcController {
+public class LoopbackController {
 
-	private final Logger log = LoggerFactory.getLogger(WebRtcController.class);
+	private final Logger log = LoggerFactory
+			.getLogger(LoopbackController.class);
 
 	@Autowired
 	private MediaPipelineFactory mpf;
 
 	@RequestMapping(value = "/webrtc", method = RequestMethod.POST)
-	private String webrtc(@RequestBody String sdpOffer) throws IOException {
-
-		// SDP Offer
-		sdpOffer = URLDecoder.decode(sdpOffer, "UTF-8");
-		log.debug("Received SDP offer: {}", sdpOffer);
+	private String processRequest(@RequestBody String sdpOffer)
+			throws IOException {
 
 		// Media Logic
 		MediaPipeline mp = mpf.create();
@@ -61,7 +59,9 @@ public class WebRtcController {
 		webRtcEndpoint.connect(faceOverlayFilter);
 		faceOverlayFilter.connect(webRtcEndpoint);
 
-		// SDP Answer
+		// SDP negotiation (offer and answer)
+		sdpOffer = URLDecoder.decode(sdpOffer, "UTF-8");
+		log.debug("Received SDP offer: {}", sdpOffer);
 		String responseSdp = webRtcEndpoint.processOffer(sdpOffer);
 		log.debug("Sent SDP response: {}", responseSdp);
 
