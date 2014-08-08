@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.kurento.tutorial</groupId>
-	<artifactId>kurento-tutorial</artifactId>
 	<version>5.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	
-	<name>Kurento Media Framework examples</name>
-	<description>Sample projects</description>
+	<artifactId>kurento-magic-mirror</artifactId>
+	<packaging>jar</packaging>
+
+	<name>Kurento Tutorial - Magic Mirror</name>
+	<description>Tutorial app with a Magic Mirror. WebRTC in loopback with filter</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
 
@@ -41,9 +41,30 @@
 		</developer>
 	</developers>
 
-	<modules>
-		<module>kurento-magic-mirror</module>
-		<module>kurento-one2one-call</module>
-		<module>kurento-group-call</module>
-	</modules>
+	<properties>
+		<!-- Cross plugins settings -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- maven-compiler-plugin -->
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+
+		<!-- KWS -->
+		<kws.version>4.3.19-SNAPSHOT</kws.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.kurento.kws</groupId>
+			<artifactId>kws-utils</artifactId>
+			<version>${kws.version}</version>
+		</dependency>
+	</dependencies>
+
 </project>
