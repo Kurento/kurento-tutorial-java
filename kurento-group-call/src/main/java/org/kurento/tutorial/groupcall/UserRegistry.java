@@ -1,4 +1,4 @@
-package com.kurento.tutorial.groupcall;
+package org.kurento.tutorial.groupcall;
 
 /*
  * (C) Copyright 2014 Kurento (http://kurento.org/)

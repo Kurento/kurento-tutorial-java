@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
-package com.kurento.tutorial.groupcall;
+package org.kurento.tutorial.groupcall;
 
 import java.io.Closeable;
 import java.io.IOException;

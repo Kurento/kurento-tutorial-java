@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
-package com.kurento.tutorial.one2onecall;
+package org.kurento.tutorial.one2onecall;
 
 import java.util.concurrent.ConcurrentHashMap;
 

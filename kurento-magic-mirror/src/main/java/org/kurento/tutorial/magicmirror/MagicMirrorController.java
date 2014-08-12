@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
-package com.kurento.tutorial.magicmirror;
+package org.kurento.tutorial.magicmirror;
 
 import java.io.IOException;
 import java.net.URLDecoder;

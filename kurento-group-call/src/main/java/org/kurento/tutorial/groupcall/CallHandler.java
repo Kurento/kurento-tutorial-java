@@ -1,4 +1,4 @@
-package com.kurento.tutorial.groupcall;
+package org.kurento.tutorial.groupcall;
 
 import java.io.IOException;
 

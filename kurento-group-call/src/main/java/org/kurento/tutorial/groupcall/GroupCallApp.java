@@ -1,7 +1,6 @@
-package com.kurento.tutorial.groupcall;
+package org.kurento.tutorial.groupcall;
 
 import org.kurento.client.factory.KurentoClient;
-import org.kurento.client.factory.KurentoClientFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +35,8 @@ public class GroupCallApp implements WebSocketConfigurer {
 	}
 
 	@Bean
-	public KurentoClient mediaPipelineFactory() {
-		return KurentoClientFactory.createKurentoClient();
+	public KurentoClient kurentoClient() {
+		return KurentoClient.create("ws://localhost:8888/kurento");
 	}
 
 	public static void main(String[] args) throws Exception {

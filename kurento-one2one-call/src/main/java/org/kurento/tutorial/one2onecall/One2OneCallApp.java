@@ -12,10 +12,9 @@
  * Lesser General Public License for more details.
  *
  */
-package com.kurento.tutorial.one2onecall;
+package org.kurento.tutorial.one2onecall;
 
 import org.kurento.client.factory.KurentoClient;
-import org.kurento.client.factory.KurentoClientFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +47,7 @@ public class One2OneCallApp implements WebSocketConfigurer {
 
 	@Bean
 	public KurentoClient kurentoClient() {
-		return KurentoClientFactory.createKurentoClient();
+		return KurentoClient.create("ws://localhost:8888/kurento");
 	}
 
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
