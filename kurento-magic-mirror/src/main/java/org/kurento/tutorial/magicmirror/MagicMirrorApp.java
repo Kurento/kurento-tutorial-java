@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Magic Mirror App (main).
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 4.3.1
  */
