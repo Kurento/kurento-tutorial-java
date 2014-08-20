@@ -29,7 +29,6 @@ ws.onmessage = function(message) {
 }
 
 function register() {
-
 	name = document.getElementById('name').value;
 	var room = document.getElementById('roomName').value;
 
@@ -38,9 +37,9 @@ function register() {
 	document.getElementById('room').style.display = 'block';
 
 	var message = {
-			id : 'joinRoom',
-			name : name,
-			room : room,
+		id : 'joinRoom',
+		name : name,
+		room : room,
 	}
 	sendMessage(message);
 }
@@ -63,30 +62,32 @@ function callResponse(message) {
 }
 
 function onExistingParticipants(msg) {
-
 	var constraints = {
-			audio : true,
-			video : {
-				mandatory: {
-					maxWidth: 320,
-					maxFrameRate : 15,
-					minFrameRate: 15
-				}
+		audio : true,
+		video : {
+			mandatory : {
+				maxWidth : 320,
+				maxFrameRate : 15,
+				minFrameRate : 15
 			}
+		}
 	};
 	console.log(name + " registered in room " + room);
 	var participant = new Participant(name);
 	participants[name] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kwsUtils.WebRtcPeer.startSendOnly(video, participant.offerToReceiveVideo.bind(participant), null, constraints);
+	participant.rtcPeer = kwsUtils.WebRtcPeer.startSendOnly(video,
+			participant.offerToReceiveVideo.bind(participant), null,
+			constraints);
 	msg.data.forEach(receiveVideo);
 }
 
 function leaveRoom() {
 	sendMessage({
-		id : 'leaveRoom'});
+		id : 'leaveRoom'
+	});
 
-	for (var key in participants) {
+	for ( var key in participants) {
 		participants[key].dispose();
 	}
 
@@ -100,7 +101,8 @@ function receiveVideo(sender) {
 	var participant = new Participant(sender);
 	participants[sender] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kwsUtils.WebRtcPeer.startRecvOnly(video, participant.offerToReceiveVideo.bind(participant));
+	participant.rtcPeer = kwsUtils.WebRtcPeer.startRecvOnly(video,
+			participant.offerToReceiveVideo.bind(participant));
 }
 
 function onParticipantLeft(request) {
@@ -110,10 +112,8 @@ function onParticipantLeft(request) {
 	delete participants[request.name];
 }
 
-
 function sendMessage(message) {
 	var jsonMessage = JSON.stringify(message);
 	console.log('Senging message: ' + jsonMessage);
 	ws.send(jsonMessage);
 }
-

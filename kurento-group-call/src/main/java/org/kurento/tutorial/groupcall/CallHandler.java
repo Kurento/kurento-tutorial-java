@@ -1,3 +1,17 @@
+/*
+ * (C) Copyright 2014 Kurento (http://kurento.org/)
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ */
 package org.kurento.tutorial.groupcall;
 
 import java.io.IOException;
@@ -74,13 +88,11 @@ public class CallHandler extends TextWebSocketHandler {
 
 	private void joinRoom(JsonObject params, WebSocketSession session)
 			throws IOException {
-
 		final String roomName = params.get("room").getAsString();
 		final String name = params.get("name").getAsString();
-
-		Room room;
 		log.info("PARTICIPANT {}: trying to join room {}", name, roomName);
-		room = roomManager.getRoom(roomName);
+
+		Room room = roomManager.getRoom(roomName);
 		final UserSession user = room.join(name, session);
 		registry.register(user);
 	}

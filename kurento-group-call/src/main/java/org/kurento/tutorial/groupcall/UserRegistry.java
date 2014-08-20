@@ -1,5 +1,3 @@
-package org.kurento.tutorial.groupcall;
-
 /*
  * (C) Copyright 2014 Kurento (http://kurento.org/)
  *
@@ -14,6 +12,7 @@ package org.kurento.tutorial.groupcall;
  * Lesser General Public License for more details.
  *
  */
+package org.kurento.tutorial.groupcall;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +21,7 @@ import org.springframework.web.socket.WebSocketSession;
 /**
  * Map of users registered in the system. This class has a concurrent hash map
  * to store users, using its name as key in the map.
- *
+ * 
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author Micael Gallego (micael.gallego@gmail.com)
  * @authos Ivan Gracia (izanmail@gmail.com)
