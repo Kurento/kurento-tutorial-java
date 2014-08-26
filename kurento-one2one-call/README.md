@@ -2,9 +2,9 @@
 
 Copyright © 2014 Kurento. Licensed under [LGPL License].
 
-kmf-webrtc-call
-===============
-KMF Demo: WebRTC call 1 to 1.
+kurento-one2one-call
+====================
+Kurento Java Tutorial 2: WebRTC one to one video call.
 
 
 What is Kurento
@@ -18,14 +18,11 @@ These include:
 
   * Kurento Media Server (KMS). A full featured media server providing
     the capability to create and manage dynamic multimedia pipelines.
-  * Kurento Media Connector (KMC). A frontend Webserver for the Thrift
-    API of the Kurento Media Server.
-  * Kurento Media Framework (KMF). A Java server-side API providing
-    the required abstractions for creating applications that manage
-    multimedia content, calls and conferences involving audio, video
-    and data information.
-  * Kurento Web SDK (KWS). A client-side HTML5 and JavaScript SDK for
-    accessing KMS capabilities.
+  * Kurento Control Server (KCS). Signaling server for KMS. It provides
+    extra capabilities such as security, load balance, and so on.
+  * Kurento Clients. Libraries to create applications with media
+    capabilities. Kurento provides libraries for Java, browser JavaScript,
+    and Node.js.
 
 Downloads
 ---------
@@ -43,7 +40,7 @@ Follow us on Twitter @[kurentoms].
 
 [KurentoImage]: https://secure.gravatar.com/avatar/21a2a12c56b2a91c8918d5779f1778bf?s=120
 [LGPL License]: http://www.gnu.org/licenses/lgpl-2.1.html
-[GitHub Repository]: https://github.com/kurento/kmf-media-api
+[GitHub Repository]: https://github.com/Kurento/kurento-tutorial-java
 [GitHub Kurento Group]: https://github.com/kurento
 [website]: http://kurento.org
 [kurentoms]: http://twitter.com/kurentoms
