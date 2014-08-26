@@ -44,6 +44,7 @@
 	<modules>
 		<module>kurento-magic-mirror</module>
 		<module>kurento-one2one-call</module>
+		<module>kurento-one2one-call-advanced</module>
 		<module>kurento-group-call</module>
 	</modules>
 </project>
