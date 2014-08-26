@@ -29,7 +29,11 @@ function start() {
 }
 
 function stop() {
-	webRtcPeer.dispose();
+	if (webRtcPeer) {
+		webRtcPeer.dispose();
+	}
+	videoInput.src = '';
+	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
 }
 
@@ -43,5 +47,6 @@ function showSpinner() {
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
 		arguments[i].poster = '';
+		arguments[i].style.background = '';
 	}
 }
