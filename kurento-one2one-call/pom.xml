@@ -7,8 +7,8 @@
 	<version>5.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>KMF Demo - WebRTC call 1 to 1</name>
-	<description>WebRTC call 1 to 1</description>
+	<name>Kurento Java Tutorial 2</name>
+	<description>WebRTC one to one video call</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
 
@@ -50,9 +50,32 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
 
+		<!-- Main class -->
+		<start-class>org.kurento.tutorial.one2onecall.One2OneCallApp</start-class>
+
 		<!-- KWS -->
 		<kws.version>4.3.19-SNAPSHOT</kws.version>
 	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>${start-class}</mainClass>
+					<layout>ZIP</layout>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<dependencies>
 		<dependency>

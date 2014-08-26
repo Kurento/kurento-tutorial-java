@@ -7,8 +7,8 @@
 	<version>5.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>KMF Demo - WebRTC call many to many</name>
-	<description>WebRTC call many to many</description>
+	<name>Kurento Java Tutorial 4</name>
+	<description>WebRTC one to one video call</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
 
@@ -50,12 +50,13 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
 
-		<start-class>com.kurento.kmf.turotial.group.GroupCall</start-class>
-		
+		<!-- Main class -->
+		<start-class>org.kurento.tutorial.groupcall.GroupCallApp</start-class>
+
 		<!-- KWS -->
 		<kws.version>4.3.19-SNAPSHOT</kws.version>
 	</properties>
-	
+
 	<build>
 		<plugins>
 			<plugin>

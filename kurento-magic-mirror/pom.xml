@@ -7,8 +7,8 @@
 	<artifactId>kurento-magic-mirror</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Tutorial - Magic Mirror</name>
-	<description>Tutorial app with a Magic Mirror. WebRTC in loopback with filter</description>
+	<name>Kurento Java Tutorial 1</name>
+	<description>WebRTC in loopback with filter (magic mirror)</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
 
@@ -50,9 +50,32 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
 
+		<!-- Main class -->
+		<start-class>org.kurento.tutorial.magicmirror.MagicMirrorApp</start-class>
+
 		<!-- KWS -->
 		<kws.version>4.3.19-SNAPSHOT</kws.version>
 	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>${start-class}</mainClass>
+					<layout>ZIP</layout>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<dependencies>
 		<dependency>
