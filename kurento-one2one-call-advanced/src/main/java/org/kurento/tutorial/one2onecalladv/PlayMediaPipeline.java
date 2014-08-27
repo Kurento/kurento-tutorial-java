@@ -20,6 +20,7 @@ import static org.kurento.tutorial.one2onecalladv.CallMediaPipeline.RECORDING_PA
 import java.io.IOException;
 
 import org.kurento.client.EndOfStreamEvent;
+import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -60,19 +61,30 @@ public class PlayMediaPipeline {
 		// Connection
 		player.connect(webRtc);
 
-		// End of stream listener
+		// Player listeners
+		player.addErrorListener(new EventListener<ErrorEvent>() {
+			@Override
+			public void onEvent(ErrorEvent event) {
+				log.info("ErrorEvent: {}", event.getDescription());
+				sendPlayEnd(session);
+			}
+		});
 		player.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
 			@Override
 			public void onEvent(EndOfStreamEvent event) {
-				try {
-					JsonObject response = new JsonObject();
-					response.addProperty("id", "playEndOfStream");
-					session.sendMessage(new TextMessage(response.toString()));
-				} catch (IOException e) {
-					log.error("Error sending playEndOfStream message", e);
-				}
+				sendPlayEnd(session);
 			}
 		});
+	}
+
+	public void sendPlayEnd(WebSocketSession session) {
+		try {
+			JsonObject response = new JsonObject();
+			response.addProperty("id", "playEnd");
+			session.sendMessage(new TextMessage(response.toString()));
+		} catch (IOException e) {
+			log.error("Error sending playEndOfStream message", e);
+		}
 	}
 
 	public void play() {

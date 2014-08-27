@@ -31,7 +31,7 @@ ws.onmessage = function(message) {
 	case 'playResponse':
 		playResponse(parsedMessage);
 		break;
-	case 'playEndOfStream':
+	case 'playEnd':
 		stop();
 		break;
 	default:
