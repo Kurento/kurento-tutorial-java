@@ -1,9 +1,11 @@
 var webRtcPeer;
-var videoInput = document.getElementById('videoInput');
-var videoOutput = document.getElementById('videoOutput');
+var videoInput;
+var videoOutput;
 
 window.onload = function() {
 	console = new Console('console', console);
+	videoInput = document.getElementById('videoInput');
+	videoOutput = document.getElementById('videoOutput');
 }
 
 function start() {
@@ -46,7 +48,12 @@ function showSpinner() {
 
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].poster = '';
+		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
 }
+
+$(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
+	event.preventDefault();
+	$(this).ekkoLightbox();
+});
