@@ -1,10 +1,14 @@
 var ws = new WebSocket('ws://' + location.host + '/call');
-var videoInput = document.getElementById('videoInput');
-var videoOutput = document.getElementById('videoOutput');
+var videoInput;
+var videoOutput;
 var webRtcPeer;
 
 window.onload = function() {
 	console = new Console('console', console);
+	dragDrop.initElement('videoSmall');
+	videoInput = document.getElementById('videoInput');
+	videoOutput = document.getElementById('videoOutput');
+	document.getElementById('name').focus();
 }
 
 window.onbeforeunload = function() {
@@ -35,7 +39,7 @@ ws.onmessage = function(message) {
 
 function resgisterResponse(message) {
 	if (message.response != 'accepted') {
-		alert('Error registering user. See log for further information.');
+		alert('Error registering user. See console for further information.');
 	}
 }
 
@@ -83,6 +87,7 @@ function register() {
 		name : document.getElementById('name').value
 	};
 	sendMessage(message);
+	document.getElementById('peer').focus();
 }
 
 function call() {
@@ -120,13 +125,18 @@ function sendMessage(message) {
 function showSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
 		arguments[i].poster = './img/transparent-1px.png';
-		arguments[i].style.background = "center transparent url('./img/spinner.gif') no-repeat";
+		arguments[i].style.background = 'center transparent url("./img/spinner.gif") no-repeat';
 	}
 }
 
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].poster = '';
+		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
 }
+
+$(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
+	event.preventDefault();
+	$(this).ekkoLightbox();
+});
