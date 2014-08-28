@@ -13,7 +13,7 @@ function start() {
 
 	webRtcPeer = kwsUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
 			function(offerSdp, wp) {
-				console.log('Invoking SDP offer callback function '
+				console.info('Invoking SDP offer callback function '
 						+ location.host);
 				$.ajax({
 					url : location.protocol + '/magicmirror',

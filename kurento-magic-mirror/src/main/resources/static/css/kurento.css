@@ -46,12 +46,7 @@ video,#console {
 	height: 120px;
 }
 
-.page-header {
-	margin-top: 0px;
-	margin-bottom: -10px;
-}
-
-.vcenter {
-	display: inline-block !important;
-	vertical-align: middle !important;
+.col-md-2 {
+	width: 80px;
+	padding-top: 190px;
 }

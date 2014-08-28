@@ -58,11 +58,11 @@
 			<h1>Tutorial 1: Magic Mirror</h1>
 			<p>
 				This application shows a <i>WebRtcEndpoint</i> connected to itself
-				(loopback) with a <i>FaceOverlay</i> filter in the middle. Take a
+				(loopback) with a <i>FaceOverlay</i> filter in the middle (take a
 				look to the <a href="./img/pipeline.png" data-toggle="lightbox"
 					data-title="Magic Mirror Media Pipeline"
 					data-footer="WebRtcEnpoint in loopback with a filter (FaceOverlay)">Media
-					Pipeline</a>. To run this demo follow these steps:
+					Pipeline</a>). To run this demo follow these steps:
 			</p>
 			<ol>
 				<li>Open this page with a browser compliant with WebRTC
@@ -75,12 +75,21 @@
 			</ol>
 		</div>
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-5">
 				<h3>Local stream</h3>
 				<video id="videoInput" autoplay width="480px" height="360px"
 					poster="./img/webrtc.png"></video>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-2">
+				<a id="start" href="#" class="btn btn-success"
+					onclick="start(); return false;"><span
+					class="glyphicon glyphicon-play"></span> Start</a><br />
+				<br />
+				<a id="stop" href="#" class="btn btn-danger"
+					onclick="stop(); return false;"><span
+					class="glyphicon glyphicon-stop"></span> Stop</a>
+			</div>
+			<div class="col-md-5">
 				<h3>Remote stream</h3>
 				<video id="videoOutput" autoplay width="480px" height="360px"
 					poster="./img/webrtc.png"></video>
@@ -88,16 +97,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<p>
-					<a id="start" href="#" class="btn btn-success" onclick="start();"><span
-						class="glyphicon glyphicon-play"></span> Start</a><a id="stop"
-						href="#" class="btn btn-danger" onclick="stop();"><span
-						class="glyphicon glyphicon-stop"></span> Stop</a>
-				</p>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
+				<label class="control-label" for="console">Console</label>
 				<div id="console"></div>
 			</div>
 		</div>
