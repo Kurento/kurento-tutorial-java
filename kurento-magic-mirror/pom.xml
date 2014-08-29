@@ -7,7 +7,7 @@
 	<artifactId>kurento-magic-mirror</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Tutorial 1</name>
+	<name>Kurento Java Tutorial 2</name>
 	<description>WebRTC in loopback with filter (magic mirror)</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>
