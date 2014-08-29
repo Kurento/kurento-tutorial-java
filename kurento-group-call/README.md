@@ -4,7 +4,7 @@ Copyright © 2014 Kurento. Licensed under [LGPL License].
 
 kurento-group-call
 ==================
-Kurento Java Tutorial 4: WebRTC one to one video call.
+Kurento Java Tutorial 5: WebRTC one to one video call.
 
 
 What is Kurento
