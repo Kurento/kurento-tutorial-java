@@ -69,8 +69,8 @@ public class CallHandler extends TextWebSocketHandler {
 		case "call":
 			call(user, jsonMessage);
 			break;
-		case "incommingCallResponse":
-			incommingCallResponse(user, jsonMessage);
+		case "incomingCallResponse":
+			incomingCallResponse(user, jsonMessage);
 			break;
 		default:
 			break;
@@ -109,7 +109,7 @@ public class CallHandler extends TextWebSocketHandler {
 					.getAsString());
 			caller.setCallingTo(to);
 
-			response.addProperty("id", "incommingCall");
+			response.addProperty("id", "incomingCall");
 			response.addProperty("from", from);
 
 			callee.sendMessage(response);
@@ -122,7 +122,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private void incommingCallResponse(UserSession callee,
+	private void incomingCallResponse(UserSession callee,
 			JsonObject jsonMessage) throws IOException {
 		String callResponse = jsonMessage.get("callResponse").getAsString();
 		String from = jsonMessage.get("from").getAsString();

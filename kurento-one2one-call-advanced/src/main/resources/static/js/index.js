@@ -41,8 +41,8 @@ ws.onmessage = function(message) {
 	case 'callResponse':
 		callResponse(parsedMessage);
 		break;
-	case 'incommingCall':
-		incommingCall(parsedMessage);
+	case 'incomingCall':
+		incomingCall(parsedMessage);
 		break;
 	case 'startCommunication':
 		startCommunication(parsedMessage);
@@ -86,14 +86,14 @@ function playResponse(message) {
 	hideSpinner(videoOutput);
 }
 
-function incommingCall(message) {
+function incomingCall(message) {
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
 		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
 				function(sdp, wp) {
 					var response = {
-						id : 'incommingCallResponse',
+						id : 'incomingCallResponse',
 						from : message.from,
 						callResponse : 'accept',
 						sdpOffer : sdp
@@ -102,7 +102,7 @@ function incommingCall(message) {
 				});
 	} else {
 		var response = {
-			id : 'incommingCallResponse',
+			id : 'incomingCallResponse',
 			from : message.from,
 			callResponse : 'reject'
 		};
