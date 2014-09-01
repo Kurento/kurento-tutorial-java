@@ -75,7 +75,7 @@ function incommingCall(message) {
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
-		webRtcPeer = kwsUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
+		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
 				function(sdp, wp) {
 					var response = {
 						id : 'incommingCallResponse',
@@ -108,7 +108,7 @@ function register() {
 function call() {
 	showSpinner(videoInput, videoOutput);
 
-	kwsUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(
+	kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(
 			offerSdp, wp) {
 		webRtcPeer = wp;
 		console.log('Invoking SDP offer callback function');

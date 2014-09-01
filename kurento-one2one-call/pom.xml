@@ -52,9 +52,6 @@
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.one2onecall.One2OneCallApp</start-class>
-
-		<!-- KWS -->
-		<kws.version>4.3.19-SNAPSHOT</kws.version>
 	</properties>
 
 	<build>
@@ -84,9 +81,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.kurento.kws</groupId>
-			<artifactId>kws-utils</artifactId>
-			<version>${kws.version}</version>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-utils-js</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

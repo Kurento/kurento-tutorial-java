@@ -26,7 +26,7 @@ window.onload = function() {
 function start() {
 	showSpinner(videoInput, videoOutput);
 
-	webRtcPeer = kwsUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
 			function(offerSdp, wp) {
 				console.info('Invoking SDP offer callback function '
 						+ location.host);

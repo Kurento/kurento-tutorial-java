@@ -1,17 +1,17 @@
 /*
-* (C) Copyright 2014 Kurento (http://kurento.org/)
-*
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the GNU Lesser General Public License
-* (LGPL) version 2.1 which accompanies this distribution, and is available at
-* http://www.gnu.org/licenses/lgpl-2.1.html
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-*/
+ * (C) Copyright 2014 Kurento (http://kurento.org/)
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ */
 
 var ws = new WebSocket('ws://' + location.host + '/groupcall');
 var participants = {};
@@ -91,7 +91,7 @@ function onExistingParticipants(msg) {
 	var participant = new Participant(name);
 	participants[name] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kwsUtils.WebRtcPeer.startSendOnly(video,
+	participant.rtcPeer = kurentoUtils.WebRtcPeer.startSendOnly(video,
 			participant.offerToReceiveVideo.bind(participant), null,
 			constraints);
 	msg.data.forEach(receiveVideo);
@@ -116,7 +116,7 @@ function receiveVideo(sender) {
 	var participant = new Participant(sender);
 	participants[sender] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kwsUtils.WebRtcPeer.startRecvOnly(video,
+	participant.rtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(video,
 			participant.offerToReceiveVideo.bind(participant));
 }
 
