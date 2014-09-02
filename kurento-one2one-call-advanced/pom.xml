@@ -26,9 +26,9 @@
 	</organization>
 
 	<scm>
-		<url>${kmf.scm.url}</url>
-		<connection>scm:git:${kmf.scm.connection}</connection>
-		<developerConnection>scm:git:${kmf.scm.connection}</developerConnection>
+		<url>https://github.com/Kurento/kurento-tutorial-java</url>
+		<connection>scm:git:git@github.com:Kurento/kurento-tutorial-java</connection>
+		<developerConnection>scm:git:git@github.com:Kurento/kurento-tutorial-java</developerConnection>
 		<tag>develop</tag>
 	</scm>
 
