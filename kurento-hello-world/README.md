@@ -4,7 +4,7 @@ Copyright © 2014 Kurento. Licensed under [LGPL License].
 
 kurento-hello-world
 ===================
-Kurento Java Tutorial 1: Player with filter.
+Kurento Java Tutorial 1: Hello World (WebRTC in loopback).
 
 
 What is Kurento
