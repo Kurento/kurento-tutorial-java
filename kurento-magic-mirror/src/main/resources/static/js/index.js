@@ -13,9 +13,10 @@
 *
 */
 
-var webRtcPeer;
+var ws = new WebSocket('ws://' + location.host + '/magicmirror');
 var videoInput;
 var videoOutput;
+var webRtcPeer;
 
 window.onload = function() {
 	console = new Console('console', console);
@@ -23,26 +24,39 @@ window.onload = function() {
 	videoOutput = document.getElementById('videoOutput');
 }
 
+window.onbeforeunload = function() {
+	ws.close();
+}
+
+ws.onmessage = function(message) {
+	var parsedMessage = JSON.parse(message.data);
+	console.info('Received message: ' + message.data);
+
+	switch (parsedMessage.id) {
+	case 'startResponse':
+		startResponse(parsedMessage);
+		break;
+	default:
+		console.error('Unrecognized message', parsedMessage);
+	}
+}
+
 function start() {
 	showSpinner(videoInput, videoOutput);
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-			function(offerSdp, wp) {
-				console.info('Invoking SDP offer callback function '
-						+ location.host);
-				$.ajax({
-					url : location.protocol + '/magicmirror',
-					type : 'POST',
-					dataType : 'text',
-					data : offerSdp,
-					success : function(data) {
-						wp.processSdpAnswer(data);
-					},
-					error : function(jqXHR, textStatus, error) {
-						console.error(error);
-					}
-				});
-			});
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
+		console.info('Invoking SDP offer callback function ' + location.host);
+
+		var message = {
+			id : 'start',
+			sdpOffer : offerSdp
+		}
+		sendMessage(message);
+	});
+}
+
+function startResponse(message) {
+	webRtcPeer.processSdpAnswer(message.sdpAnswer);
 }
 
 function stop() {
@@ -52,6 +66,12 @@ function stop() {
 	videoInput.src = '';
 	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
+}
+
+function sendMessage(message) {
+	var jsonMessage = JSON.stringify(message);
+	console.log('Senging message: ' + jsonMessage);
+	ws.send(jsonMessage);
 }
 
 function showSpinner() {

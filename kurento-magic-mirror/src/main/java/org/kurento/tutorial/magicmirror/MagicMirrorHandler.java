@@ -15,7 +15,6 @@
 package org.kurento.tutorial.magicmirror;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaPipeline;
@@ -24,38 +23,54 @@ import org.kurento.client.factory.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 /**
- * Magic Mirror REST Controller (application logic).
+ * Magic Mirror handler (application and media logic).
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
- * @since 4.3.1
+ * @since 5.0.0
  */
-@RestController
-public class MagicMirrorController {
+public class MagicMirrorHandler extends TextWebSocketHandler {
 
 	private final Logger log = LoggerFactory
-			.getLogger(MagicMirrorController.class);
+			.getLogger(MagicMirrorHandler.class);
+	private static final Gson gson = new GsonBuilder().create();
 
 	@Autowired
 	private KurentoClient kurento;
 
-	@RequestMapping(value = "/magicmirror", method = RequestMethod.POST)
-	private String processRequest(@RequestBody String sdpOffer)
-			throws IOException {
+	@Override
+	public void handleTextMessage(WebSocketSession session, TextMessage message)
+			throws Exception {
+		JsonObject jsonMessage = gson.fromJson(message.getPayload(),
+				JsonObject.class);
 
-		// Media Logic
+		log.debug("Incoming message: {}", jsonMessage);
+
+		switch (jsonMessage.get("id").getAsString()) {
+		case "start":
+			start(session, jsonMessage);
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void start(WebSocketSession session, JsonObject jsonMessage)
+			throws IOException {
+		// Media Logic (Media Pipeline and Elements)
 		MediaPipeline pipeline = kurento.createMediaPipeline();
 		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
 				.build();
-
 		FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(
 				pipeline).build();
-
 		faceOverlayFilter.setOverlayedImage(
 				"http://files.kurento.org/imgs/mario-wings.png", -0.35F, -1.2F,
 				1.6F, 1.6F);
@@ -64,12 +79,14 @@ public class MagicMirrorController {
 		faceOverlayFilter.connect(webRtcEndpoint);
 
 		// SDP negotiation (offer and answer)
-		sdpOffer = URLDecoder.decode(sdpOffer, "UTF-8");
-		log.debug("Received SDP offer: {}", sdpOffer);
-		String responseSdp = webRtcEndpoint.processOffer(sdpOffer);
-		log.debug("Sent SDP response: {}", responseSdp);
+		String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
+		String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
-		return responseSdp;
+		// Sending response back to client
+		JsonObject response = new JsonObject();
+		response.addProperty("id", "startResponse");
+		response.addProperty("sdpAnswer", sdpAnswer);
+		session.sendMessage(new TextMessage(response.toString()));
 	}
 
 }
