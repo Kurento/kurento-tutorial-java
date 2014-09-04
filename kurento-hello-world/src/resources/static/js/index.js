@@ -19,11 +19,13 @@ var videoOutput;
 
 window.onload = function() {
 	console = new Console('console', console);
+	console.log("Loading complete ...");
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
 }
 
 function start() {
+	console.log("Starting video call ...");
 	showSpinner(videoInput, videoOutput);
 
 	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
@@ -37,6 +39,7 @@ function start() {
 					contentType : 'application/sdp',
 					data : offerSdp,
 					success : function(data) {
+						console.log("Received sdpAnswer from server. Processing ...");
 						wp.processSdpAnswer(data);
 					},
 					error : function(jqXHR, textStatus, error) {
@@ -47,6 +50,7 @@ function start() {
 }
 
 function stop() {
+	console.log("Stopping video call ...");
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
 	}
