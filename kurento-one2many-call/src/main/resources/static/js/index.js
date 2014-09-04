@@ -41,7 +41,7 @@ ws.onmessage = function(message) {
 		viewerResponse(parsedMessage);
 		break;
 	case 'stopCommunication':
-		stop(true);
+		dispose();
 		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
@@ -50,29 +50,37 @@ ws.onmessage = function(message) {
 
 function masterResponse(message) {
 	if (message.response != 'accepted') {
-		console.info('Call not accepted. This means that there is a master already.');
-		stop();
+		var errorMsg = message.message ? message.message : 'Unknow error';
+		console.info('Call not accepted for the following reason: ' + errorMsg);
+		dispose();
 	} else {
 		webRtcPeer.processSdpAnswer(message.sdpAnswer);
 	}
 }
 
 function viewerResponse(message) {
-	webRtcPeer.processSdpAnswer(message.sdpAnswer);
+	if (message.response != 'accepted') {
+		var errorMsg = message.message ? message.message : 'Unknow error';
+		console.info('Call not accepted for the following reason: ' + errorMsg);
+		dispose();
+	} else {
+		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+	}
 }
 
 function master() {
 	if (!webRtcPeer) {
 		showSpinner(videoInput, videoOutput);
 
-		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
-			webRtcPeer = wp;
-			var message = {
-				id : 'master',
-				sdpOffer : offerSdp
-			};
-			sendMessage(message);
-		});
+		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
+				function(offerSdp, wp) {
+					webRtcPeer = wp;
+					var message = {
+						id : 'master',
+						sdpOffer : offerSdp
+					};
+					sendMessage(message);
+				});
 	}
 }
 
@@ -81,7 +89,8 @@ function viewer() {
 		document.getElementById('videoSmall').style.display = 'none';
 		showSpinner(videoOutput);
 
-		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp, wp) {
+		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp,
+				wp) {
 			webRtcPeer = wp;
 			var message = {
 				id : 'viewer',
@@ -92,17 +101,18 @@ function viewer() {
 	}
 }
 
-function stop(message) {
+function stop() {
+	var message = {
+		id : 'stop'
+	}
+	sendMessage(message);
+	dispose();
+}
+
+function dispose() {
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
 		webRtcPeer = null;
-
-		if (!message) {
-			var message = {
-				id : 'stop'
-			}
-			sendMessage(message);
-		}
 	}
 	videoInput.src = '';
 	videoOutput.src = '';

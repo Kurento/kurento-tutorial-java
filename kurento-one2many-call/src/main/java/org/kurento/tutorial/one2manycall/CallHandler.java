@@ -17,6 +17,8 @@ package org.kurento.tutorial.one2manycall;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.kurento.client.MediaPipeline;
+import org.kurento.client.WebRtcEndpoint;
 import org.kurento.client.factory.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,8 @@ public class CallHandler extends TextWebSocketHandler {
 	@Autowired
 	private KurentoClient kurento;
 
-	private CallMediaPipeline pipeline;
+	private MediaPipeline pipeline;
+	private UserSession masterUserSession;
 
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message)
@@ -59,10 +62,30 @@ public class CallHandler extends TextWebSocketHandler {
 
 		switch (jsonMessage.get("id").getAsString()) {
 		case "master":
-			master(session, jsonMessage);
+			try {
+				master(session, jsonMessage);
+			} catch (Throwable t) {
+				stop(session);
+				log.error(t.getMessage(), t);
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "masterResponse");
+				response.addProperty("response", "rejected");
+				response.addProperty("message", t.getMessage());
+				session.sendMessage(new TextMessage(response.toString()));
+			}
 			break;
 		case "viewer":
-			viewer(session, jsonMessage);
+			try {
+				viewer(session, jsonMessage);
+			} catch (Throwable t) {
+				stop(session);
+				log.error(t.getMessage(), t);
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "viewerResponse");
+				response.addProperty("response", "rejected");
+				response.addProperty("message", t.getMessage());
+				session.sendMessage(new TextMessage(response.toString()));
+			}
 			break;
 		case "stop":
 			stop(session);
@@ -72,71 +95,101 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private void master(WebSocketSession session, JsonObject jsonMessage)
-			throws IOException {
-		if (pipeline == null) {
-			UserSession master = new UserSession(session);
+	private synchronized void master(WebSocketSession session,
+			JsonObject jsonMessage) throws IOException {
+		if (masterUserSession == null) {
+			masterUserSession = new UserSession(session);
+
+			pipeline = kurento.createMediaPipeline();
+			masterUserSession.setWebRtcEndpoint(new WebRtcEndpoint.Builder(
+					pipeline).build());
+
+			// Loopback
+			WebRtcEndpoint masterWebRtc = masterUserSession.getWebRtcEndpoint();
+			masterWebRtc.connect(masterWebRtc);
 
 			String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer")
 					.getAsString();
-			pipeline = new CallMediaPipeline(kurento, master);
-			String sdpAnswer = pipeline.loopback(sdpOffer);
+
+			String sdpAnswer = masterWebRtc.processOffer(sdpOffer);
 
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "masterResponse");
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", sdpAnswer);
-			master.sendMessage(response);
+			masterUserSession.sendMessage(response);
 
 		} else {
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "masterResponse");
 			response.addProperty("response", "rejected");
+			response.addProperty("message",
+					"Another user is currently acting as sender. Try again later ...");
 			session.sendMessage(new TextMessage(response.toString()));
 		}
 	}
 
-	private void viewer(WebSocketSession session, JsonObject jsonMessage)
-			throws IOException {
-		if (pipeline == null) {
+	private synchronized void viewer(WebSocketSession session,
+			JsonObject jsonMessage) throws IOException {
+		if (masterUserSession == null
+				|| masterUserSession.getWebRtcEndpoint() == null) {
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "viewerResponse");
 			response.addProperty("response", "rejected");
+			response.addProperty("message",
+					"No active sender now. Become sender or . Try again later ...");
 			session.sendMessage(new TextMessage(response.toString()));
 		} else {
+			if(viewers.containsKey(session.getId())){
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "viewerResponse");
+				response.addProperty("response", "rejected");
+				response.addProperty("message",
+						"You are already viewing in this session. Use a different browser to add additional viewers.");
+				session.sendMessage(new TextMessage(response.toString()));
+				return;
+			}
 			UserSession viewer = new UserSession(session);
+			viewers.put(session.getId(), viewer);
 
 			String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer")
 					.getAsString();
-			String sdpAnswer = pipeline.connect(viewer, sdpOffer);
+
+			WebRtcEndpoint nextWebRtc = new WebRtcEndpoint.Builder(pipeline)
+					.build();
+			viewer.setWebRtcEndpoint(nextWebRtc);
+			masterUserSession.getWebRtcEndpoint().connect(nextWebRtc);
+			String sdpAnswer = nextWebRtc.processOffer(sdpOffer);
 
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "viewerResponse");
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", sdpAnswer);
 			viewer.sendMessage(response);
-
-			viewers.put(session.getId(), viewer);
 		}
 	}
 
-	private void stop(WebSocketSession session) throws IOException {
-		if (pipeline != null) {
-			String sessionId = session.getId();
-			if (pipeline.getMasterUserSession().getSession().getId()
-					.equals(sessionId)) {
-				for (UserSession viewer : viewers.values()) {
-					JsonObject response = new JsonObject();
-					response.addProperty("id", "stopCommunication");
-					viewer.sendMessage(response);
-				}
-
-				log.info("Releasing media pipeline");
-				pipeline.getPipeline().release();
-				pipeline = null;
-			} else if (viewers.containsKey(sessionId)) {
-				viewers.remove(sessionId);
+	private synchronized void stop(WebSocketSession session) throws IOException {
+		String sessionId = session.getId();
+		if (masterUserSession != null
+				&& masterUserSession.getSession().getId().equals(sessionId)) {
+			for (UserSession viewer : viewers.values()) {
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "stopCommunication");
+				viewer.sendMessage(response);
 			}
+
+			log.info("Releasing media pipeline");
+			if (pipeline != null) {
+				pipeline.release();
+			}
+			pipeline = null;
+			masterUserSession = null;
+		} else if (viewers.containsKey(sessionId)) {
+			if (viewers.get(sessionId).getWebRtcEndpoint() != null) {
+				viewers.get(sessionId).getWebRtcEndpoint().release();
+			}
+			viewers.remove(sessionId);
 		}
 	}
 
