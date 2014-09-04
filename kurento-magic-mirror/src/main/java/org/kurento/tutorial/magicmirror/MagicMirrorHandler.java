@@ -61,6 +61,7 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 		case "start":
 			start(session, jsonMessage);
 			break;
+
 		case "stop":
 			String sessionId = session.getId();
 			if (pipelines.containsKey(sessionId)) {
@@ -68,7 +69,13 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 				pipelines.remove(sessionId);
 			}
 			break;
+
 		default:
+			JsonObject response = new JsonObject();
+			response.addProperty("id", "error");
+			response.addProperty("message", "Invalid message with id "
+					+ jsonMessage.get("id").getAsString());
+			session.sendMessage(new TextMessage(response.toString()));
 			break;
 		}
 	}
