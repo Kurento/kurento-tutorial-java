@@ -15,6 +15,7 @@
 package org.kurento.tutorial.one2onecalladv;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.factory.KurentoClient;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ public class CallHandler extends TextWebSocketHandler {
 	private static final Logger log = LoggerFactory
 			.getLogger(CallHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
+
+	private ConcurrentHashMap<String, CallMediaPipeline> pipelines = new ConcurrentHashMap<String, CallMediaPipeline>();
 
 	@Autowired
 	private KurentoClient kurento;
@@ -75,6 +78,8 @@ public class CallHandler extends TextWebSocketHandler {
 		case "play":
 			play(session, jsonMessage);
 			break;
+		case "stop":
+			stop(session);
 		default:
 			break;
 		}
@@ -116,6 +121,7 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("from", from);
 
 			callee.sendMessage(response);
+			callee.setCallingFrom(from);
 		} else {
 			response.addProperty("id", "callResponse");
 			response.addProperty("response", "rejected: user '" + to
@@ -125,8 +131,8 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private void incomingCallResponse(UserSession callee,
-			JsonObject jsonMessage) throws IOException {
+	private void incomingCallResponse(UserSession callee, JsonObject jsonMessage)
+			throws IOException {
 		String callResponse = jsonMessage.get("callResponse").getAsString();
 		String from = jsonMessage.get("from").getAsString();
 		UserSession calleer = registry.getByName(from);
@@ -137,6 +143,9 @@ public class CallHandler extends TextWebSocketHandler {
 
 			CallMediaPipeline pipeline = new CallMediaPipeline(kurento, from,
 					to);
+			pipelines.put(calleer.getSessionId(), pipeline);
+			pipelines.put(callee.getSessionId(), pipeline);
+
 			String calleeSdpOffer = jsonMessage.get("sdpOffer").getAsString();
 			String calleeSdpAnswer = pipeline
 					.generateSdpAnswerForCallee(calleeSdpOffer);
@@ -163,6 +172,25 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("id", "callResponse");
 			response.addProperty("response", "rejected");
 			calleer.sendMessage(response);
+		}
+	}
+
+	public void stop(WebSocketSession session) throws IOException {
+		String sessionId = session.getId();
+		if (pipelines.containsKey(sessionId)) {
+			pipelines.get(sessionId).release();
+			pipelines.remove(sessionId);
+
+			// Both users can stop the communication. A 'stopCommunication'
+			// message will be sent to the other peer.
+			UserSession stopperUser = registry.getBySession(session);
+			UserSession stoppedUser = (stopperUser.getCallingFrom() != null) ? registry
+					.getByName(stopperUser.getCallingFrom()) : registry
+					.getByName(stopperUser.getCallingTo());
+
+			JsonObject message = new JsonObject();
+			message.addProperty("id", "stopCommunication");
+			stoppedUser.sendMessage(message);
 		}
 	}
 

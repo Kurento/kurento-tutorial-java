@@ -53,6 +53,10 @@ ws.onmessage = function(message) {
 	case 'playEnd':
 		stop();
 		break;
+	case 'stopCommunication':
+		console.info("Communication ended by remote peer");
+		stop(true);
+		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -153,9 +157,16 @@ function play() {
 	});
 }
 
-function stop() {
+function stop(message) {
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+
+		if (!message) {
+			var message = {
+				id : 'stop'
+			}
+			sendMessage(message);
+		}
 	}
 	videoInput.src = '';
 	videoOutput.src = '';

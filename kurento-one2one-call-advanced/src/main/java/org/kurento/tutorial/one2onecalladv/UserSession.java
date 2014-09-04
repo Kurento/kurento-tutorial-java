@@ -40,6 +40,7 @@ public class UserSession {
 
 	private String sdpOffer;
 	private String callingTo;
+	private String callingFrom;
 
 	public UserSession(WebSocketSession session, String name) {
 		this.session = session;
@@ -70,9 +71,20 @@ public class UserSession {
 		this.callingTo = callingTo;
 	}
 
+	public String getCallingFrom() {
+		return callingFrom;
+	}
+
+	public void setCallingFrom(String callingFrom) {
+		this.callingFrom = callingFrom;
+	}
+
 	public void sendMessage(JsonObject message) throws IOException {
 		log.debug("Sending message from user '{}': {}", name, message);
 		session.sendMessage(new TextMessage(message.toString()));
 	}
 
+	public String getSessionId() {
+		return session.getId();
+	}
 }

@@ -33,6 +33,7 @@ public class CallMediaPipeline {
 	public static final String RECORDING_PATH = "file:///tmp/";
 	public static final String RECORDING_EXT = ".webm";
 
+	private MediaPipeline pipeline;
 	private WebRtcEndpoint webRtcCaller;
 	private WebRtcEndpoint webRtcCallee;
 	private RecorderEndpoint recorderCaller;
@@ -40,7 +41,7 @@ public class CallMediaPipeline {
 
 	public CallMediaPipeline(KurentoClient kurento, String from, String to) {
 		// Media pipeline
-		MediaPipeline pipeline = kurento.createMediaPipeline();
+		pipeline = kurento.createMediaPipeline();
 
 		// Media Elements (WebRtcEndpoint, RecorderEndpoint, FaceOverlayFilter)
 		webRtcCaller = new WebRtcEndpoint.Builder(pipeline).build();
@@ -86,4 +87,9 @@ public class CallMediaPipeline {
 		return webRtcCallee.processOffer(sdpOffer);
 	}
 
+	public void release() {
+		if (pipeline != null) {
+			pipeline.release();
+		}
+	}
 }
