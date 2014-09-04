@@ -28,7 +28,6 @@ import com.google.gson.JsonObject;
  * User session.
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
- * @author Micael Gallego (micael.gallego@gmail.com)
  * @since 5.0.0
  */
 public class UserSession {
@@ -37,35 +36,20 @@ public class UserSession {
 			.getLogger(UserSession.class);
 
 	private WebSocketSession session;
-	private String sdpOffer;
 	private WebRtcEndpoint webRtcEndpoint;
 
-	public UserSession(WebSocketSession session, String sdpOffer) {
+	public UserSession(WebSocketSession session) {
 		this.session = session;
-		this.sdpOffer = sdpOffer;
 	}
 
 	public WebSocketSession getSession() {
 		return session;
 	}
 
-	public String getSdpOffer() {
-		return sdpOffer;
-	}
-
-	public void setSdpOffer(String sdpOffer) {
-		this.sdpOffer = sdpOffer;
-	}
-
 	public void sendMessage(JsonObject message) throws IOException {
 		log.debug("Sending message from user with session Id '{}': {}",
 				session.getId(), message);
 		session.sendMessage(new TextMessage(message.toString()));
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return session.getId().equals(((UserSession) obj).getSession().getId());
 	}
 
 	public WebRtcEndpoint getWebRtcEndpoint() {

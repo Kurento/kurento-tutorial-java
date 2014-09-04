@@ -27,7 +27,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  * Video call 1 to N demo (main).
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
- * @author Micael Gallego (micael.gallego@gmail.com)
  * @since 5.0.0
  */
 @Configuration
@@ -38,11 +37,6 @@ public class One2ManyCallApp implements WebSocketConfigurer {
 	@Bean
 	public CallHandler callHandler() {
 		return new CallHandler();
-	}
-
-	@Bean
-	public UserRegistry registry() {
-		return new UserRegistry();
 	}
 
 	@Bean

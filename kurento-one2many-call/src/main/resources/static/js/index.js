@@ -34,51 +34,80 @@ ws.onmessage = function(message) {
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
-	case 'callResponse':
-		callResponse(parsedMessage);
+	case 'masterResponse':
+		masterResponse(parsedMessage);
+		break;
+	case 'viewerResponse':
+		viewerResponse(parsedMessage);
+		break;
+	case 'stopCommunication':
+		stop(true);
 		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
 }
 
-
-function callResponse(message) {
+function masterResponse(message) {
 	if (message.response != 'accepted') {
-		console.info('Call not accepted by peer. Closing call');
+		console.info('Call not accepted. This means that there is a master already.');
 		stop();
 	} else {
 		webRtcPeer.processSdpAnswer(message.sdpAnswer);
 	}
 }
 
-function call() {
-	showSpinner(videoInput, videoOutput);
-
-	kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(
-			offerSdp, wp) {
-		webRtcPeer = wp;
-		console.log('Invoking SDP offer callback function');
-		var message = {
-			id : 'call',
-			sdpOffer : offerSdp
-		};
-		sendMessage(message);
-	});
+function viewerResponse(message) {
+	webRtcPeer.processSdpAnswer(message.sdpAnswer);
 }
 
-function stop() {
+function master() {
+	if (!webRtcPeer) {
+		showSpinner(videoInput, videoOutput);
+
+		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
+			webRtcPeer = wp;
+			var message = {
+				id : 'master',
+				sdpOffer : offerSdp
+			};
+			sendMessage(message);
+		});
+	}
+}
+
+function viewer() {
+	if (!webRtcPeer) {
+		document.getElementById('videoSmall').style.display = 'none';
+		showSpinner(videoOutput);
+
+		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp, wp) {
+			webRtcPeer = wp;
+			var message = {
+				id : 'viewer',
+				sdpOffer : offerSdp
+			};
+			sendMessage(message);
+		});
+	}
+}
+
+function stop(message) {
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+		webRtcPeer = null;
+
+		if (!message) {
+			var message = {
+				id : 'stop'
+			}
+			sendMessage(message);
+		}
 	}
 	videoInput.src = '';
 	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
-
-	var response = {
-		id : 'stop',
-	};
-	sendMessage(response);
+	document.getElementById('videoSmall').style.display = 'block';
 }
 
 function sendMessage(message) {

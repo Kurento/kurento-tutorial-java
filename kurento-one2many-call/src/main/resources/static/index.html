@@ -58,37 +58,51 @@
 			<h1>Tutorial 3: Video Call 1 to N with WebRTC</h1>
 			<p>
 				This web application consists on an one to many video call using <a
-					href="http://www.webrtc.org/">WebRTC</a>. The <a
+					href="http://www.webrtc.org/">WebRTC</a>. In other words, this is
+				an implementation of a video broadcasting application. There are two
+				types of kinds in this application: 1 peer sending media (let's call
+				it <i>Master</i>) and N peers receiving the media of the <i>Master</i>
+				(let's call them <i>Viewers</i>). Thus, the <a
 					href="./img/pipeline.png" data-toggle="lightbox"
 					data-title="Video Call 1 to N Media Pipeline"
 					data-footer="N interconnected WebRtcEnpoints Media Elements.">Media
-					Pipeline</a> is composed by N interconnected <i>WebRtcEndpoints</i>.
-				The first user entering a 'room' will become the 'master', i.e., the
-				rest of the participants will be connected to this 'master' user. On
-				the other hand, 'master' will be connected to the last user entering
-				the 'room'. To run this demo follow these steps:
+					Pipeline</a> is composed by 1+N interconnected <i>WebRtcEndpoints</i>.
+				To run this demo follow these steps:
 			</p>
 			<ol>
 				<li>Open this page with a browser compliant with WebRTC
-					(Chrome, Firefox) and click on <i>Start</i> button.
+					(Chrome, Firefox).</li>
+				<li>If you would like to be the <i>Master</i> of the
+					communication, click on <i>Master</i> button. There can only be one
+					of this kind of peer, and so, if the <i>Master</i> peer is already
+					present, the application returns an error (see the the console).
 				</li>
 				<li>Grant the access to the camera and microphone. After the
-					SDP negotiation the communication should start. When there is only
-					one user connected, this communication is in loopback (mirror).</li>
+					SDP negotiation the communication should start. <i>Master</i> peer
+					will be set in loopback, i.e. he/she can see its local stream
+					(small video tag) and also the remote stream (big video tag). This
+					remote stream will also be sent to the <i>Viewers</i>.
+				</li>
 				<li>In a different machine (or a different tab in the same
-					browser) follow the same procedure. Every new user will see the
-					first one, while the first one will see the last connected user.</li>
-				<li>Click on <i>Stop</i> to finish the communication.
+					browser) click on <i>Viewer</i> button to see the <i>Master</i>
+					stream.
+				</li>
+				<li>Click on <i>Stop</i> to finish the communication. When <i>Master</i>
+					clicks on <i>Stop</i>, the rest of <i>Viewers</i> (if any) ends the
+					communication too.
 				</li>
 			</ol>
 		</div>
 		<div class="row">
 			<div class="col-md-5">
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-12">
 						<a id="call" href="#" class="btn btn-success"
-							onclick="call(); return false;"><span
-							class="glyphicon glyphicon-play"></span> Start</a> <a id="terminate"
+							onclick="master(); return false;"><span
+							class="glyphicon glyphicon-play"></span> Master </a> <a id="viewer"
+							href="#" class="btn btn-primary"
+							onclick="viewer(); return false;"><span
+							class="glyphicon glyphicon-user"></span> Viewer</a> <a id="terminate"
 							href="#" class="btn btn-danger" onclick="stop(); return false;"><span
 							class="glyphicon glyphicon-stop"></span> Stop</a>
 					</div>

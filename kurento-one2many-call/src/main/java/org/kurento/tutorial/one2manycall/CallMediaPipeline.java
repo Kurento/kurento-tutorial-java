@@ -25,56 +25,44 @@ import org.kurento.client.factory.KurentoClient;
  * connections for the 1 to N video communication.
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
- * @author Micael Gallego (micael.gallego@gmail.com)
  * @since 5.0.0
  */
 public class CallMediaPipeline {
 
 	private MediaPipeline pipeline;
-	private UserSession firstUserSession;
+	private UserSession masterUserSession;
 
 	public CallMediaPipeline(KurentoClient kurento, UserSession userSession) {
 		pipeline = kurento.createMediaPipeline();
-		firstUserSession = userSession;
-		firstUserSession.setWebRtcEndpoint(new WebRtcEndpoint.Builder(pipeline)
-				.build());
+		masterUserSession = userSession;
+		masterUserSession
+				.setWebRtcEndpoint(new WebRtcEndpoint.Builder(pipeline).build());
 	}
 
-	public String connect(UserSession nextUserSession) throws IOException {
-		String sdpAnswer = null;
-		if (!nextUserSession.equals(firstUserSession)) {
-			nextUserSession.setWebRtcEndpoint(new WebRtcEndpoint.Builder(
-					pipeline).build());
-			updateConnection(nextUserSession);
-			sdpAnswer = nextUserSession.getWebRtcEndpoint().processOffer(
-					nextUserSession.getSdpOffer());
-		} else {
-			// Loopback
-			firstUserSession.getWebRtcEndpoint().connect(
-					firstUserSession.getWebRtcEndpoint());
-			sdpAnswer = firstUserSession.getWebRtcEndpoint().processOffer(
-					firstUserSession.getSdpOffer());
-		}
+	public String loopback(String sdpOffer) throws IOException {
+		WebRtcEndpoint masterWebRtc = masterUserSession.getWebRtcEndpoint();
+		masterWebRtc.connect(masterWebRtc);
 
+		String sdpAnswer = masterWebRtc.processOffer(sdpOffer);
 		return sdpAnswer;
 	}
 
-	public void setFirstUserSession(UserSession firstUserSession) {
-		this.firstUserSession = firstUserSession;
+	public String connect(UserSession nextUserSession, String sdpOffer)
+			throws IOException {
+		WebRtcEndpoint nextWebRtc = new WebRtcEndpoint.Builder(pipeline)
+				.build();
+		masterUserSession.getWebRtcEndpoint().connect(nextWebRtc);
+
+		String sdpAnswer = nextWebRtc.processOffer(sdpOffer);
+		return sdpAnswer;
 	}
 
-	public void updateConnection(UserSession userSession) {
-		firstUserSession.getWebRtcEndpoint().connect(
-				userSession.getWebRtcEndpoint());
-		userSession.getWebRtcEndpoint().connect(
-				firstUserSession.getWebRtcEndpoint());
+	public UserSession getMasterUserSession() {
+		return masterUserSession;
 	}
 
 	public MediaPipeline getPipeline() {
 		return pipeline;
 	}
 
-	public UserSession getFirstUserSession() {
-		return firstUserSession;
-	}
 }
