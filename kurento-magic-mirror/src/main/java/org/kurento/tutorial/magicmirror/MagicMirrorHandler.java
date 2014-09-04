@@ -15,6 +15,7 @@
 package org.kurento.tutorial.magicmirror;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaPipeline;
@@ -43,6 +44,8 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 			.getLogger(MagicMirrorHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
+	private ConcurrentHashMap<String, MediaPipeline> pipelines = new ConcurrentHashMap<String, MediaPipeline>();
+
 	@Autowired
 	private KurentoClient kurento;
 
@@ -58,6 +61,13 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 		case "start":
 			start(session, jsonMessage);
 			break;
+		case "stop":
+			String sessionId = session.getId();
+			if (pipelines.containsKey(sessionId)) {
+				pipelines.get(sessionId).release();
+				pipelines.remove(sessionId);
+			}
+			break;
 		default:
 			break;
 		}
@@ -67,6 +77,8 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 			throws IOException {
 		// Media Logic (Media Pipeline and Elements)
 		MediaPipeline pipeline = kurento.createMediaPipeline();
+		pipelines.put(session.getId(), pipeline);
+
 		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
 				.build();
 		FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(

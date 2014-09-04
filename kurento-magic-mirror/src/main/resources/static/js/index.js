@@ -62,6 +62,11 @@ function startResponse(message) {
 function stop() {
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+
+		var message = {
+			id : 'stop'
+		}
+		sendMessage(message);
 	}
 	videoInput.src = '';
 	videoOutput.src = '';
