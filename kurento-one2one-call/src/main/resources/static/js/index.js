@@ -1,17 +1,17 @@
 /*
-* (C) Copyright 2014 Kurento (http://kurento.org/)
-*
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the GNU Lesser General Public License
-* (LGPL) version 2.1 which accompanies this distribution, and is available at
-* http://www.gnu.org/licenses/lgpl-2.1.html
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-*/
+ * (C) Copyright 2014 Kurento (http://kurento.org/)
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ */
 
 var ws = new WebSocket('ws://' + location.host + '/call');
 var videoInput;
@@ -47,6 +47,10 @@ ws.onmessage = function(message) {
 	case 'startCommunication':
 		startCommunication(parsedMessage);
 		break;
+	case 'stopCommunication':
+		console.info("Communication ended by remote peer");
+		stop(true);
+		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -75,8 +79,8 @@ function incomingCall(message) {
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-				function(sdp, wp) {
+		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput,
+				videoOutput, function(sdp, wp) {
 					var response = {
 						id : 'incomingCallResponse',
 						from : message.from,
@@ -122,9 +126,16 @@ function call() {
 	});
 }
 
-function stop() {
+function stop(message) {
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+
+		if (!message) {
+			var message = {
+				id : 'stop'
+			}
+			sendMessage(message);
+		}
 	}
 	videoInput.src = '';
 	videoOutput.src = '';

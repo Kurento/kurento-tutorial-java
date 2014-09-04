@@ -49,4 +49,10 @@ public class CallMediaPipeline {
 		return calleeWebRtcEP.processOffer(sdpOffer);
 	}
 
+	public void release() {
+		if (pipeline != null) {
+			pipeline.release();
+		}
+	}
+
 }
