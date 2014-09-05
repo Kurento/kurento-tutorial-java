@@ -19,34 +19,32 @@ var videoOutput;
 
 window.onload = function() {
 	console = new Console('console', console);
-	console.log("Loading complete ...");
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
+	console.log("Loading complete ...");
 }
 
 function start() {
 	console.log("Starting video call ...");
 	showSpinner(videoInput, videoOutput);
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-			function(offerSdp, wp) {
-				console.info('Invoking SDP offer callback function '
-						+ location.host);
-				$.ajax({
-					url : location.protocol + '/helloworld',
-					type : 'POST',
-					dataType : 'text',
-					contentType : 'application/sdp',
-					data : offerSdp,
-					success : function(data) {
-						console.log("Received sdpAnswer from server. Processing ...");
-						wp.processSdpAnswer(data);
-					},
-					error : function(jqXHR, textStatus, error) {
-						console.error(error);
-					}
-				});
-			});
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
+		console.info('Invoking SDP offer callback function ' + location.host);
+		$.ajax({
+			url : location.protocol + '/helloworld',
+			type : 'POST',
+			dataType : 'text',
+			contentType : 'application/sdp',
+			data : offerSdp,
+			success : function(data) {
+				console.log("Received sdpAnswer from server. Processing ...");
+				wp.processSdpAnswer(data);
+			},
+			error : function(jqXHR, textStatus, error) {
+				console.error(error);
+			}
+		});
+	});
 }
 
 function stop() {
