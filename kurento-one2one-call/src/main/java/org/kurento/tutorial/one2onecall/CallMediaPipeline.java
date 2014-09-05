@@ -33,12 +33,18 @@ public class CallMediaPipeline {
 	private WebRtcEndpoint calleeWebRtcEP;
 
 	public CallMediaPipeline(KurentoClient kurento) {
-		this.pipeline = kurento.createMediaPipeline();
-		this.callerWebRtcEP = new WebRtcEndpoint.Builder(pipeline).build();
-		this.calleeWebRtcEP = new WebRtcEndpoint.Builder(pipeline).build();
+		try {
+			this.pipeline = kurento.createMediaPipeline();
+			this.callerWebRtcEP = new WebRtcEndpoint.Builder(pipeline).build();
+			this.calleeWebRtcEP = new WebRtcEndpoint.Builder(pipeline).build();
 
-		this.callerWebRtcEP.connect(this.calleeWebRtcEP);
-		this.calleeWebRtcEP.connect(this.callerWebRtcEP);
+			this.callerWebRtcEP.connect(this.calleeWebRtcEP);
+			this.calleeWebRtcEP.connect(this.callerWebRtcEP);
+		} catch (Throwable t) {
+			if(this.pipeline != null){
+				pipeline.release();
+			}
+		}
 	}
 
 	public String generateSdpAnswerForCaller(String sdpOffer) {

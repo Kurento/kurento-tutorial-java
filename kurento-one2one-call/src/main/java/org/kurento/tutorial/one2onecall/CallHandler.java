@@ -67,10 +67,28 @@ public class CallHandler extends TextWebSocketHandler {
 
 		switch (jsonMessage.get("id").getAsString()) {
 		case "register":
-			register(session, jsonMessage);
+			try {
+				register(session, jsonMessage);
+			} catch (Throwable t) {
+				log.error(t.getMessage(), t);
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "resgisterResponse");
+				response.addProperty("response", "rejected");
+				response.addProperty("message", t.getMessage());
+				session.sendMessage(new TextMessage(response.toString()));
+			}
 			break;
 		case "call":
-			call(user, jsonMessage);
+			try {
+				call(user, jsonMessage);
+			} catch (Throwable t) {
+				log.error(t.getMessage(), t);
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "callResponse");
+				response.addProperty("response", "rejected");
+				response.addProperty("message", t.getMessage());
+				session.sendMessage(new TextMessage(response.toString()));
+			}
 			break;
 		case "incomingCallResponse":
 			incomingCallResponse(user, jsonMessage);
@@ -139,28 +157,52 @@ public class CallHandler extends TextWebSocketHandler {
 		if ("accept".equals(callResponse)) {
 			log.debug("Accepted call from '{}' to '{}'", from, to);
 
-			CallMediaPipeline pipeline = new CallMediaPipeline(kurento);
-			pipelines.put(calleer.getSessionId(), pipeline);
-			pipelines.put(callee.getSessionId(), pipeline);
+			CallMediaPipeline pipeline = null;
+			try {
+				pipeline = new CallMediaPipeline(kurento);
 
-			String calleeSdpOffer = jsonMessage.get("sdpOffer").getAsString();
-			String calleeSdpAnswer = pipeline
-					.generateSdpAnswerForCallee(calleeSdpOffer);
+				pipelines.put(calleer.getSessionId(), pipeline);
+				pipelines.put(callee.getSessionId(), pipeline);
 
-			JsonObject startCommunication = new JsonObject();
-			startCommunication.addProperty("id", "startCommunication");
-			startCommunication.addProperty("sdpAnswer", calleeSdpAnswer);
-			callee.sendMessage(startCommunication);
+				String calleeSdpOffer = jsonMessage.get("sdpOffer")
+						.getAsString();
+				String calleeSdpAnswer = pipeline
+						.generateSdpAnswerForCallee(calleeSdpOffer);
+				
+				String callerSdpOffer = registry.getByName(from).getSdpOffer();
+				String callerSdpAnswer = pipeline
+						.generateSdpAnswerForCaller(callerSdpOffer);
 
-			String callerSdpOffer = registry.getByName(from).getSdpOffer();
-			String callerSdpAnswer = pipeline
-					.generateSdpAnswerForCaller(callerSdpOffer);
+				JsonObject startCommunication = new JsonObject();
+				startCommunication.addProperty("id", "startCommunication");
+				startCommunication.addProperty("sdpAnswer", calleeSdpAnswer);
+				callee.sendMessage(startCommunication);
 
-			JsonObject response = new JsonObject();
-			response.addProperty("id", "callResponse");
-			response.addProperty("response", "accepted");
-			response.addProperty("sdpAnswer", callerSdpAnswer);
-			calleer.sendMessage(response);
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "callResponse");
+				response.addProperty("response", "accepted");
+				response.addProperty("sdpAnswer", callerSdpAnswer);
+				calleer.sendMessage(response);
+
+			} catch (Throwable t) {
+				log.error(t.getMessage(), t);
+
+				if(pipeline != null){
+					pipeline.release();
+				}
+				
+				pipelines.remove(calleer.getSessionId());
+				pipelines.remove(callee.getSessionId());
+				
+				JsonObject response = new JsonObject();
+				response.addProperty("id", "callResponse");
+				response.addProperty("response", "rejected");
+				calleer.sendMessage(response);
+
+				response = new JsonObject();
+				response.addProperty("id", "stopCommunication");
+				callee.sendMessage(response);
+			}
 
 		} else {
 			JsonObject response = new JsonObject();
@@ -174,7 +216,8 @@ public class CallHandler extends TextWebSocketHandler {
 		String sessionId = session.getId();
 		if (pipelines.containsKey(sessionId)) {
 			pipelines.get(sessionId).release();
-			pipelines.remove(sessionId);
+			CallMediaPipeline pipeline = pipelines.remove(sessionId);
+			pipeline.release();
 
 			// Both users can stop the communication. A 'stopCommunication'
 			// message will be sent to the other peer.
