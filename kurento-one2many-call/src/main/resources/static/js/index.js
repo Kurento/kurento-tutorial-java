@@ -72,15 +72,14 @@ function master() {
 	if (!webRtcPeer) {
 		showSpinner(videoInput, videoOutput);
 
-		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-				function(offerSdp, wp) {
-					webRtcPeer = wp;
-					var message = {
-						id : 'master',
-						sdpOffer : offerSdp
-					};
-					sendMessage(message);
-				});
+		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
+			webRtcPeer = wp;
+			var message = {
+				id : 'master',
+				sdpOffer : offerSdp
+			};
+			sendMessage(message);
+		});
 	}
 }
 
@@ -89,8 +88,7 @@ function viewer() {
 		document.getElementById('videoSmall').style.display = 'none';
 		showSpinner(videoOutput);
 
-		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp,
-				wp) {
+		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp, wp) {
 			webRtcPeer = wp;
 			var message = {
 				id : 'viewer',
