@@ -71,41 +71,52 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 			break;
 
 		default:
-			JsonObject response = new JsonObject();
-			response.addProperty("id", "error");
-			response.addProperty("message", "Invalid message with id "
-					+ jsonMessage.get("id").getAsString());
-			session.sendMessage(new TextMessage(response.toString()));
+			sendError(session,
+					"Invalid message with id "
+							+ jsonMessage.get("id").getAsString());
 			break;
 		}
 	}
 
-	private void start(WebSocketSession session, JsonObject jsonMessage)
-			throws IOException {
-		// Media Logic (Media Pipeline and Elements)
-		MediaPipeline pipeline = kurento.createMediaPipeline();
-		pipelines.put(session.getId(), pipeline);
+	private void start(WebSocketSession session, JsonObject jsonMessage) {
+		try {
+			// Media Logic (Media Pipeline and Elements)
+			MediaPipeline pipeline = kurento.createMediaPipeline();
+			pipelines.put(session.getId(), pipeline);
 
-		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
-				.build();
-		FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(
-				pipeline).build();
-		faceOverlayFilter.setOverlayedImage(
-				"http://files.kurento.org/imgs/mario-wings.png", -0.35F, -1.2F,
-				1.6F, 1.6F);
+			WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
+					.build();
+			FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(
+					pipeline).build();
+			faceOverlayFilter.setOverlayedImage(
+					"http://files.kurento.org/imgs/mario-wings.png", -0.35F,
+					-1.2F, 1.6F, 1.6F);
 
-		webRtcEndpoint.connect(faceOverlayFilter);
-		faceOverlayFilter.connect(webRtcEndpoint);
+			webRtcEndpoint.connect(faceOverlayFilter);
+			faceOverlayFilter.connect(webRtcEndpoint);
 
-		// SDP negotiation (offer and answer)
-		String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
-		String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
+			// SDP negotiation (offer and answer)
+			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
+			String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
-		// Sending response back to client
-		JsonObject response = new JsonObject();
-		response.addProperty("id", "startResponse");
-		response.addProperty("sdpAnswer", sdpAnswer);
-		session.sendMessage(new TextMessage(response.toString()));
+			// Sending response back to client
+			JsonObject response = new JsonObject();
+			response.addProperty("id", "startResponse");
+			response.addProperty("sdpAnswer", sdpAnswer);
+			session.sendMessage(new TextMessage(response.toString()));
+		} catch (Throwable t) {
+			sendError(session, t.getMessage());
+		}
 	}
 
+	private void sendError(WebSocketSession session, String message) {
+		try {
+			JsonObject response = new JsonObject();
+			response.addProperty("id", "error");
+			response.addProperty("message", message);
+			session.sendMessage(new TextMessage(response.toString()));
+		} catch (IOException e) {
+			log.error("Exception sending message", e);
+		}
+	}
 }
