@@ -17,39 +17,11 @@ var ws = new WebSocket('ws://' + location.host + '/magicmirror');
 var videoInput;
 var videoOutput;
 var webRtcPeer;
-
-const
-I_CAN_START = 0;
-const
-I_CAN_STOP = 1;
-const
-I_AM_STARTING = 2;
-
 var state = null;
 
-function setState(nextState) {
-	switch (nextState) {
-	case I_CAN_START:
-		$('#start').attr('disabled', false);
-		$('#stop').attr('disabled', true);
-		break;
-
-	case I_CAN_STOP:
-		$('#start').attr('disabled', true);
-		$('#stop').attr('disabled', false);
-		break;
-
-	case I_AM_STARTING:
-		$('#start').attr('disabled', true);
-		$('#stop').attr('disabled', true);
-		break;
-
-	default:
-		console.error("Unknown state " + nextState);
-		return;
-	}
-	state = nextState;
-}
+const I_CAN_START = 0;
+const I_CAN_STOP = 1;
+const I_AM_STARTING = 2;
 
 window.onload = function() {
 	console.log("Page loaded ...");
@@ -92,17 +64,14 @@ function start() {
 	showSpinner(videoInput, videoOutput);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-			function(offerSdp, wp) {
-				console.info('Invoking SDP offer callback function '
-						+ location.host);
-
-				var message = {
-					id : 'start',
-					sdpOffer : offerSdp
-				}
-				sendMessage(message);
-			});
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
+		console.info('Invoking SDP offer callback function ' + location.host);
+		var message = {
+			id : 'start',
+			sdpOffer : offerSdp
+		}
+		sendMessage(message);
+	});
 }
 
 function startResponse(message) {
@@ -125,6 +94,30 @@ function stop() {
 	videoInput.src = '';
 	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
+}
+
+function setState(nextState) {
+	switch (nextState) {
+	case I_CAN_START:
+		$('#start').attr('disabled', false);
+		$('#stop').attr('disabled', true);
+		break;
+
+	case I_CAN_STOP:
+		$('#start').attr('disabled', true);
+		$('#stop').attr('disabled', false);
+		break;
+
+	case I_AM_STARTING:
+		$('#start').attr('disabled', true);
+		$('#stop').attr('disabled', true);
+		break;
+
+	default:
+		console.error("Unknown state " + nextState);
+		return;
+	}
+	state = nextState;
 }
 
 function sendMessage(message) {
