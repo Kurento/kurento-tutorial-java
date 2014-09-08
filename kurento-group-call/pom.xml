@@ -27,8 +27,8 @@
 
 	<scm>
 		<url>https://github.com/Kurento/kurento-tutorial-java</url>
-		<connection>scm:git:git@github.com:Kurento/kurento-tutorial-java</connection>
-		<developerConnection>scm:git:git@github.com:Kurento/kurento-tutorial-java</developerConnection>
+		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java</connection>
+		<developerConnection>scm:git://git@github.com:Kurento/kurento-tutorial-java</developerConnection>
 		<tag>develop</tag>
 	</scm>
 
