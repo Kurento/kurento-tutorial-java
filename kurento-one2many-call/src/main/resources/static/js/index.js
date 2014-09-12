@@ -14,15 +14,12 @@
  */
 
 var ws = new WebSocket('ws://' + location.host + '/call');
-var videoInput;
-var videoOutput;
+var video;
 var webRtcPeer;
 
 window.onload = function() {
 	console = new Console('console', console);
-	dragDrop.initElement('videoSmall');
-	videoInput = document.getElementById('videoInput');
-	videoOutput = document.getElementById('videoOutput');
+	video = document.getElementById('video');
 }
 
 window.onbeforeunload = function() {
@@ -70,9 +67,9 @@ function viewerResponse(message) {
 
 function master() {
 	if (!webRtcPeer) {
-		showSpinner(videoInput, videoOutput);
+		showSpinner(video);
 
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
+		webRtcPeer = kurentoUtils.WebRtcPeer.startSendOnly(video, function(offerSdp) {
 			var message = {
 				id : 'master',
 				sdpOffer : offerSdp
@@ -84,10 +81,9 @@ function master() {
 
 function viewer() {
 	if (!webRtcPeer) {
-		document.getElementById('videoSmall').style.display = 'none';
-		showSpinner(videoOutput);
+		showSpinner(video);
 
-		webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp) {
+		webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(video, function(offerSdp) {
 			var message = {
 				id : 'viewer',
 				sdpOffer : offerSdp
@@ -110,8 +106,7 @@ function dispose() {
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 	}
-	hideSpinner(videoInput, videoOutput);
-	document.getElementById('videoSmall').style.display = 'block';
+	hideSpinner(video);
 }
 
 function sendMessage(message) {

@@ -104,13 +104,9 @@ public class CallHandler extends TextWebSocketHandler {
 			masterUserSession.setWebRtcEndpoint(new WebRtcEndpoint.Builder(
 					pipeline).build());
 
-			// Loopback
 			WebRtcEndpoint masterWebRtc = masterUserSession.getWebRtcEndpoint();
-			masterWebRtc.connect(masterWebRtc);
-
 			String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer")
 					.getAsString();
-
 			String sdpAnswer = masterWebRtc.processOffer(sdpOffer);
 
 			JsonObject response = new JsonObject();
@@ -140,11 +136,12 @@ public class CallHandler extends TextWebSocketHandler {
 					"No active sender now. Become sender or . Try again later ...");
 			session.sendMessage(new TextMessage(response.toString()));
 		} else {
-			if(viewers.containsKey(session.getId())){
+			if (viewers.containsKey(session.getId())) {
 				JsonObject response = new JsonObject();
 				response.addProperty("id", "viewerResponse");
 				response.addProperty("response", "rejected");
-				response.addProperty("message",
+				response.addProperty(
+						"message",
 						"You are already viewing in this session. Use a different browser to add additional viewers.");
 				session.sendMessage(new TextMessage(response.toString()));
 				return;
