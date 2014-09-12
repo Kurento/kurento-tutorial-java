@@ -72,8 +72,7 @@ function master() {
 	if (!webRtcPeer) {
 		showSpinner(videoInput, videoOutput);
 
-		kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
-			webRtcPeer = wp;
+		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
 			var message = {
 				id : 'master',
 				sdpOffer : offerSdp
@@ -88,8 +87,7 @@ function viewer() {
 		document.getElementById('videoSmall').style.display = 'none';
 		showSpinner(videoOutput);
 
-		kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp, wp) {
-			webRtcPeer = wp;
+		webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp) {
 			var message = {
 				id : 'viewer',
 				sdpOffer : offerSdp
@@ -112,8 +110,6 @@ function dispose() {
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 	}
-	videoInput.src = '';
-	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
 	document.getElementById('videoSmall').style.display = 'block';
 }
@@ -133,11 +129,15 @@ function showSpinner() {
 
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
 }
 
+/**
+ * Lightbox utility (to display media pipeline image in a modal dialog)
+ */
 $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
 	event.preventDefault();
 	$(this).ekkoLightbox();

@@ -47,13 +47,13 @@ ws.onmessage = function(message) {
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
-		console.error("Error message from server: " + parsedMessage.message);
+		onError("Error message from server: " + parsedMessage.message);
 		break;
 	default:
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
-		console.error('Unrecognized message', parsedMessage);
+		onError('Unrecognized message', parsedMessage);
 	}
 }
 
@@ -64,14 +64,20 @@ function start() {
 	showSpinner(videoInput, videoOutput);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp, wp) {
-		console.info('Invoking SDP offer callback function ' + location.host);
-		var message = {
-			id : 'start',
-			sdpOffer : offerSdp
-		}
-		sendMessage(message);
-	});
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, onOffer, onError);
+}
+
+function onOffer(offerSdp) {
+	console.info('Invoking SDP offer callback function ' + location.host);
+	var message = {
+		id : 'start',
+		sdpOffer : offerSdp
+	}
+	sendMessage(message);
+}
+
+function onError(error) {
+	console.error(error);
 }
 
 function startResponse(message) {
@@ -85,14 +91,13 @@ function stop() {
 	setState(I_CAN_START);
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+		webRtcPeer = null;
 
 		var message = {
 			id : 'stop'
 		}
 		sendMessage(message);
 	}
-	videoInput.src = '';
-	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
 }
 
@@ -114,7 +119,7 @@ function setState(nextState) {
 		break;
 
 	default:
-		console.error("Unknown state " + nextState);
+		onError("Unknown state " + nextState);
 		return;
 	}
 	state = nextState;
@@ -135,11 +140,15 @@ function showSpinner() {
 
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
 }
 
+/**
+ * Lightbox utility (to display media pipeline image in a modal dialog)
+ */
 $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
 	event.preventDefault();
 	$(this).ekkoLightbox();

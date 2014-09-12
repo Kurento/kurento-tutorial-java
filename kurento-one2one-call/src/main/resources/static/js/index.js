@@ -18,48 +18,43 @@ var videoInput;
 var videoOutput;
 var webRtcPeer;
 
-
 var registerName = null;
+var registerState = null;
 const NOT_REGISTERED = 0;
 const REGISTERING = 1;
 const REGISTERED = 2;
-var registerState = null
 
-function setRegisterState(nextState){
+function setRegisterState(nextState) {
 	switch (nextState) {
 	case NOT_REGISTERED:
 		$('#register').attr('disabled', false);
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', true);
 		break;
-		
 	case REGISTERING:
 		$('#register').attr('disabled', true);
 		break;
-		
 	case REGISTERED:
 		$('#register').attr('disabled', true);
 		setCallState(NO_CALL);
 		break;
-		
 	default:
 		return;
 	}
 	registerState = nextState;
 }
 
+var callState = null;
 const NO_CALL = 0;
 const PROCESSING_CALL = 1;
-const IN_CALL =2;
-var callState = null
+const IN_CALL = 2;
 
-function setCallState(nextState){
+function setCallState(nextState) {
 	switch (nextState) {
 	case NO_CALL:
 		$('#call').attr('disabled', false);
 		$('#terminate').attr('disabled', true);
 		break;
-
 	case PROCESSING_CALL:
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', true);
@@ -73,7 +68,6 @@ function setCallState(nextState){
 	}
 	callState = nextState;
 }
-
 
 window.onload = function() {
 	setRegisterState(NOT_REGISTERED);
@@ -115,7 +109,7 @@ ws.onmessage = function(message) {
 }
 
 function resgisterResponse(message) {
-	if(message.response == 'accepted'){
+	if (message.response == 'accepted') {
 		setRegisterState(REGISTERED);
 	} else {
 		setRegisterState(NOT_REGISTERED);
@@ -123,7 +117,6 @@ function resgisterResponse(message) {
 		console.log(errorMessage);
 		alert('Error registering user. See console for further information.');
 	}
-	
 }
 
 function callResponse(message) {
@@ -144,35 +137,32 @@ function startCommunication(message) {
 }
 
 function incomingCall(message) {
-	
 	//If bussy just reject without disturbing user
-	if(callState != NO_CALL){
+	if (callState != NO_CALL) {
 		var response = {
-				id : 'incomingCallResponse',
-				from : message.from,
-				callResponse : 'reject',
-				message : 'bussy'
-				
-			};
-			return sendMessage(response);
+			id : 'incomingCallResponse',
+			from : message.from,
+			callResponse : 'reject',
+			message : 'bussy'
+		};
+		return sendMessage(response);
 	}
-	
+
 	setCallState(PROCESSING_CALL);
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput,
-				videoOutput, function(sdp, wp) {
-					var response = {
-						id : 'incomingCallResponse',
-						from : message.from,
-						callResponse : 'accept',
-						sdpOffer : sdp
-					};
-					sendMessage(response);
-				}, function(error){
-					setCallState(NO_CALL);
-				});
+		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
+			var response = {
+				id : 'incomingCallResponse',
+				from : message.from,
+				callResponse : 'accept',
+				sdpOffer : offerSdp
+			};
+			sendMessage(response);
+			}, function(error) {
+				setCallState(NO_CALL);
+			});
 	} else {
 		var response = {
 			id : 'incomingCallResponse',
@@ -185,15 +175,14 @@ function incomingCall(message) {
 	}
 }
 
-function register() {	
+function register() {
 	var name = document.getElementById('name').value;
-	if(name == '') {
+	if (name == '') {
 		window.alert("You must insert your user name");
 		return;
 	}
-	
 	setRegisterState(REGISTERING);
-	
+
 	var message = {
 		id : 'register',
 		name : name
@@ -203,19 +192,14 @@ function register() {
 }
 
 function call() {
-	
-	if(document.getElementById('peer').value == ''){
+	if (document.getElementById('peer').value == '') {
 		window.alert("You must specify the peer name");
 		return;
 	}
-	
 	setCallState(PROCESSING_CALL);
-	
 	showSpinner(videoInput, videoOutput);
 
-	kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(
-			offerSdp, wp) {
-		webRtcPeer = wp;
+	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
 		console.log('Invoking SDP offer callback function');
 		var message = {
 			id : 'call',
@@ -224,7 +208,7 @@ function call() {
 			sdpOffer : offerSdp
 		};
 		sendMessage(message);
-	}, function(error){
+	}, function(error) {
 		console.log(error);
 		setCallState(NO_CALL);
 	});
@@ -234,6 +218,7 @@ function stop(message) {
 	setCallState(NO_CALL);
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
+		webRtcPeer = null;
 
 		if (!message) {
 			var message = {
@@ -242,8 +227,6 @@ function stop(message) {
 			sendMessage(message);
 		}
 	}
-	videoInput.src = '';
-	videoOutput.src = '';
 	hideSpinner(videoInput, videoOutput);
 }
 
@@ -262,11 +245,15 @@ function showSpinner() {
 
 function hideSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
 }
 
+/**
+ * Lightbox utility (to display media pipeline image in a modal dialog)
+ */
 $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
 	event.preventDefault();
 	$(this).ekkoLightbox();
