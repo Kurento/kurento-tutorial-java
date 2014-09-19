@@ -30,9 +30,12 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableAutoConfiguration
 public class HelloWorldApp {
 
+	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+
 	@Bean
 	public KurentoClient kurentoClient() {
-		return KurentoClient.create("ws://localhost:8888/kurento");
+		return KurentoClient.create(System.getProperty("kms.ws.uri",
+				DEFAULT_KMS_WS_URI));
 	}
 
 	public static void main(String[] args) throws Exception {
