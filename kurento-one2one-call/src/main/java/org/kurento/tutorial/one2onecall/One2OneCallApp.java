@@ -35,6 +35,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class One2OneCallApp implements WebSocketConfigurer {
 
+	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+
 	@Bean
 	public CallHandler callHandler() {
 		return new CallHandler();
@@ -47,7 +49,8 @@ public class One2OneCallApp implements WebSocketConfigurer {
 
 	@Bean
 	public KurentoClient kurentoClient() {
-		return KurentoClient.create("ws://localhost:8888/kurento");
+		return KurentoClient.create(System.getProperty("kms.ws.uri",
+				DEFAULT_KMS_WS_URI));
 	}
 
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
