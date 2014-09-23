@@ -51,13 +51,16 @@
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.magicmirror.MagicMirrorApp</start-class>
 
+		<!-- Kurento -->
+		<kurento.version>[5.0.0,6.0.0)</kurento.version>
+
 		<!-- Plugins -->
 		<spring-boot.version>1.1.6.RELEASE</spring-boot.version>
 		<failsafe.version>2.17</failsafe.version>
 
 		<!-- Test dependencies versions -->
 		<junit.version>4.11</junit.version>
-		<selenium-java.version>2.41.0</selenium-java.version>
+		<selenium-java.version>2.43.1</selenium-java.version>
 		<spring-test.version>4.1.0.RELEASE</spring-test.version>
 	</properties>
 
@@ -100,12 +103,12 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-client</artifactId>
-			<version>${project.version}</version>
+			<version>${kurento.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-utils-js</artifactId>
-			<version>${project.version}</version>
+			<version>${kurento.version}</version>
 		</dependency>
 
 		<!-- Test -->

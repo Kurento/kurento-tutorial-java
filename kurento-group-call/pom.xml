@@ -52,6 +52,9 @@
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.groupcall.GroupCallApp</start-class>
+
+		<!-- Kurento -->
+		<kurento.version>[5.0.0,6.0.0)</kurento.version>
 	</properties>
 
 	<build>
@@ -78,12 +81,12 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-client</artifactId>
-			<version>${project.version}</version>
+			<version>${kurento.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-utils-js</artifactId>
-			<version>${project.version}</version>
+			<version>${kurento.version}</version>
 		</dependency>
 	</dependencies>
 </project>

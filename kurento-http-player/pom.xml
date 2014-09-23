@@ -49,13 +49,16 @@
 		<!-- maven-compiler-plugin -->
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
+
+		<!-- Kurento -->
+		<kurento.version>[5.0.0,6.0.0)</kurento.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-client</artifactId>
-			<version>${project.version}</version>
+			<version>${kurento.version}</version>
 		</dependency>
 	</dependencies>
 
