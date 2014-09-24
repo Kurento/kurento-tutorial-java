@@ -32,6 +32,7 @@ requirements of this test are:
     in the machine running the test. This can be done as follows:
 
 		sudo add-apt-repository ppa:kurento/kurento
+		wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
 		sudo apt-get update
 		sudo apt-get install kurento-media-server
 
