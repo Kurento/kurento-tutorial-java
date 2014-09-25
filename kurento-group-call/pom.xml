@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-group-call</artifactId>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>5.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>Kurento Java Tutorial 6</name>
@@ -29,7 +28,7 @@
 		<url>https://github.com/Kurento/kurento-tutorial-java</url>
 		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java</connection>
 		<developerConnection>scm:git://git@github.com:Kurento/kurento-tutorial-java</developerConnection>
-		<tag>develop</tag>
+		<tag>kurento-tutorial-5.0.3</tag>
 	</scm>
 
 	<developers>
