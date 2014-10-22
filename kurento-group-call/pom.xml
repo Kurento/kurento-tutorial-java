@@ -43,7 +43,7 @@
 
 	<properties>
 		<demo.port>8086</demo.port>
-		
+
 		<!-- Cross plugins settings -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

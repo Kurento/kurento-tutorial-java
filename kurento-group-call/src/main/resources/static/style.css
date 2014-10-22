@@ -6,7 +6,7 @@ body {
 	background: #0ca3d2;
 }
 
-input[type=checkbox],input[type=radio] {
+input[type=checkbox], input[type=radio] {
 	border: 1px solid #c0c0c0;
 	margin: 0 0.1em 0 0;
 	padding: 0;
@@ -74,7 +74,6 @@ select {
 		rgba(0, 0, 0, 0.3);
 	box-shadow: 0 0 200px rgba(255, 255, 255, 0.5), 0 1px 2px
 		rgba(0, 0, 0, 0.3);
-	
 	/*Transition*/
 	-webkit-transition: all 0.3s linear;
 	-moz-transition: all 0.3s linear;
@@ -121,7 +120,7 @@ select {
 	margin-top: 0;
 }
 
-.join input[type=text],.join input[type=password] {
+.join input[type=text], .join input[type=password] {
 	width: 278px;
 }
 
@@ -144,7 +143,7 @@ input {
 	font-size: 14px;
 }
 
-input[type=text],input[type=password] {
+input[type=text], input[type=password] {
 	margin: 5px;
 	padding: 0 10px;
 	width: 200px;
@@ -160,13 +159,13 @@ input[type=text],input[type=password] {
 	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-input[type=text]:focus,input[type=password]:focus {
+input[type=text]:focus, input[type=password]:focus {
 	border-color: #7dc9e2;
 	outline-color: #dceefc;
 	outline-offset: 0;
 }
 
-input[type=button],input[type=submit] {
+input[type=button], input[type=submit] {
 	padding: 0 18px;
 	height: 29px;
 	font-size: 12px;
@@ -189,26 +188,26 @@ input[type=button],input[type=submit] {
 	box-shadow: inset 0 1px white, 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-input[type=button]:active,input[type=submit]:active {
+input[type=button]:active, input[type=submit]:active {
 	background: #cde5ef;
 	border-color: #9eb9c2 #b3c0c8 #b4ccce;
 	-webkit-box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
 	box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.lt-ie9 input[type=text],.lt-ie9 input[type=password] {
+.lt-ie9 input[type=text], .lt-ie9 input[type=password] {
 	line-height: 34px;
 }
 
 #room {
 	width: 100%;
-    text-align: center;
+	text-align: center;
 }
 
 #button-leave {
 	text-align: center;
 	position: absolute;
-	bottom:10px;
+	bottom: 10px;
 }
 
 .participant {
@@ -253,8 +252,10 @@ input[type=button]:active,input[type=submit]:active {
 }
 
 .participant video, .participant.main video {
-	width: 100%; !important;
-	height: auto; !important;
+	width: 100%; ! important;
+	height: auto;
+	!
+	important;
 }
 
 .participant span {
@@ -284,63 +285,100 @@ input[type=button]:active,input[type=submit]:active {
 }
 
 .removed {
-  
-  -webkit-animation: disapear 1s;
-  -webkit-animation-fill-mode: forwards; 
-  animation: disapear 1s;
-  animation-fill-mode: forwards;
+	-webkit-animation: disapear 1s;
+	-webkit-animation-fill-mode: forwards;
+	animation: disapear 1s;
+	animation-fill-mode: forwards;
 }
 
-@-webkit-keyframes disapear{
-  
-  50% {
-    
-    -webkit-transform: translateX(-5%);
-    transform: translateX(-5%);
-  }
-  
-  100% {
-    -webkit-transform: translateX(200%);
-    transform: translateX(200%); 
-  }    
+@
+-webkit-keyframes disapear { 50% {
+	-webkit-transform: translateX(-5%);
+	transform: translateX(-5%);
 }
 
-@keyframes disapear{
-  
-  50% {
-    
-    -webkit-transform: translateX(-5%);
-    transform: translateX(-5%);
-  }
-  
-  100% {
-    -webkit-transform: translateX(200%);
-    transform: translateX(200%); 
-  }    
+100%
+{
+-webkit-transform
+
+
+:
+
+ 
+
+translateX
+
+
+(200%);
+transform
+
+
+:
+
+ 
+
+translateX
+
+
+(200%);
+}
+}
+@
+keyframes disapear { 50% {
+	-webkit-transform: translateX(-5%);
+	transform: translateX(-5%);
 }
 
- a.hovertext {
-    position: relative;
-    width: 500px;
-    text-decoration: none !important;
-    text-align: center;
-  }
-  a.hovertext:after {
-    content: attr(title);
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    padding: 0.5em 20px;
-    width: 460px;
-    background: rgba(0,0,0,0.8);
-    text-decoration: none !important;
-    color: #fff;
-    opacity: 0;
-    -webkit-transition: 0.5s;
-    -moz-transition: 0.5s;
-    -o-transition: 0.5s;
-    -ms-transition: 0.5s;
-  }
-  a.hovertext:hover:after, a.hovertext:focus:after {
-    opacity: 1.0;
-  }
+100%
+{
+-webkit-transform
+
+
+:
+
+ 
+
+translateX
+
+
+(200%);
+transform
+
+
+:
+
+ 
+
+translateX
+
+
+(200%);
+}
+}
+a.hovertext {
+	position: relative;
+	width: 500px;
+	text-decoration: none !important;
+	text-align: center;
+}
+
+a.hovertext:after {
+	content: attr(title);
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	padding: 0.5em 20px;
+	width: 460px;
+	background: rgba(0, 0, 0, 0.8);
+	text-decoration: none !important;
+	color: #fff;
+	opacity: 0;
+	-webkit-transition: 0.5s;
+	-moz-transition: 0.5s;
+	-o-transition: 0.5s;
+	-ms-transition: 0.5s;
+}
+
+a.hovertext:hover:after, a.hovertext:focus:after {
+	opacity: 1.0;
+}
