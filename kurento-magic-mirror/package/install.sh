@@ -10,17 +10,6 @@ fi
 
 APP_HOME=$(dirname $(dirname $(readlink -f $0)))
 
-#
-# This is a POSIX shell fragment
-#
-
-# Commment next line to disable ${project.artifactId} daemon
-START_DAEMON=true
-
-# Whom the daemons should run as
-DAEMON_USER=nobody
-EOF
-
 # Install binaries
 install -o root -g root -m 755 $APP_HOME/demo-startup.sh /etc/init.d/${project.artifactId}
 mkdir -p /var/lib/kurento
