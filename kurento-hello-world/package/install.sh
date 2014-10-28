@@ -8,7 +8,7 @@ if [ `id -u` -ne 0 ]; then
     exit 1
 fi
 
-APP_HOME=$(dirname $(dirname $(readlink -f $0)))
+APP_HOME=$(dirname $(readlink -f $0))
 
 # Install binaries
 install -o root -g root -m 755 $APP_HOME/demo-startup.sh /etc/init.d/${project.artifactId}

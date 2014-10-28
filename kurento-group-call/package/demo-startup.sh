@@ -5,12 +5,12 @@
 
 echo "Service [$APP_NAME] - [$1]"
 
-APP_HOME=/var/lib/kurento/
+APP_HOME=/var/lib/kurento
 APP_NAME=${project.artifactId}
 APP_VERSION=${project.version}
 APP=$APP_NAME-$APP_VERSION
 APP_PORT=${demo.port}
-CONSOLE_LOG=/var/logs/kurento-media-server/$APP_NAME.log
+CONSOLE_LOG=/var/log/kurento-media-server/$APP_NAME.log
 
 # Setup the JVM
 if [ "x$JAVA" = "x" ]; then
