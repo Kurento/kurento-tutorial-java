@@ -199,19 +199,26 @@ public class CallHandler extends TextWebSocketHandler {
 		String user = jsonMessage.get("user").getAsString();
 		log.debug("Playing recorded call of user '{}'", user);
 
-		PlayMediaPipeline pipeline = new PlayMediaPipeline(kurento, user,
-				session);
-		String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
-		String sdpAnswer = pipeline.generateSdpAnswer(sdpOffer);
-
 		JsonObject response = new JsonObject();
 		response.addProperty("id", "playResponse");
-		response.addProperty("response", "accepted");
-		response.addProperty("sdpAnswer", sdpAnswer);
+
+		if (registry.getByName(user) != null
+				&& registry.getBySession(session) != null) {
+			PlayMediaPipeline pipeline = new PlayMediaPipeline(kurento, user,
+					session);
+			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
+			String sdpAnswer = pipeline.generateSdpAnswer(sdpOffer);
+
+			response.addProperty("response", "accepted");
+			response.addProperty("sdpAnswer", sdpAnswer);
+
+			pipeline.play();
+		} else {
+			response.addProperty("response", "rejected");
+			response.addProperty("error", "No recording for user '" + user
+					+ "'. Please type a correct user in the 'Peer' field.");
+		}
 		session.sendMessage(new TextMessage(response.toString()));
-
-		pipeline.play();
-
 	}
 
 	@Override

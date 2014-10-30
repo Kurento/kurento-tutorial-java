@@ -30,6 +30,7 @@ function setRegisterState(nextState) {
 		$('#register').attr('disabled', false);
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', true);
+		$('#play').attr('disabled', true);
 		break;
 	case REGISTERING:
 		$('#register').attr('disabled', true);
@@ -48,6 +49,7 @@ var callState = null;
 const NO_CALL = 0;
 const PROCESSING_CALL = 1;
 const IN_CALL = 2;
+const POST_CALL = 3;
 
 function setCallState(nextState) {
 	switch (nextState) {
@@ -62,6 +64,11 @@ function setCallState(nextState) {
 	case IN_CALL:
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', false);
+		break;
+	case POST_CALL:
+		$('#call').attr('disabled', false);
+		$('#terminate').attr('disabled', true);
+		$('#play').attr('disabled', false);
 		break;
 	default:
 		return;
@@ -144,16 +151,18 @@ function startCommunication(message) {
 
 function playResponse(message) {
 	if (message.response != 'accepted') {
-		alert('Play request rejected');
+		hideSpinner(videoOutput);
+		document.getElementById('videoSmall').style.display = 'block';
+		alert(message.error);
+		document.getElementById('peer').focus();
 	} else {
 		webRtcPeer.processSdpAnswer(message.sdpAnswer);
 	}
-	hideSpinner(videoOutput);
 }
 
 function incomingCall(message) {
 	//If bussy just reject without disturbing user
-	if (callState != NO_CALL) {
+	if (callState != NO_CALL && callState != POST_CALL) {
 		var response = {
 			id : 'incomingCallResponse',
 			from : message.from,
@@ -230,6 +239,13 @@ function call() {
 }
 
 function play() {
+	var peer = document.getElementById('peer').value;
+	if (peer == '') {
+		window.alert("You must insert the name of the user recording to be played (field 'Peer')");
+		document.getElementById('peer').focus();
+		return;
+	}
+
 	document.getElementById('videoSmall').style.display = 'none';
 	showSpinner(videoOutput);
 
@@ -245,7 +261,7 @@ function play() {
 }
 
 function stop(message) {
-	setCallState(NO_CALL);
+	setCallState(POST_CALL);
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
 		webRtcPeer = null;
