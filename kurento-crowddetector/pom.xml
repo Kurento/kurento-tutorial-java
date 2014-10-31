@@ -27,7 +27,7 @@
 		<url>https://github.com/Kurento/kurento-tutorial-java</url>
 		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java</connection>
 		<developerConnection>scm:git://git@github.com:Kurento/kurento-tutorial-java</developerConnection>
-		<tag>kurento-tutorial-5.0.3</tag>
+		<tag>develop</tag>
 	</scm>
 
 	<developers>
