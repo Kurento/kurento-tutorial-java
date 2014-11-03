@@ -54,7 +54,7 @@
 		<start-class>org.kurento.tutorial.helloworld.HelloWorldApp</start-class>
 
 		<!-- Kurento -->
-		<kurento.version>5.0.4-SNAPSHOT</kurento.version>
+		<kurento.version>[5.0.0,6.0.0)</kurento.version>
 
 		<!-- Plugins -->
 		<spring-boot.version>1.1.8.RELEASE</spring-boot.version>

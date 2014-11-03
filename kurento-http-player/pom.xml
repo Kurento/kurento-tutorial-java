@@ -54,7 +54,7 @@
 		<start-class>org.kurento.tutorial.player.KurentoHttpPlayer</start-class>
 
 		<!-- Kurento -->
-		<kurento.version>5.0.4-SNAPSHOT</kurento.version>
+		<kurento.version>[5.0.0,6.0.0)</kurento.version>
 
 		<!-- Plugins -->
 		<exec-maven.version>1.3.2</exec-maven.version>
