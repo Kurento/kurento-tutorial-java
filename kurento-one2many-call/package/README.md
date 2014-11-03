@@ -1,7 +1,7 @@
 ${project.name}
 ======================
 
-The ${project.name} shows how to build a Hangouts-like application with Kurento.
+The ${project.name} shows how to build a WebRTC one to many video call application with Kurento.
 
 Installation instructions
 -------------------------

@@ -4,7 +4,7 @@ Copyright © 2014 Kurento. Licensed under [LGPL License].
 
 kurento-magic-mirror
 ====================
-Kurento Java Tutorial 2: WebRTC in loopback with filter (magic mirror).
+Kurento Java Tutorial 2: WebRTC in loopback with faceoverlay filter (magic mirror).
 
 
 What is Kurento

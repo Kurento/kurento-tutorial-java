@@ -1,7 +1,7 @@
 ${project.name}
 ======================
 
-The ${project.name} shows how to build a Hangouts-like application with Kurento.
+The ${project.name} shows how to build a WebRTC in loopback with plate detector filter application with Kurento.
 
 Installation instructions
 -------------------------

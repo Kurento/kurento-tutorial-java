@@ -4,8 +4,7 @@ Copyright © 2014 Kurento. Licensed under [LGPL License].
 
 kurento-one2one-call-advanced
 =============================
-Kurento Java Tutorial 5: WebRTC one to one video call with recording
-and filtering.
+Kurento Java Tutorial 5: WebRTC one to one video call with recording and filtering.
 
 
 What is Kurento
