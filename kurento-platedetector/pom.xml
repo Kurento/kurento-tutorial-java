@@ -148,11 +148,6 @@
 			<version>${kurento.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.kurento</groupId>
-			<artifactId>kurento-utils-js</artifactId>
-			<version>${kurento.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.kurento.module</groupId>
 			<artifactId>platedetector</artifactId>
 			<version>${kurento.platedetector.version}</version>
