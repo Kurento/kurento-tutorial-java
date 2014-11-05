@@ -97,41 +97,6 @@
 					<mainClass>${start-class}</mainClass>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>${assembly.plugin.version}</version>
-				<configuration>
-					<descriptor>src/assembly/bin.xml</descriptor>
-					<finalName>${project.artifactId}-${project.version}</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>${antrun.plugin.version}</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<configuration>
-							<tasks>
-								<copy
-									file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip"
-									tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 
 		<resources>
@@ -141,6 +106,58 @@
 			</resource>
 		</resources>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>${assembly.plugin.version}</version>
+						<configuration>
+							<descriptor>src/assembly/bin.xml</descriptor>
+							<finalName>${project.artifactId}-${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>${antrun.plugin.version}</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<configuration>
+									<tasks>
+										<copy
+											file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip"
+											tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>no-assembly</id>
+		</profile>
+	</profiles>
+
 
 	<dependencies>
 		<!-- Kurento -->
