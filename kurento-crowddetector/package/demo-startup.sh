@@ -12,6 +12,10 @@ APP=$APP_NAME-$APP_VERSION
 APP_PORT=${demo.port}
 CONSOLE_LOG=/var/log/kurento-media-server/$APP_NAME.log
 
+JAVA_OPTS="-Dserver.port=$APP_PORT"
+
+JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
+
 # Setup the JVM
 if [ "x$JAVA" = "x" ]; then
     if [ "x$JAVA_HOME" != "x" ]; then
@@ -42,7 +46,7 @@ function start {
         exit 1
     fi
     echo "Starting application $APP_NAME in port $APP_PORT..."
-    nohup $JAVA -Dserver.port=$APP_PORT -jar $APP_HOME/$APP_NAME.jar \
+    nohup $JAVA $JAVA_OPTS -jar $APP_HOME/$APP_NAME.jar \
         < /dev/null > $CONSOLE_LOG 2>&1 &
 }
 
