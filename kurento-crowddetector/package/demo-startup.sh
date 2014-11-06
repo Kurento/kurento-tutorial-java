@@ -13,7 +13,6 @@ APP_PORT=${demo.port}
 CONSOLE_LOG=/var/log/kurento-media-server/$APP_NAME.log
 
 JAVA_OPTS="-Dserver.port=$APP_PORT"
-
 JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 
 # Setup the JVM
@@ -59,20 +58,27 @@ function stop {
 
     # First, we will try to trigger a controlled shutdown using 
     # spring-boot-actuator
+    echo "Triggering controlled shutdown in 127.0.0.1:$APP_PORT"
     curl -X POST http://127.0.0.1:$APP_PORT/shutdown < /dev/null > /dev/null 2>&1
 
     # Wait until the server process has shut down
+    echo -n "Waiting 5s for process shutdown"
     attempts=0
     while pkill -0 -f $APP_NAME.jar > /dev/null 2>&1
     do
+        echo -n "."
         attempts=$[$attempts + 1]
         if [ $attempts -gt 5 ]
         then
             # We have waited too long. Kill it.
+            echo ""
+            echo "The process did not shutdown gracefuly. Forcing kill"
             pkill -f $APP_NAME.jar > /dev/null 2>&1
         fi
         sleep 1s
     done
+
+    echo "Service [$APP_NAME] stopped"
 }
 
 case $1 in
