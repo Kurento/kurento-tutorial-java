@@ -19,4 +19,4 @@ install -o root -g root $APP_HOME/${project.artifactId}.jar /var/lib/kurento/
 # update-rc.d ${project.artifactId} defaults
 
 # start demo
-/etc/init.d/${project.artifactId} start
+/etc/init.d/${project.artifactId} restart
