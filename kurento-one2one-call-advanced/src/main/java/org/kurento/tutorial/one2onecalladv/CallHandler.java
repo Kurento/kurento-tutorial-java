@@ -17,6 +17,7 @@ package org.kurento.tutorial.one2onecalladv;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.kurento.client.MediaPipeline;
 import org.kurento.client.factory.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class CallHandler extends TextWebSocketHandler {
 			.getLogger(CallHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
-	private ConcurrentHashMap<String, CallMediaPipeline> pipelines = new ConcurrentHashMap<String, CallMediaPipeline>();
+	private ConcurrentHashMap<String, MediaPipeline> pipelines = new ConcurrentHashMap<String, MediaPipeline>();
 
 	@Autowired
 	private KurentoClient kurento;
@@ -79,7 +80,10 @@ public class CallHandler extends TextWebSocketHandler {
 			play(session, jsonMessage);
 			break;
 		case "stop":
-			stop(session);
+			stopCommunication(session);
+			releasePipeline(session);
+		case "stopPlay":
+			releasePipeline(session);
 		default:
 			break;
 		}
@@ -124,7 +128,8 @@ public class CallHandler extends TextWebSocketHandler {
 			callee.setCallingFrom(from);
 		} else {
 			response.addProperty("id", "callResponse");
-			response.addProperty("response", "rejected: user '" + to
+			response.addProperty("response", "rejected");
+			response.addProperty("message", "user '" + to
 					+ "' is not registered");
 
 			caller.sendMessage(response);
@@ -141,13 +146,15 @@ public class CallHandler extends TextWebSocketHandler {
 		if ("accept".equals(callResponse)) {
 			log.debug("Accepted call from '{}' to '{}'", from, to);
 
-			CallMediaPipeline pipeline = new CallMediaPipeline(kurento, from,
-					to);
-			pipelines.put(calleer.getSessionId(), pipeline);
-			pipelines.put(callee.getSessionId(), pipeline);
+			CallMediaPipeline callMediaPipeline = new CallMediaPipeline(
+					kurento, from, to);
+			pipelines.put(calleer.getSessionId(),
+					callMediaPipeline.getPipeline());
+			pipelines.put(callee.getSessionId(),
+					callMediaPipeline.getPipeline());
 
 			String calleeSdpOffer = jsonMessage.get("sdpOffer").getAsString();
-			String calleeSdpAnswer = pipeline
+			String calleeSdpAnswer = callMediaPipeline
 					.generateSdpAnswerForCallee(calleeSdpOffer);
 
 			JsonObject startCommunication = new JsonObject();
@@ -156,7 +163,7 @@ public class CallHandler extends TextWebSocketHandler {
 			callee.sendMessage(startCommunication);
 
 			String callerSdpOffer = registry.getByName(from).getSdpOffer();
-			String callerSdpAnswer = pipeline
+			String callerSdpAnswer = callMediaPipeline
 					.generateSdpAnswerForCaller(callerSdpOffer);
 
 			JsonObject response = new JsonObject();
@@ -165,7 +172,7 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("sdpAnswer", callerSdpAnswer);
 			calleer.sendMessage(response);
 
-			pipeline.record();
+			callMediaPipeline.record();
 
 		} else {
 			JsonObject response = new JsonObject();
@@ -175,22 +182,24 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	public void stop(WebSocketSession session) throws IOException {
+	public void stopCommunication(WebSocketSession session) throws IOException {
+		// Both users can stop the communication. A 'stopCommunication'
+		// message will be sent to the other peer.
+		UserSession stopperUser = registry.getBySession(session);
+		UserSession stoppedUser = (stopperUser.getCallingFrom() != null) ? registry
+				.getByName(stopperUser.getCallingFrom()) : registry
+				.getByName(stopperUser.getCallingTo());
+
+		JsonObject message = new JsonObject();
+		message.addProperty("id", "stopCommunication");
+		stoppedUser.sendMessage(message);
+	}
+
+	public void releasePipeline(WebSocketSession session) throws IOException {
 		String sessionId = session.getId();
 		if (pipelines.containsKey(sessionId)) {
 			pipelines.get(sessionId).release();
 			pipelines.remove(sessionId);
-
-			// Both users can stop the communication. A 'stopCommunication'
-			// message will be sent to the other peer.
-			UserSession stopperUser = registry.getBySession(session);
-			UserSession stoppedUser = (stopperUser.getCallingFrom() != null) ? registry
-					.getByName(stopperUser.getCallingFrom()) : registry
-					.getByName(stopperUser.getCallingTo());
-
-			JsonObject message = new JsonObject();
-			message.addProperty("id", "stopCommunication");
-			stoppedUser.sendMessage(message);
 		}
 	}
 
@@ -204,15 +213,17 @@ public class CallHandler extends TextWebSocketHandler {
 
 		if (registry.getByName(user) != null
 				&& registry.getBySession(session) != null) {
-			PlayMediaPipeline pipeline = new PlayMediaPipeline(kurento, user,
-					session);
+			PlayMediaPipeline playMediaPipeline = new PlayMediaPipeline(
+					kurento, user, session);
 			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
-			String sdpAnswer = pipeline.generateSdpAnswer(sdpOffer);
+			String sdpAnswer = playMediaPipeline.generateSdpAnswer(sdpOffer);
 
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", sdpAnswer);
 
-			pipeline.play();
+			playMediaPipeline.play();
+
+			pipelines.put(session.getId(), playMediaPipeline.getPipeline());
 		} else {
 			response.addProperty("response", "rejected");
 			response.addProperty("error", "No recording for user '" + user

@@ -28,9 +28,7 @@ function setRegisterState(nextState) {
 	switch (nextState) {
 	case NOT_REGISTERED:
 		$('#register').attr('disabled', false);
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', true);
-		$('#play').attr('disabled', true);
+		setCallState(DISABLED);
 		break;
 	case REGISTERING:
 		$('#register').attr('disabled', true);
@@ -47,28 +45,37 @@ function setRegisterState(nextState) {
 
 var callState = null;
 const NO_CALL = 0;
-const PROCESSING_CALL = 1;
-const IN_CALL = 2;
-const POST_CALL = 3;
+const IN_CALL = 1;
+const POST_CALL = 2;
+const DISABLED = 3;
+const IN_PLAY = 4;
 
 function setCallState(nextState) {
 	switch (nextState) {
 	case NO_CALL:
 		$('#call').attr('disabled', false);
 		$('#terminate').attr('disabled', true);
+		$('#play').attr('disabled', true);
 		break;
-	case PROCESSING_CALL:
+	case DISABLED:
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', true);
+		$('#play').attr('disabled', true);
 		break;
 	case IN_CALL:
 		$('#call').attr('disabled', true);
 		$('#terminate').attr('disabled', false);
+		$('#play').attr('disabled', true);
 		break;
 	case POST_CALL:
 		$('#call').attr('disabled', false);
 		$('#terminate').attr('disabled', true);
 		$('#play').attr('disabled', false);
+		break;
+	case IN_PLAY:
+		$('#call').attr('disabled', true);
+		$('#terminate').attr('disabled', false);
+		$('#play').attr('disabled', true);
 		break;
 	default:
 		return;
@@ -114,7 +121,7 @@ ws.onmessage = function(message) {
 		playResponse(parsedMessage);
 		break;
 	case 'playEnd':
-		stop();
+		playEnd();
 		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
@@ -124,10 +131,12 @@ ws.onmessage = function(message) {
 function resgisterResponse(message) {
 	if (message.response == 'accepted') {
 		setRegisterState(REGISTERED);
+		document.getElementById('peer').focus();
 	} else {
 		setRegisterState(NOT_REGISTERED);
 		var errorMessage = message.message ? message.message : 'Unknown reason for register rejection.';
 		console.log(errorMessage);
+		document.getElementById('name').focus();
 		alert('Error registering user. See console for further information.');
 	}
 }
@@ -135,9 +144,11 @@ function resgisterResponse(message) {
 function callResponse(message) {
 	if (message.response != 'accepted') {
 		console.info('Call not accepted by peer. Closing call');
-		var errorMessage = message.message ? message.message : 'Unknown reason for call rejection.';
-		console.log(errorMessage);
 		stop();
+		setCallState(NO_CALL);
+		if (message.message) {
+			alert(message.message);
+		}
 	} else {
 		setCallState(IN_CALL);
 		webRtcPeer.processSdpAnswer(message.sdpAnswer);
@@ -155,13 +166,15 @@ function playResponse(message) {
 		document.getElementById('videoSmall').style.display = 'block';
 		alert(message.error);
 		document.getElementById('peer').focus();
+		setCallState(POST_CALL);
 	} else {
+		setCallState(IN_PLAY);
 		webRtcPeer.processSdpAnswer(message.sdpAnswer);
 	}
 }
 
 function incomingCall(message) {
-	//If bussy just reject without disturbing user
+	// If bussy just reject without disturbing user
 	if (callState != NO_CALL && callState != POST_CALL) {
 		var response = {
 			id : 'incomingCallResponse',
@@ -172,7 +185,7 @@ function incomingCall(message) {
 		return sendMessage(response);
 	}
 
-	setCallState(PROCESSING_CALL);
+	setCallState(DISABLED);
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
@@ -203,6 +216,7 @@ function register() {
 	var name = document.getElementById('name').value;
 	if (name == '') {
 		window.alert("You must insert your user name");
+		document.getElementById('name').focus();
 		return;
 	}
 	setRegisterState(REGISTERING);
@@ -212,15 +226,15 @@ function register() {
 		name : name
 	};
 	sendMessage(message);
-	document.getElementById('peer').focus();
 }
 
 function call() {
 	if (document.getElementById('peer').value == '') {
+		document.getElementById('peer').focus();
 		window.alert("You must specify the peer name");
 		return;
 	}
-	setCallState(PROCESSING_CALL);
+	setCallState(DISABLED);
 	showSpinner(videoInput, videoOutput);
 
 	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
@@ -247,6 +261,7 @@ function play() {
 	}
 
 	document.getElementById('videoSmall').style.display = 'none';
+	setCallState(DISABLED);
 	showSpinner(videoOutput);
 
 	webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp) {
@@ -260,7 +275,14 @@ function play() {
 	});
 }
 
+function playEnd() {
+	setCallState(POST_CALL);
+	hideSpinner(videoInput, videoOutput);
+	document.getElementById('videoSmall').style.display = 'block';
+}
+
 function stop(message) {
+	var stopMessageId = (callState == IN_CALL) ? 'stop' : 'stopPlay';
 	setCallState(POST_CALL);
 	if (webRtcPeer) {
 		webRtcPeer.dispose();
@@ -268,7 +290,7 @@ function stop(message) {
 
 		if (!message) {
 			var message = {
-				id : 'stop'
+				id : stopMessageId
 			}
 			sendMessage(message);
 		}

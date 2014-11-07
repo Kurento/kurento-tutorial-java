@@ -45,13 +45,14 @@ public class PlayMediaPipeline {
 	private static final Logger log = LoggerFactory
 			.getLogger(PlayMediaPipeline.class);
 
+	private MediaPipeline pipeline;
 	private WebRtcEndpoint webRtc;
 	private PlayerEndpoint player;
 
 	public PlayMediaPipeline(KurentoClient kurento, String user,
 			final WebSocketSession session) {
 		// Media pipeline
-		MediaPipeline pipeline = kurento.createMediaPipeline();
+		pipeline = kurento.createMediaPipeline();
 
 		// Media Elements (WebRtcEndpoint, PlayerEndpoint)
 		webRtc = new WebRtcEndpoint.Builder(pipeline).build();
@@ -85,6 +86,9 @@ public class PlayMediaPipeline {
 		} catch (IOException e) {
 			log.error("Error sending playEndOfStream message", e);
 		}
+
+		// Release pipeline
+		pipeline.release();
 	}
 
 	public void play() {
@@ -93,6 +97,10 @@ public class PlayMediaPipeline {
 
 	public String generateSdpAnswer(String sdpOffer) {
 		return webRtc.processOffer(sdpOffer);
+	}
+
+	public MediaPipeline getPipeline() {
+		return pipeline;
 	}
 
 }

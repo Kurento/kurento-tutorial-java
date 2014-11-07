@@ -87,9 +87,7 @@ public class CallMediaPipeline {
 		return webRtcCallee.processOffer(sdpOffer);
 	}
 
-	public void release() {
-		if (pipeline != null) {
-			pipeline.release();
-		}
+	public MediaPipeline getPipeline() {
+		return pipeline;
 	}
 }
