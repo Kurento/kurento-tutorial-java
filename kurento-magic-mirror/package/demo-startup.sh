@@ -42,7 +42,6 @@ function start {
     if pkill -0 -f $APP_NAME.jar > /dev/null 2>&1
     then
         echo "Service [$APP_NAME] is already running. Ignoring startup request."
-        exit 1
     fi
     echo "Starting application $APP_NAME in port $APP_PORT..."
     nohup $JAVA $JAVA_OPTS -jar $APP_HOME/$APP_NAME.jar \
@@ -53,7 +52,6 @@ function stop {
     if ! pkill -0 -f $APP_NAME.jar > /dev/null 2>&1
     then
         echo "Service [$APP_NAME] is not running. Ignoring shutdown request."
-        exit 1
     fi
 
     pkill -f $APP_NAME.jar > /dev/null 2>&1
