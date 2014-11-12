@@ -16,7 +16,7 @@ package org.kurento.tutorial.one2onecall;
 
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 
 /**
  * Media Pipeline (WebRTC endpoints, i.e. Kurento Media Elements) and

@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

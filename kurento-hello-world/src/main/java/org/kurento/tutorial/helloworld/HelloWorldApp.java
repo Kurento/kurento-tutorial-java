@@ -14,7 +14,7 @@
  */
 package org.kurento.tutorial.helloworld;
 
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;

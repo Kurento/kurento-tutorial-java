@@ -25,7 +25,7 @@ import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.HttpGetEndpoint;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 
 /**
  * HTTP Player with Kurento; the media pipeline is composed by a PlayerEndpoint

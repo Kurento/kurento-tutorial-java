@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 import org.kurento.module.platedetector.PlateDetectedEvent;
 import org.kurento.module.platedetector.PlateDetectorFilter;
 import org.slf4j.Logger;

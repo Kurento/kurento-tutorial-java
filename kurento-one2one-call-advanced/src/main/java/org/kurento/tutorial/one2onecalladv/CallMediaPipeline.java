@@ -15,10 +15,10 @@
 package org.kurento.tutorial.one2onecalladv;
 
 import org.kurento.client.FaceOverlayFilter;
+import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.RecorderEndpoint;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
 
 /**
  * Media Pipeline (connection of Media Elements) for the advanced one to one

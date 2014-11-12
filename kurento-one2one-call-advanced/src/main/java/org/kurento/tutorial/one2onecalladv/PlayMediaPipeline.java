@@ -25,7 +25,7 @@ import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;

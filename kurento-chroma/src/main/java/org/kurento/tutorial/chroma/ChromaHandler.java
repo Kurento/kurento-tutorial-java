@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.factory.KurentoClient;
+import org.kurento.client.KurentoClient;
 import org.kurento.module.chroma.ChromaFilter;
 import org.kurento.module.chroma.WindowParam;
 import org.slf4j.Logger;
