@@ -86,7 +86,7 @@ function setCallState(nextState) {
 window.onload = function() {
 	setRegisterState(NOT_REGISTERED);
 	console = new Console('console', console);
-	dragDrop.initElement('videoSmall');
+	var drag = new Draggabilly(document.getElementById('videoSmall'));
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
 	document.getElementById('name').focus();
