@@ -52,17 +52,17 @@ public class CallMediaPipeline {
 		recorderCallee = new RecorderEndpoint.Builder(pipeline, RECORDING_PATH
 				+ to + RECORDING_EXT).build();
 
+		String appServerUrl = System.getProperty("app.server.url",
+				One2OneCallAdvApp.DEFAULT_APP_SERVER_URL);
 		FaceOverlayFilter faceOverlayFilterCaller = new FaceOverlayFilter.Builder(
 				pipeline).build();
-		faceOverlayFilterCaller.setOverlayedImage(
-				"http://files.kurento.org/imgs/mario-wings.png", -0.35F, -1.2F,
-				1.6F, 1.6F);
+		faceOverlayFilterCaller.setOverlayedImage(appServerUrl
+				+ "/img/mario-wings.png", -0.35F, -1.2F, 1.6F, 1.6F);
 
 		FaceOverlayFilter faceOverlayFilterCallee = new FaceOverlayFilter.Builder(
 				pipeline).build();
 		faceOverlayFilterCallee.setOverlayedImage(
-				"http://files.kurento.org/imgs/Hat.png", -0.2F, -1.35F, 1.5F,
-				1.5F);
+				appServerUrl + "/img/Hat.png", -0.2F, -1.35F, 1.5F, 1.5F);
 
 		// Connections
 		webRtcCaller.connect(faceOverlayFilterCaller);

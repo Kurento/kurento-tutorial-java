@@ -90,8 +90,9 @@ public class ChromaHandler extends TextWebSocketHandler {
 			ChromaFilter chromaFilter = new ChromaFilter.Builder(pipeline,
 					new WindowParam(5, 5, 40, 40)).build();
 
-			chromaFilter
-					.setBackground("http://files.kurento.org/imgs/mario.jpg");
+			String appServerUrl = System.getProperty("app.server.url",
+					ChromaApp.DEFAULT_APP_SERVER_URL);
+			chromaFilter.setBackground(appServerUrl + "/img/mario.jpg");
 
 			webRtcEndpoint.connect(chromaFilter);
 			chromaFilter.connect(webRtcEndpoint);
