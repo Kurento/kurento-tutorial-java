@@ -12,7 +12,7 @@ APP=$APP_NAME-$APP_VERSION
 APP_PORT=${demo.port}
 CONSOLE_LOG=/var/log/kurento-media-server/$APP_NAME.log
 
-JAVA_OPTS="-Dserver.port=$APP_PORT"
+JAVA_OPTS="-Dserver.port=$APP_PORT -Dapp.server.url=http://127.0.0.1:$APP_PORT/"
 JAVA_OPTS="$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 
 # Setup the JVM
