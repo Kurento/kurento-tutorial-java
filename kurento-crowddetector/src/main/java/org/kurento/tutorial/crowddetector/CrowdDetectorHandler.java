@@ -101,9 +101,9 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 			List<RelativePoint> points = new ArrayList<RelativePoint>();
 
 			points.add(new RelativePoint(0, 0));
-			points.add(new RelativePoint((float) 0.5, 0));
-			points.add(new RelativePoint((float) 0.5, (float) 0.5));
-			points.add(new RelativePoint(0, (float) 0.5));
+			points.add(new RelativePoint(0.5F, 0));
+			points.add(new RelativePoint(0.5F, 0.5F));
+			points.add(new RelativePoint(0, 0.5F));
 
 			RegionOfInterestConfig config = new RegionOfInterestConfig();
 
