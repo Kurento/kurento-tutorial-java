@@ -4,7 +4,7 @@
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-platedetector</artifactId>
-	<version>5.0.4-SNAPSHOT</version>
+	<version>5.0.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Kurento Java Module Tutorial 4 - Plate Detector</name>
