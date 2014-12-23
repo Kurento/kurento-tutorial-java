@@ -11,6 +11,7 @@
 	<files>
 		<file>
 			<source>target/${project.artifactId}-${project.version}.jar</source>
+			<outputDirectory>lib</outputDirectory>
 			<destName>${project.artifactId}.jar</destName>
 		</file>
 	</files>
