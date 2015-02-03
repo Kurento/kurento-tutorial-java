@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.kurento.tutorial</groupId>
-	<version>5.1.0</version>
+	<version>5.1.1-SNAPSHOT</version>
 	<artifactId>kurento-http-player</artifactId>
 	<packaging>jar</packaging>
 
@@ -28,7 +28,7 @@
 		<url>https://github.com/Kurento/kurento-tutorial-java</url>
 		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java</connection>
 		<developerConnection>scm:git://git@github.com:Kurento/kurento-tutorial-java</developerConnection>
-		<tag>kurento-tutorial-5.1.0</tag>
+		<tag>develop</tag>
 	</scm>
 
 	<developers>
