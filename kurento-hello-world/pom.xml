@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.kurento.tutorial</groupId>
@@ -53,7 +54,7 @@
 		<start-class>org.kurento.tutorial.helloworld.HelloWorldApp</start-class>
 
 		<!-- Kurento -->
-		<kurento.version>[5.0.0,6.0.0)</kurento.version>
+		<kurento.version>[5.0.0,6.0.0-SNAPSHOT)</kurento.version>
 
 		<!-- Plugins -->
 		<spring-boot.version>1.2.1.RELEASE</spring-boot.version>
@@ -62,7 +63,7 @@
 		<antrun.plugin.version>1.7</antrun.plugin.version>
 		<clean.plugin.version>2.6.1</clean.plugin.version>
 	</properties>
-
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -171,7 +172,9 @@
 								<phase>package</phase>
 								<configuration>
 									<tasks>
-										<copy file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip" tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
+										<copy
+											file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip"
+											tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
 									</tasks>
 								</configuration>
 							</execution>
@@ -186,6 +189,11 @@
 	</profiles>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>${spring-boot.version}</version>
+		</dependency>
 		<!-- Kurento -->
 		<dependency>
 			<groupId>org.kurento</groupId>

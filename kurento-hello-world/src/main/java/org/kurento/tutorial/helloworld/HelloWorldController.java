@@ -14,11 +14,9 @@
  */
 package org.kurento.tutorial.helloworld;
 
-import java.io.IOException;
-
+import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.KurentoClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Hello World REST Controller (application logic).
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 5.0.0
  */
@@ -38,13 +36,12 @@ public class HelloWorldController {
 	private KurentoClient kurento;
 
 	@RequestMapping(value = "/helloworld", method = RequestMethod.POST)
-	private String processRequest(@RequestBody String sdpOffer)
-			throws IOException {
+	private String processRequest(@RequestBody String sdpOffer) {
 
 		// Media Logic
 		MediaPipeline pipeline = kurento.createMediaPipeline();
 		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
-				.build();
+		.build();
 		webRtcEndpoint.connect(webRtcEndpoint);
 
 		// SDP negotiation (offer and answer)

@@ -25,7 +25,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 /**
  * Magic Mirror main class.
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 5.0.0
  */
@@ -48,6 +48,7 @@ public class MagicMirrorApp implements WebSocketConfigurer {
 				DEFAULT_KMS_WS_URI));
 	}
 
+	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		registry.addHandler(handler(), "/magicmirror");
 	}
