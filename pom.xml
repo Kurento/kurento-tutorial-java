@@ -46,7 +46,6 @@
 		<module>kurento-one2one-call</module>
 		<module>kurento-one2one-call-advanced</module>
 		<module>kurento-one2many-call</module>
-		<module>kurento-one2many-filter</module>
 		<module>kurento-group-call</module>
 		<module>kurento-http-player</module>
 		<module>kurento-platedetector</module>
