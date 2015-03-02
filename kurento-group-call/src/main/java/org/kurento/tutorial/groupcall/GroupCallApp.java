@@ -33,6 +33,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class GroupCallApp implements WebSocketConfigurer {
 
+	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+
 	@Bean
 	public UserRegistry registry() {
 		return new UserRegistry();
@@ -50,7 +52,8 @@ public class GroupCallApp implements WebSocketConfigurer {
 
 	@Bean
 	public KurentoClient kurentoClient() {
-		return KurentoClient.create("ws://localhost:8888/kurento");
+		return KurentoClient.create(System.getProperty("kms.ws.uri",
+				DEFAULT_KMS_WS_URI));
 	}
 
 	public static void main(String[] args) throws Exception {
