@@ -1,10 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.kurento.tutorial</groupId>
+	<parent>
+		<groupId>org.kurento.tutorial</groupId>
+		<artifactId>kurento-tutorial</artifactId>
+		<version>5.1.1-SNAPSHOT</version>
+	</parent>
+
 	<artifactId>kurento-pointerdetector</artifactId>
-	<version>5.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
+
 
 	<name>Kurento Java Module Tutorial 1 - Pointer Detector</name>
 	<description>WebRTC in loopback with a pointer detector filter</description>
@@ -41,36 +46,41 @@
 	<properties>
 		<demo.port>8091</demo.port>
 
-		<!-- Cross plugins settings -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-		<!-- maven-compiler-plugin -->
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.source>1.7</maven.compiler.source>
-
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.pointerdetector.PointerDetectorApp</start-class>
 
-		<!-- Kurento -->
-		<kurento.version>[5.0.0,6.0.0-SNAPSHOT)</kurento.version>
-		<kurento.pointerdetector.version>[1.0.0,2.0.0)</kurento.pointerdetector.version>
-
-		<!-- Plugins -->
-		<spring-boot.version>1.2.1.RELEASE</spring-boot.version>
-		<spring.version>4.1.1.RELEASE</spring.version>
-		<exec-maven.version>1.3.2</exec-maven.version>
-		<assembly.plugin.version>2.5</assembly.plugin.version>
-		<antrun.plugin.version>1.7</antrun.plugin.version>
-		<clean.plugin.version>2.6.1</clean.plugin.version>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
+		</dependency>
+
+		<!-- Kurento -->
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-utils-js</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento.module</groupId>
+			<artifactId>pointerdetector</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-boot.version}</version>
 				<configuration>
 					<mainClass>${start-class}</mainClass>
 					<layout>ZIP</layout>
@@ -86,7 +96,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>${exec-maven.version}</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
@@ -105,7 +114,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>${clean.plugin.version}</version>
 				<configuration>
 					<filesets>
 						<fileset>
@@ -137,83 +145,5 @@
 			</resource>
 		</resources>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${assembly.plugin.version}</version>
-						<configuration>
-							<descriptor>src/assembly/bin.xml</descriptor>
-							<finalName>${project.artifactId}-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>${antrun.plugin.version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<configuration>
-									<tasks>
-										<copy file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip" tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
-									</tasks>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>no-assembly</id>
-		</profile>
-	</profiles>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring-boot.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<!-- Kurento -->
-		<dependency>
-			<groupId>org.kurento</groupId>
-			<artifactId>kurento-client</artifactId>
-			<version>${kurento.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.kurento</groupId>
-			<artifactId>kurento-utils-js</artifactId>
-			<version>${kurento.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.kurento.module</groupId>
-			<artifactId>pointerdetector</artifactId>
-			<version>${kurento.pointerdetector.version}</version>
-		</dependency>
-	</dependencies>
 
 </project>
