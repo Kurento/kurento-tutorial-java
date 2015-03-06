@@ -3,7 +3,7 @@
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-crowddetector</artifactId>
-	<version>5.1.1-SNAPSHOT</version>
+	<version>5.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>Kurento Java Module Tutorial 3 - Crowd Detector</name>
