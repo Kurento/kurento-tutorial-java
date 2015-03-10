@@ -20,9 +20,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.EventListener;
-import org.kurento.client.MediaPipeline;
-import org.kurento.client.WebRtcEndpoint;
+import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
+import org.kurento.client.MediaPipeline;
+import org.kurento.client.OnIceCandidateEvent;
+import org.kurento.client.WebRtcEndpoint;
+import org.kurento.jsonrpc.JsonUtils;
 import org.kurento.module.crowddetector.CrowdDetectorDirectionEvent;
 import org.kurento.module.crowddetector.CrowdDetectorFilter;
 import org.kurento.module.crowddetector.CrowdDetectorFluidityEvent;
@@ -54,7 +57,7 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 			.getLogger(CrowdDetectorHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
-	private final ConcurrentHashMap<String, MediaPipeline> pipelines = new ConcurrentHashMap<String, MediaPipeline>();
+	private final ConcurrentHashMap<String, UserSession> users = new ConcurrentHashMap<String, UserSession>();
 
 	@Autowired
 	private KurentoClient kurento;
@@ -72,13 +75,27 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 			start(session, jsonMessage);
 			break;
 
-		case "stop":
-			String sessionId = session.getId();
-			if (pipelines.containsKey(sessionId)) {
-				pipelines.get(sessionId).release();
-				pipelines.remove(sessionId);
+		case "stop": {
+			UserSession user = users.remove(session.getId());
+			if (user != null) {
+				user.release();
 			}
 			break;
+		}
+
+		case "onIceCandidate": {
+			JsonObject candidate = jsonMessage.get("candidate")
+					.getAsJsonObject();
+
+			UserSession user = users.get(session.getId());
+			if (user != null) {
+				IceCandidate cand = new IceCandidate(candidate.get("candidate")
+						.getAsString(), candidate.get("sdpMid").getAsString(),
+						candidate.get("sdpMLineIndex").getAsInt());
+				user.addCandidate(cand);
+			}
+			break;
+		}
 
 		default:
 			sendError(session,
@@ -91,11 +108,33 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 	private void start(final WebSocketSession session, JsonObject jsonMessage) {
 		try {
 			// Media Logic (Media Pipeline and Elements)
+			UserSession user = new UserSession();
 			MediaPipeline pipeline = kurento.createMediaPipeline();
-			pipelines.put(session.getId(), pipeline);
-
+			user.setMediaPipeline(pipeline);
 			WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
 					.build();
+			user.setWebRtcEndpoint(webRtcEndpoint);
+			users.put(session.getId(), user);
+
+			webRtcEndpoint
+					.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (session) {
+									session.sendMessage(new TextMessage(
+											response.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
 
 			List<RegionOfInterest> rois = new ArrayList<>();
 			List<RelativePoint> points = new ArrayList<RelativePoint>();
@@ -195,7 +234,13 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "startResponse");
 			response.addProperty("sdpAnswer", sdpAnswer);
-			session.sendMessage(new TextMessage(response.toString()));
+
+			synchronized (session) {
+				session.sendMessage(new TextMessage(response.toString()));
+			}
+
+			webRtcEndpoint.gatherCandidates();
+
 		} catch (Throwable t) {
 			sendError(session, t.getMessage());
 		}
