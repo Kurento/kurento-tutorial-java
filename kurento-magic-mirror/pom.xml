@@ -53,7 +53,7 @@
 		<start-class>org.kurento.tutorial.magicmirror.MagicMirrorApp</start-class>
 
 		<!-- Kurento -->
-		<kurento.version>[5.0.0,6.0.0-SNAPSHOT)</kurento.version>
+		<kurento.version>6.0.0-SNAPSHOT</kurento.version>
 
 		<!-- Plugins -->
 		<spring-boot.version>1.2.1.RELEASE</spring-boot.version>

@@ -49,6 +49,13 @@ ws.onmessage = function(message) {
 		}
 		onError("Error message from server: " + parsedMessage.message);
 		break;
+	case 'iceCandidate':
+	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+        if (!error) return;
+	      console.error("Error adding candidate: " + error);
+	    });
+	    break;
+
 	default:
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
@@ -64,7 +71,14 @@ function start() {
 	showSpinner(videoInput, videoOutput);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, onOffer, onError);
+
+    var options = {
+	      localVideo: videoInput,
+	      remoteVideo: videoOutput,
+	      onsdpoffer: onOffer,
+	      onicecandidate: onIceCandidate
+	    }
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options);
 }
 
 function onOffer(offerSdp) {
@@ -78,6 +92,16 @@ function onOffer(offerSdp) {
 
 function onError(error) {
 	console.error(error);
+}
+
+function onIceCandidate(candidate) {
+	  console.log("Local candidate" + JSON.stringify(candidate));
+
+	  var message = {
+	    id: 'onIceCandidate',
+	    candidate: candidate
+	  };
+	  sendMessage(message);
 }
 
 function startResponse(message) {
@@ -145,7 +169,6 @@ function hideSpinner() {
 		arguments[i].style.background = '';
 	}
 }
-
 /**
  * Lightbox utility (to display media pipeline image in a modal dialog)
  */
