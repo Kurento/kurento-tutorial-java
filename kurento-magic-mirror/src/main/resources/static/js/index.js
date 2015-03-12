@@ -51,8 +51,10 @@ ws.onmessage = function(message) {
 		break;
 	case 'iceCandidate':
 	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-        if (!error) return;
+        if (error) {
 	      console.error("Error adding candidate: " + error);
+	      return;
+        }
 	    });
 	    break;
 
@@ -75,13 +77,20 @@ function start() {
     var options = {
 	      localVideo: videoInput,
 	      remoteVideo: videoOutput,
-	      onsdpoffer: onOffer,
 	      onicecandidate: onIceCandidate
 	    }
-	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options);
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+		function (error) {
+		  if(error) {
+			  return console.error(error);
+		  }
+		  webRtcPeer.generateOffer (onOffer);
+		});
+
 }
 
-function onOffer(offerSdp) {
+function onOffer(error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
 		id : 'start',
@@ -107,7 +116,10 @@ function onIceCandidate(candidate) {
 function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log("SDP answer received from server. Processing ...");
-	webRtcPeer.processSdpAnswer(message.sdpAnswer);
+
+	webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+		if (error) return console.error (error);
+	});
 }
 
 function stop() {
