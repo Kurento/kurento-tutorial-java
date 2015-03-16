@@ -14,9 +14,9 @@
  */
 package org.kurento.tutorial.one2onecall;
 
+import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.KurentoClient;
 
 /**
  * Media Pipeline (WebRTC endpoints, i.e. Kurento Media Elements) and
@@ -41,7 +41,7 @@ public class CallMediaPipeline {
 			this.callerWebRtcEP.connect(this.calleeWebRtcEP);
 			this.calleeWebRtcEP.connect(this.callerWebRtcEP);
 		} catch (Throwable t) {
-			if(this.pipeline != null){
+			if (this.pipeline != null) {
 				pipeline.release();
 			}
 		}
@@ -59,6 +59,14 @@ public class CallMediaPipeline {
 		if (pipeline != null) {
 			pipeline.release();
 		}
+	}
+
+	public WebRtcEndpoint getCallerWebRtcEP() {
+		return callerWebRtcEP;
+	}
+
+	public WebRtcEndpoint getCalleeWebRtcEP() {
+		return calleeWebRtcEP;
 	}
 
 }

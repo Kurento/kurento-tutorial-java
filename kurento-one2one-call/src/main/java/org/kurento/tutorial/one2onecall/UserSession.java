@@ -15,7 +15,11 @@
 package org.kurento.tutorial.one2onecall;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.kurento.client.IceCandidate;
+import org.kurento.client.WebRtcEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
@@ -35,12 +39,14 @@ public class UserSession {
 	private static final Logger log = LoggerFactory
 			.getLogger(UserSession.class);
 
-	private String name;
-	private WebSocketSession session;
+	private final String name;
+	private final WebSocketSession session;
 
 	private String sdpOffer;
 	private String callingTo;
 	private String callingFrom;
+	private WebRtcEndpoint webRtcEndpoint;
+	private final List<IceCandidate> candidateList = new ArrayList<IceCandidate>();
 
 	public UserSession(WebSocketSession session, String name) {
 		this.session = session;
@@ -88,4 +94,20 @@ public class UserSession {
 		return session.getId();
 	}
 
+	public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
+		this.webRtcEndpoint = webRtcEndpoint;
+
+		for (IceCandidate e : candidateList) {
+			this.webRtcEndpoint.addIceCandidate(e);
+		}
+		this.candidateList.clear();
+	}
+
+	public void addCandidate(IceCandidate e) {
+		if (this.webRtcEndpoint != null) {
+			this.webRtcEndpoint.addIceCandidate(e);
+		} else {
+			candidateList.add(e);
+		}
+	}
 }
