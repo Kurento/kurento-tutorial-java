@@ -17,9 +17,13 @@ package org.kurento.tutorial.one2manycall;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.kurento.client.MediaPipeline;
-import org.kurento.client.WebRtcEndpoint;
+import org.kurento.client.EventListener;
+import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
+import org.kurento.client.MediaPipeline;
+import org.kurento.client.OnIceCandidateEvent;
+import org.kurento.client.WebRtcEndpoint;
+import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +48,7 @@ public class CallHandler extends TextWebSocketHandler {
 			.getLogger(CallHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
-	private ConcurrentHashMap<String, UserSession> viewers = new ConcurrentHashMap<String, UserSession>();
+	private final ConcurrentHashMap<String, UserSession> viewers = new ConcurrentHashMap<String, UserSession>();
 
 	@Autowired
 	private KurentoClient kurento;
@@ -87,6 +91,24 @@ public class CallHandler extends TextWebSocketHandler {
 				session.sendMessage(new TextMessage(response.toString()));
 			}
 			break;
+		case "onIceCandidate": {
+			JsonObject candidate = jsonMessage.get("candidate")
+					.getAsJsonObject();
+
+			UserSession user = null;
+			if (masterUserSession.getSession() == session) {
+				user = masterUserSession;
+			} else {
+				user = viewers.get(session.getId());
+			}
+			if (user != null) {
+				IceCandidate cand = new IceCandidate(candidate.get("candidate")
+						.getAsString(), candidate.get("sdpMid").getAsString(),
+						candidate.get("sdpMLineIndex").getAsInt());
+				user.addCandidate(cand);
+			}
+			break;
+		}
 		case "stop":
 			stop(session);
 			break;
@@ -95,7 +117,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private synchronized void master(WebSocketSession session,
+	private synchronized void master(final WebSocketSession session,
 			JsonObject jsonMessage) throws IOException {
 		if (masterUserSession == null) {
 			masterUserSession = new UserSession(session);
@@ -105,6 +127,27 @@ public class CallHandler extends TextWebSocketHandler {
 					pipeline).build());
 
 			WebRtcEndpoint masterWebRtc = masterUserSession.getWebRtcEndpoint();
+
+			masterWebRtc
+					.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (session) {
+									session.sendMessage(new TextMessage(
+											response.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
+
 			String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer")
 					.getAsString();
 			String sdpAnswer = masterWebRtc.processOffer(sdpOffer);
@@ -113,7 +156,11 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("id", "masterResponse");
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", sdpAnswer);
-			masterUserSession.sendMessage(response);
+
+			synchronized (session) {
+				masterUserSession.sendMessage(response);
+			}
+			masterWebRtc.gatherCandidates();
 
 		} else {
 			JsonObject response = new JsonObject();
@@ -125,7 +172,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private synchronized void viewer(WebSocketSession session,
+	private synchronized void viewer(final WebSocketSession session,
 			JsonObject jsonMessage) throws IOException {
 		if (masterUserSession == null
 				|| masterUserSession.getWebRtcEndpoint() == null) {
@@ -154,6 +201,27 @@ public class CallHandler extends TextWebSocketHandler {
 
 			WebRtcEndpoint nextWebRtc = new WebRtcEndpoint.Builder(pipeline)
 					.build();
+
+			nextWebRtc
+					.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (session) {
+									session.sendMessage(new TextMessage(
+											response.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
+
 			viewer.setWebRtcEndpoint(nextWebRtc);
 			masterUserSession.getWebRtcEndpoint().connect(nextWebRtc);
 			String sdpAnswer = nextWebRtc.processOffer(sdpOffer);
@@ -162,7 +230,11 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("id", "viewerResponse");
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", sdpAnswer);
-			viewer.sendMessage(response);
+
+			synchronized (session) {
+				viewer.sendMessage(response);
+			}
+			nextWebRtc.gatherCandidates();
 		}
 	}
 

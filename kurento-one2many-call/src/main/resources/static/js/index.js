@@ -37,6 +37,12 @@ ws.onmessage = function(message) {
 	case 'viewerResponse':
 		viewerResponse(parsedMessage);
 		break;
+	case 'iceCandidate':
+	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+        if (!error) return;
+	      console.error("Error adding candidate: " + error);
+	    });
+	    break;
 	case 'stopCommunication':
 		dispose();
 		break;
@@ -51,7 +57,9 @@ function masterResponse(message) {
 		console.info('Call not accepted for the following reason: ' + errorMsg);
 		dispose();
 	} else {
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
@@ -61,7 +69,9 @@ function viewerResponse(message) {
 		console.info('Call not accepted for the following reason: ' + errorMsg);
 		dispose();
 	} else {
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
@@ -69,28 +79,66 @@ function master() {
 	if (!webRtcPeer) {
 		showSpinner(video);
 
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendOnly(video, function(offerSdp) {
-			var message = {
-				id : 'master',
-				sdpOffer : offerSdp
-			};
-			sendMessage(message);
+		var options = {
+			      localVideo: video,
+			      onicecandidate: onIceCandidate
+			    }
+		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options,
+			function (error) {
+			  if(error) {
+				  return console.error(error);
+			  }
+			  webRtcPeer.generateOffer (onOfferMaster);
 		});
 	}
+}
+
+function onOfferMaster(error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	console.info('Invoking SDP offer callback function ' + location.host);
+	var message = {
+		id : 'master',
+		sdpOffer : offerSdp
+	}
+	sendMessage(message);
 }
 
 function viewer() {
 	if (!webRtcPeer) {
 		showSpinner(video);
 
-		webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(video, function(offerSdp) {
-			var message = {
-				id : 'viewer',
-				sdpOffer : offerSdp
-			};
-			sendMessage(message);
+		var options = {
+			      remoteVideo: video,
+			      onicecandidate: onIceCandidate
+			    }
+		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
+			function (error) {
+			  if(error) {
+				  return console.error(error);
+			  }
+			 this.generateOffer(onOfferViewer);
 		});
 	}
+}
+
+function onOfferViewer(error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	console.info('Invoking SDP offer callback function ' + location.host);
+	var message = {
+		id : 'viewer',
+		sdpOffer : offerSdp
+	}
+	sendMessage(message);
+}
+
+function onIceCandidate(candidate) {
+	  console.log("Local candidate" + JSON.stringify(candidate));
+
+	  var message = {
+	    id: 'onIceCandidate',
+	    candidate: candidate
+	  };
+	  sendMessage(message);
 }
 
 function stop() {
