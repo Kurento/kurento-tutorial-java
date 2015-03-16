@@ -17,6 +17,9 @@ var ws = new WebSocket('ws://' + location.host + '/call');
 var videoInput;
 var videoOutput;
 var webRtcPeer;
+var response;
+var callerMessage;
+var from;
 
 var registerName = null;
 var registerState = null;
@@ -103,6 +106,12 @@ ws.onmessage = function(message) {
 		console.info("Communication ended by remote peer");
 		stop(true);
 		break;
+	case 'iceCandidate':
+	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+        if (!error) return;
+	      console.error("Error adding candidate: " + error);
+	    });
+	    break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -127,13 +136,17 @@ function callResponse(message) {
 		stop();
 	} else {
 		setCallState(IN_CALL);
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
 function startCommunication(message) {
 	setCallState(IN_CALL);
-	webRtcPeer.processSdpAnswer(message.sdpAnswer);
+	webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+		if (error) return console.error (error);
+	});
 }
 
 function incomingCall(message) {
@@ -152,17 +165,22 @@ function incomingCall(message) {
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
-			var response = {
-				id : 'incomingCallResponse',
-				from : message.from,
-				callResponse : 'accept',
-				sdpOffer : offerSdp
-			};
-			sendMessage(response);
-			}, function(error) {
-				setCallState(NO_CALL);
+
+		from = message.from;
+		var options = {
+			      localVideo: videoInput,
+			      remoteVideo: videoOutput,
+			      onicecandidate: onIceCandidate,
+			      onerror: onError
+			    }
+	    webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+	      function (error) {
+			  if(error) {
+				  return console.error(error);
+			  }
+			  webRtcPeer.generateOffer (onOfferIncomingCall);
 			});
+
 	} else {
 		var response = {
 			id : 'incomingCallResponse',
@@ -173,6 +191,17 @@ function incomingCall(message) {
 		sendMessage(response);
 		stop();
 	}
+}
+
+function onOfferIncomingCall (error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	var response = {
+			id : 'incomingCallResponse',
+			from : from,
+			callResponse : 'accept',
+			sdpOffer : offerSdp
+		};
+	sendMessage(response);
 }
 
 function register() {
@@ -199,19 +228,31 @@ function call() {
 	setCallState(PROCESSING_CALL);
 	showSpinner(videoInput, videoOutput);
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
-		console.log('Invoking SDP offer callback function');
-		var message = {
-			id : 'call',
-			from : document.getElementById('name').value,
-			to : document.getElementById('peer').value,
-			sdpOffer : offerSdp
-		};
-		sendMessage(message);
-	}, function(error) {
-		console.log(error);
-		setCallState(NO_CALL);
+	var options = {
+		      localVideo: videoInput,
+		      remoteVideo: videoOutput,
+		      onicecandidate: onIceCandidate,
+		      onerror: onError
+		    }
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+		function (error) {
+		  if(error) {
+			  return console.error(error);
+		  }
+		  webRtcPeer.generateOffer (onOfferCall);
 	});
+}
+
+function onOfferCall (error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	console.log('Invoking SDP offer callback function');
+	var message = {
+		id : 'call',
+		from : document.getElementById('name').value,
+		to : document.getElementById('peer').value,
+		sdpOffer : offerSdp
+	};
+	sendMessage(message);
 }
 
 function stop(message) {
@@ -228,6 +269,20 @@ function stop(message) {
 		}
 	}
 	hideSpinner(videoInput, videoOutput);
+}
+
+function onError () {
+	setCallState(NO_CALL);
+}
+
+function onIceCandidate(candidate) {
+	  console.log("Local candidate" + JSON.stringify(candidate));
+
+	  var message = {
+	    id: 'onIceCandidate',
+	    candidate: candidate
+	  };
+	  sendMessage(message);
 }
 
 function sendMessage(message) {
