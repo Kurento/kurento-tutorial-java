@@ -14,8 +14,12 @@
  */
 package org.kurento.tutorial.helloworld;
 
+import java.util.concurrent.CountDownLatch;
+
+import org.kurento.client.EventListener;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.OnIceGatheringDoneEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Hello World REST Controller (application logic).
- *
+ * 
  * @author Boni Garcia (bgarcia@gsyc.es)
- * @since 5.0.0
+ * @author David Fernandez (d.fernandezlop@gmail.com)
+ * @since 6.0.0-SNAPSHOT
  */
 @RestController
 public class HelloWorldController {
@@ -38,14 +43,30 @@ public class HelloWorldController {
 	@RequestMapping(value = "/helloworld", method = RequestMethod.POST)
 	private String processRequest(@RequestBody String sdpOffer) {
 
+		final CountDownLatch eventReceived = new CountDownLatch(1);
 		// Media Logic
 		MediaPipeline pipeline = kurento.createMediaPipeline();
 		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
-		.build();
-		webRtcEndpoint.connect(webRtcEndpoint);
+				.build();
+		webRtcEndpoint
+				.addOnIceGatheringDoneListener(new EventListener<OnIceGatheringDoneEvent>() {
+					@Override
+					public void onEvent(OnIceGatheringDoneEvent event) {
+						eventReceived.countDown();
+					}
+				});
 
+		webRtcEndpoint.connect(webRtcEndpoint);
+		webRtcEndpoint.processOffer(sdpOffer);
+		webRtcEndpoint.gatherCandidates();
+
+		try {
+			eventReceived.await();
+		} catch (InterruptedException e) {
+
+		}
 		// SDP negotiation (offer and answer)
-		String responseSdp = webRtcEndpoint.processOffer(sdpOffer);
+		String responseSdp = webRtcEndpoint.getLocalSessionDescriptor();
 		return responseSdp;
 	}
 
