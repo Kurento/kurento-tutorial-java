@@ -17,6 +17,7 @@ var ws = new WebSocket('ws://' + location.host + '/call');
 var videoInput;
 var videoOutput;
 var webRtcPeer;
+var from;
 
 var registerName = null;
 var registerState = null;
@@ -123,6 +124,12 @@ ws.onmessage = function(message) {
 	case 'playEnd':
 		playEnd();
 		break;
+	case 'iceCandidate':
+	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+        if (!error) return;
+	      console.error("Error adding candidate: " + error);
+	    });
+	    break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -151,13 +158,17 @@ function callResponse(message) {
 		}
 	} else {
 		setCallState(IN_CALL);
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
 function startCommunication(message) {
 	setCallState(IN_CALL);
-	webRtcPeer.processSdpAnswer(message.sdpAnswer);
+	webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+		if (error) return console.error (error);
+	});
 }
 
 function playResponse(message) {
@@ -169,7 +180,9 @@ function playResponse(message) {
 		setCallState(POST_CALL);
 	} else {
 		setCallState(IN_PLAY);
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
@@ -189,16 +202,19 @@ function incomingCall(message) {
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
-		webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
-			var response = {
-				id : 'incomingCallResponse',
-				from : message.from,
-				callResponse : 'accept',
-				sdpOffer : offerSdp
-			};
-			sendMessage(response);
-			}, function(error) {
-				setCallState(NO_CALL);
+
+		from = message.from;
+		var options = {
+			      localVideo: videoInput,
+			      remoteVideo: videoOutput,
+			      onicecandidate: onIceCandidate
+			    }
+	    webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+	      function (error) {
+			  if(error) {
+				  return console.error(error);
+			  }
+			  this.generateOffer (onOfferIncomingCall);
 			});
 	} else {
 		var response = {
@@ -210,6 +226,17 @@ function incomingCall(message) {
 		sendMessage(response);
 		stop();
 	}
+}
+
+function onOfferIncomingCall (error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	var response = {
+			id : 'incomingCallResponse',
+			from : from,
+			callResponse : 'accept',
+			sdpOffer : offerSdp
+		};
+	sendMessage(response);
 }
 
 function register() {
@@ -237,19 +264,30 @@ function call() {
 	setCallState(DISABLED);
 	showSpinner(videoInput, videoOutput);
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, function(offerSdp) {
-		console.log('Invoking SDP offer callback function');
-		var message = {
-			id : 'call',
-			from : document.getElementById('name').value,
-			to : document.getElementById('peer').value,
-			sdpOffer : offerSdp
-		};
-		sendMessage(message);
-	}, function(error) {
-		console.log(error);
-		setCallState(NO_CALL);
+	var options = {
+		      localVideo: videoInput,
+		      remoteVideo: videoOutput,
+		      onicecandidate: onIceCandidate
+		    }
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+		function (error) {
+		  if(error) {
+			  return console.error(error);
+		  }
+		  this.generateOffer (onOfferCall);
 	});
+}
+
+function onOfferCall (error, offerSdp) {
+	if (error) return console.error ("Error generating the offer");
+	console.log('Invoking SDP offer callback function');
+	var message = {
+		id : 'call',
+		from : document.getElementById('name').value,
+		to : document.getElementById('peer').value,
+		sdpOffer : offerSdp
+	};
+	sendMessage(message);
 }
 
 function play() {
@@ -264,15 +302,27 @@ function play() {
 	setCallState(DISABLED);
 	showSpinner(videoOutput);
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(videoOutput, function(offerSdp) {
-		console.log('Invoking SDP offer callback function');
-		var message = {
-			id : 'play',
-			user : document.getElementById('peer').value,
-			sdpOffer : offerSdp
-		};
-		sendMessage(message);
+	var options = {
+		      remoteVideo: videoOutput,
+		      onicecandidate: onIceCandidate
+		    }
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
+		function (error) {
+		  if(error) {
+			  return console.error(error);
+		  }
+		  this.generateOffer (onOfferPlay);
 	});
+}
+
+function onOfferPlay (error, offerSdp) {
+	console.log('Invoking SDP offer callback function');
+	var message = {
+		id : 'play',
+		user : document.getElementById('peer').value,
+		sdpOffer : offerSdp
+	};
+	sendMessage(message);
 }
 
 function playEnd() {
@@ -303,6 +353,16 @@ function sendMessage(message) {
 	var jsonMessage = JSON.stringify(message);
 	console.log('Senging message: ' + jsonMessage);
 	ws.send(jsonMessage);
+}
+
+function onIceCandidate(candidate) {
+	  console.log("Local candidate" + JSON.stringify(candidate));
+
+	  var message = {
+	    id: 'onIceCandidate',
+	    candidate: candidate
+	  };
+	  sendMessage(message);
 }
 
 function showSpinner() {
