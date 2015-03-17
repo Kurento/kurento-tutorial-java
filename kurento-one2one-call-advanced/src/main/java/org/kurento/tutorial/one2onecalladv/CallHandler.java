@@ -17,8 +17,12 @@ package org.kurento.tutorial.one2onecalladv;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.kurento.client.MediaPipeline;
+import org.kurento.client.EventListener;
+import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
+import org.kurento.client.MediaPipeline;
+import org.kurento.client.OnIceCandidateEvent;
+import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +48,7 @@ public class CallHandler extends TextWebSocketHandler {
 			.getLogger(CallHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
-	private ConcurrentHashMap<String, MediaPipeline> pipelines = new ConcurrentHashMap<String, MediaPipeline>();
+	private final ConcurrentHashMap<String, MediaPipeline> pipelines = new ConcurrentHashMap<String, MediaPipeline>();
 
 	@Autowired
 	private KurentoClient kurento;
@@ -77,13 +81,25 @@ public class CallHandler extends TextWebSocketHandler {
 			incomingCallResponse(user, jsonMessage);
 			break;
 		case "play":
-			play(session, jsonMessage);
+			play(user, jsonMessage);
 			break;
+		case "onIceCandidate": {
+			JsonObject candidate = jsonMessage.get("candidate")
+					.getAsJsonObject();
+
+			if (user != null) {
+				IceCandidate cand = new IceCandidate(candidate.get("candidate")
+						.getAsString(), candidate.get("sdpMid").getAsString(),
+						candidate.get("sdpMLineIndex").getAsInt());
+				user.addCandidate(cand);
+			}
+			break;
+		}
 		case "stop":
 			stopCommunication(session);
-			releasePipeline(session);
+			releasePipeline(user);
 		case "stopPlay":
-			releasePipeline(session);
+			releasePipeline(user);
 		default:
 			break;
 		}
@@ -136,11 +152,11 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private void incomingCallResponse(UserSession callee, JsonObject jsonMessage)
-			throws IOException {
+	private void incomingCallResponse(final UserSession callee,
+			JsonObject jsonMessage) throws IOException {
 		String callResponse = jsonMessage.get("callResponse").getAsString();
 		String from = jsonMessage.get("from").getAsString();
-		UserSession calleer = registry.getByName(from);
+		final UserSession calleer = registry.getByName(from);
 		String to = calleer.getCallingTo();
 
 		if ("accept".equals(callResponse)) {
@@ -157,12 +173,64 @@ public class CallHandler extends TextWebSocketHandler {
 			String calleeSdpAnswer = callMediaPipeline
 					.generateSdpAnswerForCallee(calleeSdpOffer);
 
+			callee.setWebRtcEndpoint(callMediaPipeline.getCalleeWebRtcEP());
+			callMediaPipeline.getCalleeWebRtcEP().addOnIceCandidateListener(
+					new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (callee.getSession()) {
+									callee.getSession()
+											.sendMessage(
+													new TextMessage(response
+															.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
+
 			JsonObject startCommunication = new JsonObject();
 			startCommunication.addProperty("id", "startCommunication");
 			startCommunication.addProperty("sdpAnswer", calleeSdpAnswer);
-			callee.sendMessage(startCommunication);
+
+			synchronized (callee) {
+				callee.sendMessage(startCommunication);
+			}
+
+			callMediaPipeline.getCalleeWebRtcEP().gatherCandidates();
 
 			String callerSdpOffer = registry.getByName(from).getSdpOffer();
+
+			calleer.setWebRtcEndpoint(callMediaPipeline.getCallerWebRtcEP());
+			callMediaPipeline.getCallerWebRtcEP().addOnIceCandidateListener(
+					new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (calleer.getSession()) {
+									calleer.getSession()
+											.sendMessage(
+													new TextMessage(response
+															.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
+
 			String callerSdpAnswer = callMediaPipeline
 					.generateSdpAnswerForCaller(callerSdpOffer);
 
@@ -170,7 +238,12 @@ public class CallHandler extends TextWebSocketHandler {
 			response.addProperty("id", "callResponse");
 			response.addProperty("response", "accepted");
 			response.addProperty("sdpAnswer", callerSdpAnswer);
-			calleer.sendMessage(response);
+
+			synchronized (calleer) {
+				calleer.sendMessage(response);
+			}
+
+			callMediaPipeline.getCallerWebRtcEP().gatherCandidates();
 
 			callMediaPipeline.record();
 
@@ -195,15 +268,24 @@ public class CallHandler extends TextWebSocketHandler {
 		stoppedUser.sendMessage(message);
 	}
 
-	public void releasePipeline(WebSocketSession session) throws IOException {
-		String sessionId = session.getId();
+	public void releasePipeline(UserSession session) throws IOException {
+		String sessionId = session.getSessionId();
+		// set to null the endpoint of the other user
+		UserSession stoppedUser = (session.getCallingFrom() != null) ? registry
+				.getByName(session.getCallingFrom()) : registry
+				.getByName(session.getCallingTo());
+
 		if (pipelines.containsKey(sessionId)) {
 			pipelines.get(sessionId).release();
 			pipelines.remove(sessionId);
 		}
+		session.setWebRtcEndpoint(null);
+		session.setPlayingWebRtcEndpoint(null);
+		stoppedUser.setWebRtcEndpoint(null);
+		stoppedUser.setPlayingWebRtcEndpoint(null);
 	}
 
-	private void play(WebSocketSession session, JsonObject jsonMessage)
+	private void play(final UserSession session, JsonObject jsonMessage)
 			throws IOException {
 		String user = jsonMessage.get("user").getAsString();
 		log.debug("Playing recorded call of user '{}'", user);
@@ -212,24 +294,57 @@ public class CallHandler extends TextWebSocketHandler {
 		response.addProperty("id", "playResponse");
 
 		if (registry.getByName(user) != null
-				&& registry.getBySession(session) != null) {
+				&& registry.getBySession(session.getSession()) != null) {
 			PlayMediaPipeline playMediaPipeline = new PlayMediaPipeline(
-					kurento, user, session);
+					kurento, user, session.getSession());
 			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
+
+			session.setPlayingWebRtcEndpoint(playMediaPipeline.getWebRtc());
+
+			playMediaPipeline.getWebRtc().addOnIceCandidateListener(
+					new EventListener<OnIceCandidateEvent>() {
+
+						@Override
+						public void onEvent(OnIceCandidateEvent event) {
+							JsonObject response = new JsonObject();
+							response.addProperty("id", "iceCandidate");
+							response.add("candidate", JsonUtils
+									.toJsonObject(event.getCandidate()));
+							try {
+								synchronized (session) {
+									session.getSession()
+											.sendMessage(
+													new TextMessage(response
+															.toString()));
+								}
+							} catch (IOException e) {
+								log.debug(e.getMessage());
+							}
+						}
+					});
+
 			String sdpAnswer = playMediaPipeline.generateSdpAnswer(sdpOffer);
 
 			response.addProperty("response", "accepted");
+
 			response.addProperty("sdpAnswer", sdpAnswer);
 
 			playMediaPipeline.play();
+			pipelines.put(session.getSessionId(),
+					playMediaPipeline.getPipeline());
+			synchronized (session.getSession()) {
+				session.sendMessage(response);
+			}
 
-			pipelines.put(session.getId(), playMediaPipeline.getPipeline());
+			playMediaPipeline.getWebRtc().gatherCandidates();
+
 		} else {
 			response.addProperty("response", "rejected");
 			response.addProperty("error", "No recording for user '" + user
 					+ "'. Please type a correct user in the 'Peer' field.");
+			session.getSession().sendMessage(
+					new TextMessage(response.toString()));
 		}
-		session.sendMessage(new TextMessage(response.toString()));
 	}
 
 	@Override

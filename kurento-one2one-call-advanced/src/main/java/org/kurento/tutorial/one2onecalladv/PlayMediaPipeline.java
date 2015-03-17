@@ -22,10 +22,10 @@ import java.io.IOException;
 import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
+import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.WebRtcEndpoint;
-import org.kurento.client.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
@@ -45,9 +45,9 @@ public class PlayMediaPipeline {
 	private static final Logger log = LoggerFactory
 			.getLogger(PlayMediaPipeline.class);
 
-	private MediaPipeline pipeline;
+	private final MediaPipeline pipeline;
 	private WebRtcEndpoint webRtc;
-	private PlayerEndpoint player;
+	private final PlayerEndpoint player;
 
 	public PlayMediaPipeline(KurentoClient kurento, String user,
 			final WebSocketSession session) {
@@ -89,6 +89,7 @@ public class PlayMediaPipeline {
 
 		// Release pipeline
 		pipeline.release();
+		this.webRtc = null;
 	}
 
 	public void play() {
@@ -103,4 +104,7 @@ public class PlayMediaPipeline {
 		return pipeline;
 	}
 
+	public WebRtcEndpoint getWebRtc() {
+		return webRtc;
+	}
 }
