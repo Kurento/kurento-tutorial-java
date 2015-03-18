@@ -38,6 +38,14 @@ ws.onmessage = function(message) {
 	case 'receiveVideoAnswer':
 		receiveVideoResponse(parsedMessage);
 		break;
+	case 'iceCandidate':
+		participants[parsedMessage.name].rtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+	        if (error) {
+		      console.error("Error adding candidate: " + error);
+		      return;
+	        }
+	    });
+	    break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -64,7 +72,9 @@ function onNewParticipant(request) {
 }
 
 function receiveVideoResponse(result) {
-	participants[result.name].rtcPeer.processSdpAnswer(result.sdpAnswer);
+	participants[result.name].rtcPeer.processAnswer (result.sdpAnswer, function (error) {
+		if (error) return console.error (error);
+	});
 }
 
 function callResponse(message) {
@@ -72,7 +82,9 @@ function callResponse(message) {
 		console.info('Call not accepted by peer. Closing call');
 		stop();
 	} else {
-		webRtcPeer.processSdpAnswer(message.sdpAnswer);
+		webRtcPeer.processAnswer(message.sdpAnswer, function (error) {
+			if (error) return console.error (error);
+		});
 	}
 }
 
@@ -91,9 +103,20 @@ function onExistingParticipants(msg) {
 	var participant = new Participant(name);
 	participants[name] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kurentoUtils.WebRtcPeer.startSendOnly(video,
-			participant.offerToReceiveVideo.bind(participant), null,
-			constraints);
+
+	var options = {
+	      localVideo: video,
+	      mediaConstraints: constraints,
+	      onicecandidate: participant.onIceCandidate.bind(participant)
+	    }
+	participant.rtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options,
+		function (error) {
+		  if(error) {
+			  return console.error(error);
+		  }
+		  this.generateOffer (participant.offerToReceiveVideo.bind(participant));
+	});
+
 	msg.data.forEach(receiveVideo);
 }
 
@@ -116,8 +139,19 @@ function receiveVideo(sender) {
 	var participant = new Participant(sender);
 	participants[sender] = participant;
 	var video = participant.getVideoElement();
-	participant.rtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(video,
-			participant.offerToReceiveVideo.bind(participant));
+
+	var options = {
+      remoteVideo: video,
+      onicecandidate: participant.onIceCandidate.bind(participant)
+    }
+
+	participant.rtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
+			function (error) {
+			  if(error) {
+				  return console.error(error);
+			  }
+			  this.generateOffer (participant.offerToReceiveVideo.bind(participant));
+	});;
 }
 
 function onParticipantLeft(request) {
