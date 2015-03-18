@@ -20,8 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.kurento.client.Continuation;
+import org.kurento.client.EventListener;
+import org.kurento.client.IceCandidate;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
+import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
@@ -48,14 +52,35 @@ public class UserSession implements Closeable {
 	private final WebRtcEndpoint outgoingMedia;
 	private final ConcurrentMap<String, WebRtcEndpoint> incomingMedia = new ConcurrentHashMap<>();
 
-	public UserSession(String name, String roomName, WebSocketSession session,
-			MediaPipeline pipeline) {
+	public UserSession(final String name, String roomName,
+			final WebSocketSession session, MediaPipeline pipeline) {
 
 		this.pipeline = pipeline;
 		this.name = name;
 		this.session = session;
 		this.roomName = roomName;
 		this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
+
+		this.outgoingMedia
+				.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+
+					@Override
+					public void onEvent(OnIceCandidateEvent event) {
+						JsonObject response = new JsonObject();
+						response.addProperty("id", "iceCandidate");
+						response.addProperty("name", name);
+						response.add("candidate",
+								JsonUtils.toJsonObject(event.getCandidate()));
+						try {
+							synchronized (session) {
+								session.sendMessage(new TextMessage(response
+										.toString()));
+							}
+						} catch (IOException e) {
+							log.debug(e.getMessage());
+						}
+					}
+				});
 	}
 
 	public WebRtcEndpoint getOutgoingWebRtcPeer() {
@@ -108,6 +133,8 @@ public class UserSession implements Closeable {
 		log.trace("USER {}: SdpAnswer for {} is {}", this.name,
 				sender.getName(), ipSdpAnswer);
 		this.sendMessage(scParams);
+		log.debug("gather candidates");
+		this.getEndpointForUser(sender).gatherCandidates();
 	}
 
 	/**
@@ -115,7 +142,7 @@ public class UserSession implements Closeable {
 	 *            the user
 	 * @return the endpoint used to receive media from a certain user
 	 */
-	private WebRtcEndpoint getEndpointForUser(UserSession sender) {
+	private WebRtcEndpoint getEndpointForUser(final UserSession sender) {
 		if (sender.getName().equals(name)) {
 			log.debug("PARTICIPANT {}: configuring loopback", this.name);
 			return outgoingMedia;
@@ -129,6 +156,27 @@ public class UserSession implements Closeable {
 			log.debug("PARTICIPANT {}: creating new endpoint for {}",
 					this.name, sender.getName());
 			incoming = new WebRtcEndpoint.Builder(pipeline).build();
+
+			incoming.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+
+				@Override
+				public void onEvent(OnIceCandidateEvent event) {
+					JsonObject response = new JsonObject();
+					response.addProperty("id", "iceCandidate");
+					response.addProperty("name", sender.getName());
+					response.add("candidate",
+							JsonUtils.toJsonObject(event.getCandidate()));
+					try {
+						synchronized (session) {
+							session.sendMessage(new TextMessage(response
+									.toString()));
+						}
+					} catch (IOException e) {
+						log.debug(e.getMessage());
+					}
+				}
+			});
+
 			incomingMedia.put(sender.getName(), incoming);
 		}
 
@@ -222,7 +270,20 @@ public class UserSession implements Closeable {
 
 	public void sendMessage(JsonObject message) throws IOException {
 		log.debug("USER {}: Sending message {}", name, message);
-		session.sendMessage(new TextMessage(message.toString()));
+		synchronized (session) {
+			session.sendMessage(new TextMessage(message.toString()));
+		}
+	}
+
+	public void addCandidate(IceCandidate e, String name) {
+		if (this.name.compareTo(name) == 0) {
+			outgoingMedia.addIceCandidate(e);
+		} else {
+			WebRtcEndpoint webRtc = incomingMedia.get(name);
+			if (webRtc != null) {
+				webRtc.addIceCandidate(e);
+			}
+		}
 	}
 
 	/*

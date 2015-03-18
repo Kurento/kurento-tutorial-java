@@ -16,6 +16,7 @@ package org.kurento.tutorial.groupcall;
 
 import java.io.IOException;
 
+import org.kurento.client.IceCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,17 @@ public class CallHandler extends TextWebSocketHandler {
 			break;
 		case "leaveRoom":
 			leaveRoom(user);
+			break;
+		case "onIceCandidate":
+			JsonObject candidate = jsonMessage.get("candidate")
+					.getAsJsonObject();
+
+			if (user != null) {
+				IceCandidate cand = new IceCandidate(candidate.get("candidate")
+						.getAsString(), candidate.get("sdpMid").getAsString(),
+						candidate.get("sdpMLineIndex").getAsInt());
+				user.addCandidate(cand, jsonMessage.get("name").getAsString());
+			}
 			break;
 		default:
 			break;
