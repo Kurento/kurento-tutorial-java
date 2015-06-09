@@ -120,7 +120,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 
 		JsonObject response = new JsonObject();
-		response.addProperty("id", "resgisterResponse");
+		response.addProperty("id", "registerResponse");
 		response.addProperty("response", responseMsg);
 		caller.sendMessage(response);
 	}
