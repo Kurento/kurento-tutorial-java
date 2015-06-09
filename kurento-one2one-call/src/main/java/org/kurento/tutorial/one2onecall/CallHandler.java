@@ -76,7 +76,7 @@ public class CallHandler extends TextWebSocketHandler {
 			} catch (Throwable t) {
 				log.error(t.getMessage(), t);
 				JsonObject response = new JsonObject();
-				response.addProperty("id", "resgisterResponse");
+				response.addProperty("id", "registerResponse");
 				response.addProperty("response", "rejected");
 				response.addProperty("message", t.getMessage());
 				session.sendMessage(new TextMessage(response.toString()));
@@ -132,7 +132,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 
 		JsonObject response = new JsonObject();
-		response.addProperty("id", "resgisterResponse");
+		response.addProperty("id", "registerResponse");
 		response.addProperty("response", responseMsg);
 		caller.sendMessage(response);
 	}
