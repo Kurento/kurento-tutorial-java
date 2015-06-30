@@ -51,13 +51,12 @@ ws.onmessage = function(message) {
 		break;
 	case 'iceCandidate':
 	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-        if (error) {
-	      console.error("Error adding candidate: " + error);
-	      return;
-        }
+			if (error) {
+				console.error("Error adding candidate: " + error);
+				return;
+			}
 	    });
 	    break;
-
 	default:
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
@@ -81,12 +80,11 @@ function start() {
 	    }
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
 		function (error) {
-		  if(error) {
-			  return console.error(error);
+	      if (error) {
+		      return console.error(error);
 		  }
-		  webRtcPeer.generateOffer (onOffer);
+		  webRtcPeer.generateOffer(onOffer);
 		});
-
 }
 
 function onOffer(error, offerSdp) {

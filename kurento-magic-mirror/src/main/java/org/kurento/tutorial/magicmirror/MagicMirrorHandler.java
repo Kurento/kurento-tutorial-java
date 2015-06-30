@@ -42,11 +42,9 @@ import com.google.gson.JsonObject;
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 5.0.0
  */
-
 public class MagicMirrorHandler extends TextWebSocketHandler {
 
-	private final Logger log = LoggerFactory
-			.getLogger(MagicMirrorHandler.class);
+	private final Logger log = LoggerFactory.getLogger(MagicMirrorHandler.class);
 	private static final Gson gson = new GsonBuilder().create();
 
 	private final ConcurrentHashMap<String, UserSession> users = new ConcurrentHashMap<String, UserSession>();
@@ -55,10 +53,8 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 	private KurentoClient kurento;
 
 	@Override
-	public void handleTextMessage(WebSocketSession session, TextMessage message)
-			throws Exception {
-		JsonObject jsonMessage = gson.fromJson(message.getPayload(),
-				JsonObject.class);
+	public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);
 
 		log.debug("Incoming message: {}", jsonMessage);
 
@@ -66,7 +62,6 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 		case "start":
 			start(session, jsonMessage);
 			break;
-
 		case "stop": {
 			UserSession user = users.remove(session.getId());
 			if (user != null) {
@@ -75,64 +70,54 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 			break;
 		}
 		case "onIceCandidate": {
-			JsonObject candidate = jsonMessage.get("candidate")
-					.getAsJsonObject();
+			JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
 			UserSession user = users.get(session.getId());
 			if (user != null) {
-				IceCandidate cand = new IceCandidate(candidate.get("candidate")
-						.getAsString(), candidate.get("sdpMid").getAsString(),
-						candidate.get("sdpMLineIndex").getAsInt());
-				user.addCandidate(cand);
+				IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+						jsonCandidate.get("sdpMid").getAsString(), jsonCandidate.get("sdpMLineIndex").getAsInt());
+				user.addCandidate(candidate);
 			}
 			break;
 		}
 		default:
-			sendError(session,
-					"Invalid message with id "
-							+ jsonMessage.get("id").getAsString());
+			sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
 			break;
 		}
 	}
 
 	private void start(final WebSocketSession session, JsonObject jsonMessage) {
 		try {
-			// Media Logic (Media Pipeline and Elements)
+			// User session
 			UserSession user = new UserSession();
 			MediaPipeline pipeline = kurento.createMediaPipeline();
 			user.setMediaPipeline(pipeline);
-			WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
-					.build();
+			WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
 			user.setWebRtcEndpoint(webRtcEndpoint);
 			users.put(session.getId(), user);
 
-			webRtcEndpoint
-					.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
-
-						@Override
-						public void onEvent(OnIceCandidateEvent event) {
-							JsonObject response = new JsonObject();
-							response.addProperty("id", "iceCandidate");
-							response.add("candidate", JsonUtils
-									.toJsonObject(event.getCandidate()));
-							try {
-								synchronized (session) {
-									session.sendMessage(new TextMessage(
-											response.toString()));
-								}
-							} catch (IOException e) {
-								log.debug(e.getMessage());
-							}
+			// ICE candidates
+			webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+				@Override
+				public void onEvent(OnIceCandidateEvent event) {
+					JsonObject response = new JsonObject();
+					response.addProperty("id", "iceCandidate");
+					response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
+					try {
+						synchronized (session) {
+							session.sendMessage(new TextMessage(response.toString()));
 						}
-					});
+					} catch (IOException e) {
+						log.debug(e.getMessage());
+					}
+				}
+			});
 
-			FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(
-					pipeline).build();
+			// Media logic
+			FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(pipeline).build();
 
-			String appServerUrl = System.getProperty("app.server.url",
-					MagicMirrorApp.DEFAULT_APP_SERVER_URL);
-			faceOverlayFilter.setOverlayedImage(appServerUrl
-					+ "/img/mario-wings.png", -0.35F, -1.2F, 1.6F, 1.6F);
+			String appServerUrl = System.getProperty("app.server.url", MagicMirrorApp.DEFAULT_APP_SERVER_URL);
+			faceOverlayFilter.setOverlayedImage(appServerUrl + "/img/mario-wings.png", -0.35F, -1.2F, 1.6F, 1.6F);
 
 			webRtcEndpoint.connect(faceOverlayFilter);
 			faceOverlayFilter.connect(webRtcEndpoint);
@@ -141,7 +126,6 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
 			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
 			String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
-			// Sending response back to client
 			JsonObject response = new JsonObject();
 			response.addProperty("id", "startResponse");
 			response.addProperty("sdpAnswer", sdpAnswer);
