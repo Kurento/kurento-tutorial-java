@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author David Fernandez (d.fernandezlop@gmail.com)
- * @since 6.0.0-SNAPSHOT
+ * @since 6.0.0
  */
 @RestController
 public class HelloWorldController {
@@ -41,31 +41,28 @@ public class HelloWorldController {
 	private KurentoClient kurento;
 
 	@RequestMapping(value = "/helloworld", method = RequestMethod.POST)
-	private String processRequest(@RequestBody String sdpOffer) {
-
-		final CountDownLatch eventReceived = new CountDownLatch(1);
-		// Media Logic
+	private String processRequest(@RequestBody String sdpOffer)
+			throws InterruptedException {
+		// 1. Media Logic
 		MediaPipeline pipeline = kurento.createMediaPipeline();
 		WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline)
 				.build();
+		webRtcEndpoint.connect(webRtcEndpoint);
+		webRtcEndpoint.processOffer(sdpOffer);
+
+		// 2. Gather candidates
+		final CountDownLatch latchCandidates = new CountDownLatch(1);
 		webRtcEndpoint
 				.addOnIceGatheringDoneListener(new EventListener<OnIceGatheringDoneEvent>() {
 					@Override
 					public void onEvent(OnIceGatheringDoneEvent event) {
-						eventReceived.countDown();
+						latchCandidates.countDown();
 					}
 				});
-
-		webRtcEndpoint.connect(webRtcEndpoint);
-		webRtcEndpoint.processOffer(sdpOffer);
 		webRtcEndpoint.gatherCandidates();
+		latchCandidates.await();
 
-		try {
-			eventReceived.await();
-		} catch (InterruptedException e) {
-
-		}
-		// SDP negotiation (offer and answer)
+		// 3. SDP negotiation
 		String responseSdp = webRtcEndpoint.getLocalSessionDescriptor();
 		return responseSdp;
 	}

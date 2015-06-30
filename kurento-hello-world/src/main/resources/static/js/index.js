@@ -21,38 +21,36 @@ window.onload = function() {
 	console = new Console('console', console);
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
-	console.log("Loading complete ...");
+	console.log('Page loaded');
 }
 
 function start() {
-	console.log("Starting video call ...");
+	console.log('Starting video call ...');
 	showSpinner(videoInput, videoOutput);
 
 	var options = {
-      localVideo: videoInput,
-      remoteVideo: videoOutput,
-      oncandidategatheringdone: onCandidateGatheringDone
-    }
+		localVideo : videoInput,
+		remoteVideo : videoOutput,
+		oncandidategatheringdone : onCandidateGatheringDone
+	}
 
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
-		function (error) {
-		  if(error) {
-			  return console.error(error);
-		  }
-		  webRtcPeer.generateOffer (onOffer);
-	});
+			function(error) {
+				if (error) return console.error(error);
+				webRtcPeer.generateOffer(onOffer);
+			});
 }
 
 function stop() {
 	if (webRtcPeer) {
-		console.log("Stopping video call ...");
+		console.log('Stopping video call ...');
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 	}
 	hideSpinner(videoInput, videoOutput);
 }
 
-function onCandidateGatheringDone () {
+function onCandidateGatheringDone() {
 	$.ajax({
 		url : location.protocol + '/helloworld',
 		type : 'POST',
@@ -61,23 +59,18 @@ function onCandidateGatheringDone () {
 		data : webRtcPeer.getLocalSessionDescriptor().sdp,
 		success : function(sdpAnswer) {
 			console.log("Received sdpAnswer from server. Processing ...");
-			webRtcPeer.processAnswer (sdpAnswer, function (error) {
-				if (error) return console.error (error);
+			webRtcPeer.processAnswer(sdpAnswer, function(error) {
+				if (error) return console.error(error);
 			});
 		},
 		error : function(jqXHR, textStatus, error) {
-			onError(error);
+			console.error(error);
 		}
 	});
-
 }
 
-function onOffer(sdpOffer) {
-	console.info('Invoking SDP offer callback function ' + location.host);
-}
-
-function onError(error) {
-	console.error(error);
+function onOffer(error, sdpOffer) {
+	console.info('Waiting for ICE candidates ...');
 }
 
 function showSpinner() {
