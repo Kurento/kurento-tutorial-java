@@ -14,10 +14,18 @@
  */
 
 var ws = new WebSocket('ws://' + location.host + '/crowddetector');
-var videoInput;
 var videoOutput;
 var webRtcPeer;
 var state = null;
+
+var feed = null;
+var roisLoaded = false;
+var created = false;
+
+var conn;
+var roiscounter = 0;
+
+var roisValues;
 
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
@@ -26,12 +34,14 @@ const I_AM_STARTING = 2;
 window.onload = function() {
 	console.log("Page loaded ...");
 	console = new Console('console', console);
-	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
 	setState(I_CAN_START);
+	
+	init();
 }
 
 window.onbeforeunload = function() {
+	stop();
 	ws.close();
 }
 
@@ -43,14 +53,11 @@ ws.onmessage = function(message) {
 	case 'startResponse':
 		startResponse(parsedMessage);
 		break;
-	case 'directionEvent':
-		directionEvent(parsedMessage);
+	case 'noPlayer':
+		noPlayer();
 		break;
-	case 'fluidityEvent':
-		fluidityEvent(parsedMessage);
-		break;
-	case 'occupancyEvent':
-		occupancyEvent(parsedMessage);
+	case 'noPlaying':
+		noPlaying();
 		break;
 	case 'error':
 		if (state == I_AM_STARTING) {
@@ -60,8 +67,10 @@ ws.onmessage = function(message) {
 		break;
 	case 'iceCandidate':
 	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-        if (!error) return;
-	      console.error("Error adding candidate: " + error);
+	        if (error) {
+		      console.error("Error adding candidate: " + error);
+		      return;
+	        }
 	    });
 	    break;
 	default:
@@ -72,54 +81,53 @@ ws.onmessage = function(message) {
 	}
 }
 
+function noPlayer () {
+	alert ("Player not configured. Please set a feed to playing");
+	setState(I_CAN_START);
+	hideSpinner(videoOutput);
+    document.getElementById('changeFeed').onclick= changeFeed;
+    document.getElementById('address').disabled=false;    
+}
+
 function start() {
 	console.log("Starting video call ...")
 	// Disable start button
 	setState(I_AM_STARTING);
-	showSpinner(videoInput, videoOutput);
+	showSpinner(videoOutput);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
 
-    var options = {
-	      localVideo: videoInput,
-	      remoteVideo: videoOutput,
-	      onicecandidate: onIceCandidate
-	    }
-	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+	var options = {
+		      remoteVideo: videoOutput,
+		      onicecandidate: onIceCandidate
+    }
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
 		function (error) {
 		  if(error) {
 			  return console.error(error);
 		  }
-		  webRtcPeer.generateOffer (onOffer);
+		  this.generateOffer (onOffer);
 	});
-}
-
-function directionEvent(message) {
-	console.log("Direction event received in roi " + message.roiId + " with angle " + message.angle);
-}
-
-function fluidityEvent(message) {
-	console.log("Fluidity event received in roi " + message.roiId + ". Fluidity percentage " 
-			+ message.percentage +" and fluidity level " + message.level);
-}
-
-function occupancyEvent(message) {
-	console.log("Occupancy event received in roi " + message.roiId + ". Occupancy percentage " 
-			+ message.percentage +" and occupancy level " + message.level);
+	created = true;
 }
 
 function onOffer(error, offerSdp) {
-	if (error) return console.error ("Error generating the offer");
+	if (error) return console.error (error);
 	console.info('Invoking SDP offer callback function ' + location.host);
-	var message = {
-		id : 'start',
-		sdpOffer : offerSdp
-	}
-	sendMessage(message);
-}
 
-function onError(error) {
-	console.error(error);
+	if (feed == null){
+		var message = {
+			id : 'start',
+			sdpOffer : offerSdp
+		}
+	} else {
+		var message = {
+			id : 'start',
+			sdpOffer : offerSdp,
+			feedUrl : feed
+		}
+	}
+	sendMessage(message);	
 }
 
 function onIceCandidate(candidate) {
@@ -132,12 +140,80 @@ function onIceCandidate(candidate) {
 	  sendMessage(message);
 }
 
+function onError(error) {
+	roisValues = new Array();
+	setState(I_CAN_PLAY);
+	console.error(error);
+}
+
 function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log("SDP answer received from server. Processing ...");
 	webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
 		if (error) return console.error (error);
 	});
+	
+    document.getElementById('changeFeed').onclick= changeFeed;
+    document.getElementById('address').disabled=false;
+    document.getElementById('address').value=message.feedUrl;
+    
+    if (!roisLoaded) {
+    	roisValues = JSON.parse(message.rois);
+        
+	    select = document.getElementById('rois');
+	    
+	    for (var i = 0, len = roisValues.length; i < len; ++i) {
+	        var opt = document.createElement('option');
+	        opt.value = roisValues[i].id;
+	        opt.innerHTML = roisValues[i].id;
+	        select.appendChild(opt);
+	    }
+	    changeRoi();
+	    roisLoaded = true;
+    }
+}
+
+function changeRoi() {
+	var selectValue = document.getElementById('rois').value;
+    for (var i = 0, len = roisValues.length; i < len; ++i) {
+        if (roisValues[i].id == selectValue){
+			document.getElementById('rangeValue1').value = roisValues[i].regionOfInterestConfig.occupancyLevelMin;
+			document.getElementById('rangeValue2').value = roisValues[i].regionOfInterestConfig.occupancyLevelMed;
+			document.getElementById('rangeValue3').value = roisValues[i].regionOfInterestConfig.occupancyLevelMax;
+			document.getElementById('rangeValue4').value = roisValues[i].regionOfInterestConfig.occupancyNumFramesToEvent;
+			document.getElementById('rangeValue5').value = roisValues[i].regionOfInterestConfig.fluidityLevelMin;
+			document.getElementById('rangeValue6').value = roisValues[i].regionOfInterestConfig.fluidityLevelMed;
+			document.getElementById('rangeValue7').value = roisValues[i].regionOfInterestConfig.fluidityLevelMax;
+			document.getElementById('rangeValue8').value = roisValues[i].regionOfInterestConfig.fluidityNumFramesToEvent;
+			document.getElementById('rangeValue9').value = roisValues[i].regionOfInterestConfig.opticalFlowNumFramesToEvent;
+			document.getElementById('rangeValue10').value = roisValues[i].regionOfInterestConfig.opticalFlowNumFramesToReset;
+			document.getElementById('rangeValue11').value = roisValues[i].regionOfInterestConfig.opticalFlowAngleOffset;
+			
+			if (roisValues[i].regionOfInterestConfig.sendOpticalFlowEvent == true) {
+				document.getElementById('true').value = true;
+				document.getElementById('false').value = false;
+			} else {
+				document.getElementById('true').value = false;
+				document.getElementById('false').value = true;
+			}
+			
+			document.getElementById('rangeValue1_1').value = roisValues[i].regionOfInterestConfig.occupancyLevelMin;
+			document.getElementById('rangeValue2_1').value = roisValues[i].regionOfInterestConfig.occupancyLevelMed;
+			document.getElementById('rangeValue3_1').value = roisValues[i].regionOfInterestConfig.occupancyLevelMax;
+			document.getElementById('rangeValue4_1').value = roisValues[i].regionOfInterestConfig.occupancyNumFramesToEvent;
+			document.getElementById('rangeValue5_1').value = roisValues[i].regionOfInterestConfig.fluidityLevelMin;
+			document.getElementById('rangeValue6_1').value = roisValues[i].regionOfInterestConfig.fluidityLevelMed;
+			document.getElementById('rangeValue7_1').value = roisValues[i].regionOfInterestConfig.fluidityLevelMax;
+			document.getElementById('rangeValue8_1').value = roisValues[i].regionOfInterestConfig.fluidityNumFramesToEvent;
+			document.getElementById('rangeValue9_1').value = roisValues[i].regionOfInterestConfig.opticalFlowNumFramesToEvent;
+			document.getElementById('rangeValue10_1').value = roisValues[i].regionOfInterestConfig.opticalFlowNumFramesToReset;
+			document.getElementById('rangeValue11_1').value = roisValues[i].regionOfInterestConfig.opticalFlowAngleOffset; 	
+        }        
+    }
+    document.getElementById('rangeValue12_1').disabled = false;
+    document.getElementById('rangeValue12_1').value = 640;
+    document.getElementById('rangeValue12').value = 640;
+
 }
 
 function stop() {
@@ -152,7 +228,11 @@ function stop() {
 		}
 		sendMessage(message);
 	}
-	hideSpinner(videoInput, videoOutput);
+	hideSpinner(videoOutput);
+    document.getElementById('changeFeed').onclick= changeFeed;
+    document.getElementById('address').disabled=false;
+    document.getElementById('address').value="";
+    feed = null;
 }
 
 function setState(nextState) {
@@ -200,6 +280,55 @@ function hideSpinner() {
 	}
 }
 
+function updateValue(val, name) {
+	document.getElementById(name).value = val;
+	changeProcessingWidth (val);
+}
+	
+function init() {
+	document.getElementById('rangeValue1').value = 0;
+	document.getElementById('rangeValue2').value = 0;
+	document.getElementById('rangeValue3').value = 0;
+	document.getElementById('rangeValue4').value = 0;
+	document.getElementById('rangeValue5').value = 0;
+	document.getElementById('rangeValue6').value = 0;
+	document.getElementById('rangeValue7').value = 0;
+	document.getElementById('rangeValue8').value = 0;
+	document.getElementById('rangeValue9').value = 0;
+	document.getElementById('rangeValue10').value = 0;
+	document.getElementById('rangeValue11').value = 0;
+	document.getElementById('rangeValue12').value = 160;
+}
+
+function changeFeed(){
+	feed = document.getElementById('address').value;
+	alert ("Feed updated");
+	if (!created) {
+		start ();
+	} else {
+		var message = {
+			id : 'updateFeed',
+			feedUrl : feed
+		}
+		sendMessage(message);
+	}
+}
+
+function noPlaying() {
+	console.log ("Video feed not available.");
+	setState(I_CAN_START);
+	hideSpinner(videoOutput);
+}
+
+function changeProcessingWidth (width){
+	value = document.getElementById('rangeValue12').value;
+	var message = {
+		id : 'changeProcessingWidth',
+		width : value
+	}
+	sendMessage(message);
+}
+	
 /**
  * Lightbox utility (to display media pipeline image in a modal dialog)
  */
