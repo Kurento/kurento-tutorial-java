@@ -12,9 +12,11 @@
  * Lesser General Public License for more details.
  *
  */
-package org.kurento.tutorial.crowddetector;
+package org.kurento.demo;
 
 import org.kurento.client.KurentoClient;
+import org.kurento.orion.OrionConnector;
+import org.kurento.orion.OrionConnectorConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -24,11 +26,11 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 /**
- * Crowd Detector main class.
+ * CrowdDetector with RTSP media source (application and media logic).
  * 
- * @author Boni Garcia (bgarcia@gsyc.es)
- * @author David Fernandez (d.fernandezlop@gmail.com)
- * @since 5.0.0
+ * @author David Fernández (d.fernandezlop@gmail.com)
+ * @author Ivan Gracia (igracia@kurento.org)
+ * @since 5.0.4
  */
 @Configuration
 @EnableWebSocket
@@ -36,16 +38,43 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class CrowdDetectorApp implements WebSocketConfigurer {
 
 	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+	static final String DEFAULT_CONFIG_FILE_PATH = "/etc/kurento/demo-crowddetector.conf.json";
 
 	@Bean
-	public CrowdDetectorHandler handler() {
-		return new CrowdDetectorHandler();
+	public ConfigurationReader init() {
+		return new ConfigurationReader(System.getProperty("app.configFile",
+				DEFAULT_CONFIG_FILE_PATH));
 	}
 
 	@Bean
 	public KurentoClient kurentoClient() {
 		return KurentoClient.create(System.getProperty("kms.ws.uri",
 				DEFAULT_KMS_WS_URI));
+	}
+	
+	@Bean
+	public OrionConnector orionConnector() {
+		return new OrionConnector();
+	}
+	
+	@Bean
+	public OrionConnectorConfiguration orionConnectorConfiguration() {
+		return new OrionConnectorConfiguration();
+	}
+	
+	@Bean
+	public CrowdDetectorOrionPublisher crowdDetectorOrionPublisher() {
+		return new CrowdDetectorOrionPublisher();
+	}
+
+	@Bean
+	public Pipeline pipeline() {
+		return new Pipeline();
+	}
+
+	@Bean
+	public CrowdDetectorHandler handler() {
+		return new CrowdDetectorHandler();
 	}
 
 	@Override

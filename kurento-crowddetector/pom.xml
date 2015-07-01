@@ -1,17 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.kurento.tutorial</groupId>
-		<artifactId>kurento-tutorial</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+            <groupId>org.kurento.tutorial</groupId>
+            <artifactId>kurento-tutorial</artifactId>
+            <version>6.0.0-SNAPSHOT</version>
+    </parent>
 
+	<groupId>org.kurento.demo</groupId>
 	<artifactId>kurento-crowddetector</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Module Tutorial 3 - Crowd Detector</name>
-	<description>WebRTC in loopback with a crowd detector filter</description>
+	<name>Kurento Demos: CrowdDetector Filter </name>
+	<description>A Crowd Detector Filter using RTSP conexion to the camera. The video will be recorded.</description>
 
 	<licenses>
 		<license>
@@ -27,10 +29,9 @@
 	</organization>
 
 	<scm>
-		<url>https://github.com/Kurento/kurento-tutorial-java</url>
-		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java</connection>
-		<developerConnection>scm:git://git@github.com:Kurento/kurento-tutorial-java</developerConnection>
-		<tag>develop</tag>
+		<url>https://github.com/Kurento/kurento-demo</url>
+		<connection>scm:git:https://github.com/Kurento/kurento-demo</connection>
+		<developerConnection>scm:git://git@github.com:Kurento/kurento-demo</developerConnection>
 	</scm>
 
 	<developers>
@@ -43,37 +44,12 @@
 	</developers>
 
 	<properties>
-		<demo.port>8093</demo.port>
-
+		<demo.port>9081</demo.port>
+		
 		<!-- Main class -->
-		<start-class>org.kurento.tutorial.crowddetector.CrowdDetectorApp</start-class>
-
+		<start-class>org.kurento.demo.CrowdDetectorApp</start-class>
+		
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-		</dependency>
-
-		<!-- Kurento -->
-		<dependency>
-			<groupId>org.kurento</groupId>
-			<artifactId>kurento-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.kurento</groupId>
-			<artifactId>kurento-utils-js</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.kurento.module</groupId>
-			<artifactId>crowddetector</artifactId>
-		</dependency>
-	</dependencies>
 
 	<build>
 		<plugins>
@@ -112,6 +88,39 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptor>src/assembly/bin.xml</descriptor>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<tasks>
+								<copy
+									file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip"
+									tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets>
@@ -122,8 +131,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
-		<resources>
+		<resources>			
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>false</filtering>
@@ -145,51 +153,29 @@
 		</resources>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<descriptor>src/assembly/bin.xml</descriptor>
-							<finalName>${project.artifactId}-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<configuration>
-									<tasks>
-										<copy file="${project.build.directory}/target/${project.artifactId}-${project.version}-bin.zip" tofile="${project.build.directory}/target/${project.artifactId}-${project.version}.zip" />
-									</tasks>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>no-assembly</id>
-		</profile>
-	</profiles>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<!-- Kurento -->
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-jsonrpc-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-utils-js</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento.module</groupId>
+			<artifactId>crowddetector</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>
