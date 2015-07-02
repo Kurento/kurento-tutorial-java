@@ -12,15 +12,16 @@
 	href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 <link rel="stylesheet"
 	href="bower_components/ekko-lightbox/dist/ekko-lightbox.min.css">
+<link rel="stylesheet" href="bower_components/demo-console/index.css">
 <link rel="stylesheet" href="css/kurento.css">
 
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="bower_components/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
 <script src="bower_components/adapter.js/adapter.js"></script>
+<script src="bower_components/demo-console/index.js"></script>
 
 <script src="js/kurento-utils.js"></script>
-<script src="js/console.js"></script>
 <script src="js/index.js"></script>
 <title>Kurento Tutorial 2: WebRTC Magic Mirror</title>
 </head>
@@ -88,8 +89,11 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<label class="control-label" for="console">Console</label>
-				<div id="console"></div>
+				<label class="control-label" for="console">Console</label><br>
+				<br>
+				<div id="console" class="democonsole">
+					<ul></ul>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -98,7 +102,7 @@
 		<div class="foot-fixed-bottom">
 			<div class="container text-center">
 				<hr />
-				<div class="row">&copy; 2014 Kurento</div>
+				<div class="row">&copy; 2014-2015 Kurento</div>
 				<div class="row">
 					<div class="col-md-4">
 						<a href="http://www.urjc.es"><img src="img/urjc.gif"
@@ -109,8 +113,8 @@
 							alt="Kurento" height="50px" /></a>
 					</div>
 					<div class="col-md-4">
-						<a href="http://www.naevatec.com"><img
-							src="img/naevatec.png" alt="Naevatec" height="50px" /></a>
+						<a href="http://www.naevatec.com"><img src="img/naevatec.png"
+							alt="Naevatec" height="50px" /></a>
 					</div>
 				</div>
 			</div>
