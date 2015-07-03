@@ -73,8 +73,8 @@ function setCallState(nextState) {
 }
 
 window.onload = function() {
+	console = new Console();
 	setRegisterState(NOT_REGISTERED);
-	console = new Console('console', console);
 	var drag = new Draggabilly(document.getElementById('videoSmall'));
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
@@ -103,15 +103,15 @@ ws.onmessage = function(message) {
 		startCommunication(parsedMessage);
 		break;
 	case 'stopCommunication':
-		console.info("Communication ended by remote peer");
+		console.info('Communication ended by remote peer');
 		stop(true);
 		break;
 	case 'iceCandidate':
-	    webRtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-        if (!error) return;
-	      console.error("Error adding candidate: " + error);
-	    });
-	    break;
+		webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
+			if (error)
+				return console.error('Error adding candidate: ' + error);
+		});
+		break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -122,7 +122,8 @@ function resgisterResponse(message) {
 		setRegisterState(REGISTERED);
 	} else {
 		setRegisterState(NOT_REGISTERED);
-		var errorMessage = message.message ? message.message : 'Unknown reason for register rejection.';
+		var errorMessage = message.message ? message.message
+				: 'Unknown reason for register rejection.';
 		console.log(errorMessage);
 		alert('Error registering user. See console for further information.');
 	}
@@ -131,26 +132,29 @@ function resgisterResponse(message) {
 function callResponse(message) {
 	if (message.response != 'accepted') {
 		console.info('Call not accepted by peer. Closing call');
-		var errorMessage = message.message ? message.message : 'Unknown reason for call rejection.';
+		var errorMessage = message.message ? message.message
+				: 'Unknown reason for call rejection.';
 		console.log(errorMessage);
 		stop();
 	} else {
 		setCallState(IN_CALL);
-		webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
-			if (error) return console.error (error);
+		webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
+			if (error)
+				return console.error(error);
 		});
 	}
 }
 
 function startCommunication(message) {
 	setCallState(IN_CALL);
-	webRtcPeer.processAnswer (message.sdpAnswer, function (error) {
-		if (error) return console.error (error);
+	webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
+		if (error)
+			return console.error(error);
 	});
 }
 
 function incomingCall(message) {
-	//If bussy just reject without disturbing user
+	// If bussy just reject without disturbing user
 	if (callState != NO_CALL) {
 		var response = {
 			id : 'incomingCallResponse',
@@ -168,18 +172,18 @@ function incomingCall(message) {
 
 		from = message.from;
 		var options = {
-			      localVideo: videoInput,
-			      remoteVideo: videoOutput,
-			      onicecandidate: onIceCandidate,
-			      onerror: onError
-			    }
-	    webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
-	      function (error) {
-			  if(error) {
-				  return console.error(error);
-			  }
-			  webRtcPeer.generateOffer (onOfferIncomingCall);
-			});
+			localVideo : videoInput,
+			remoteVideo : videoOutput,
+			onicecandidate : onIceCandidate,
+			onerror : onError
+		}
+		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
+				function(error) {
+					if (error) {
+						return console.error(error);
+					}
+					webRtcPeer.generateOffer(onOfferIncomingCall);
+				});
 
 	} else {
 		var response = {
@@ -193,21 +197,22 @@ function incomingCall(message) {
 	}
 }
 
-function onOfferIncomingCall (error, offerSdp) {
-	if (error) return console.error ("Error generating the offer");
+function onOfferIncomingCall(error, offerSdp) {
+	if (error)
+		return console.error("Error generating the offer");
 	var response = {
-			id : 'incomingCallResponse',
-			from : from,
-			callResponse : 'accept',
-			sdpOffer : offerSdp
-		};
+		id : 'incomingCallResponse',
+		from : from,
+		callResponse : 'accept',
+		sdpOffer : offerSdp
+	};
 	sendMessage(response);
 }
 
 function register() {
 	var name = document.getElementById('name').value;
 	if (name == '') {
-		window.alert("You must insert your user name");
+		window.alert('You must insert your user name');
 		return;
 	}
 	setRegisterState(REGISTERING);
@@ -222,29 +227,30 @@ function register() {
 
 function call() {
 	if (document.getElementById('peer').value == '') {
-		window.alert("You must specify the peer name");
+		window.alert('You must specify the peer name');
 		return;
 	}
 	setCallState(PROCESSING_CALL);
 	showSpinner(videoInput, videoOutput);
 
 	var options = {
-		      localVideo: videoInput,
-		      remoteVideo: videoOutput,
-		      onicecandidate: onIceCandidate,
-		      onerror: onError
-		    }
+		localVideo : videoInput,
+		remoteVideo : videoOutput,
+		onicecandidate : onIceCandidate,
+		onerror : onError
+	}
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
-		function (error) {
-		  if(error) {
-			  return console.error(error);
-		  }
-		  webRtcPeer.generateOffer (onOfferCall);
-	});
+			function(error) {
+				if (error) {
+					return console.error(error);
+				}
+				webRtcPeer.generateOffer(onOfferCall);
+			});
 }
 
-function onOfferCall (error, offerSdp) {
-	if (error) return console.error ("Error generating the offer");
+function onOfferCall(error, offerSdp) {
+	if (error)
+		return console.error('Error generating the offer');
 	console.log('Invoking SDP offer callback function');
 	var message = {
 		id : 'call',
@@ -271,18 +277,18 @@ function stop(message) {
 	hideSpinner(videoInput, videoOutput);
 }
 
-function onError () {
+function onError() {
 	setCallState(NO_CALL);
 }
 
 function onIceCandidate(candidate) {
-	  console.log("Local candidate" + JSON.stringify(candidate));
+	console.log("Local candidate" + JSON.stringify(candidate));
 
-	  var message = {
-	    id: 'onIceCandidate',
-	    candidate: candidate
-	  };
-	  sendMessage(message);
+	var message = {
+		id : 'onIceCandidate',
+		candidate : candidate
+	};
+	sendMessage(message);
 }
 
 function sendMessage(message) {
