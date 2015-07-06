@@ -88,35 +88,18 @@ public class HelloWorldHandler extends TextWebSocketHandler {
 
 	private void start(final WebSocketSession session, JsonObject jsonMessage) {
 		try {
-			// User session
-			UserSession user = new UserSession();
+			// 1. Media logic (webRtcEndpoint in loopback)
 			MediaPipeline pipeline = kurento.createMediaPipeline();
-			user.setMediaPipeline(pipeline);
 			WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
+			webRtcEndpoint.connect(webRtcEndpoint);
+
+			// 2. Store user session
+			UserSession user = new UserSession();
+			user.setMediaPipeline(pipeline);
 			user.setWebRtcEndpoint(webRtcEndpoint);
 			users.put(session.getId(), user);
 
-			// ICE candidates
-			webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
-				@Override
-				public void onEvent(OnIceCandidateEvent event) {
-					JsonObject response = new JsonObject();
-					response.addProperty("id", "iceCandidate");
-					response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
-					try {
-						synchronized (session) {
-							session.sendMessage(new TextMessage(response.toString()));
-						}
-					} catch (IOException e) {
-						log.debug(e.getMessage());
-					}
-				}
-			});
-
-			// Media logic (webRtcEndpoint in loopback)
-			webRtcEndpoint.connect(webRtcEndpoint);
-
-			// SDP negotiation (offer and answer)
+			// 3. SDP negotiation
 			String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
 			String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
@@ -128,6 +111,22 @@ public class HelloWorldHandler extends TextWebSocketHandler {
 				session.sendMessage(new TextMessage(response.toString()));
 			}
 
+			// 4. Gather ICE candidates
+			webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+				@Override
+				public void onEvent(OnIceCandidateEvent event) {
+					JsonObject response = new JsonObject();
+					response.addProperty("id", "iceCandidate");
+					response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
+					try {
+						synchronized (session) {
+							session.sendMessage(new TextMessage(response.toString()));
+						}
+					} catch (IOException e) {
+						log.error(e.getMessage());
+					}
+				}
+			});
 			webRtcEndpoint.gatherCandidates();
 
 		} catch (Throwable t) {
