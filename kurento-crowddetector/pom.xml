@@ -8,7 +8,6 @@
             <version>6.0.0-SNAPSHOT</version>
     </parent>
 
-	<groupId>org.kurento.demo</groupId>
 	<artifactId>kurento-crowddetector</artifactId>
 	<packaging>jar</packaging>
 
