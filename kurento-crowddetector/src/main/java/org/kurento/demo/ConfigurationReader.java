@@ -7,6 +7,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.kurento.commons.ConfigFileFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,22 +19,22 @@ import com.google.gson.stream.JsonReader;
 
 public class ConfigurationReader {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(ConfigurationReader.class);
+	private static final Logger log = LoggerFactory.getLogger(ConfigurationReader.class);
 	private static final Gson gson = new GsonBuilder().create();
 
 	private JsonObject configFile;
 
-	public ConfigurationReader(String configFileName) {
+	public ConfigurationReader(String configFileName) throws IOException {
 
-		Path configFilePath = Paths.get(configFileName);
+		String configFile = ConfigFileFinder.getPathInClasspath(configFileName).toString();
+
+		Path configFilePath = Paths.get(configFile);
 
 		if (configFilePath == null) {
 			log.debug("File not found {}", configFileName);
 		}
 
-		try (JsonReader reader = new JsonReader(Files.newBufferedReader(configFilePath,
-					StandardCharsets.UTF_8))) {
+		try (JsonReader reader = new JsonReader(Files.newBufferedReader(configFilePath, StandardCharsets.UTF_8))) {
 			reader.setLenient(true);
 			this.configFile = gson.fromJson(reader, JsonObject.class);
 

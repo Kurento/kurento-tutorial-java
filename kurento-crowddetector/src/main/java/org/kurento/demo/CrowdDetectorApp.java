@@ -14,6 +14,8 @@
  */
 package org.kurento.demo;
 
+import java.io.IOException;
+
 import org.kurento.client.KurentoClient;
 import org.kurento.orion.OrionConnector;
 import org.kurento.orion.OrionConnectorConfiguration;
@@ -38,10 +40,10 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class CrowdDetectorApp implements WebSocketConfigurer {
 
 	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
-	static final String DEFAULT_CONFIG_FILE_PATH = "/etc/kurento/demo-crowddetector.conf.json";
+	static final String DEFAULT_CONFIG_FILE_PATH = "/config/configuration.conf.json";
 
 	@Bean
-	public ConfigurationReader init() {
+	public ConfigurationReader init() throws IOException {
 		return new ConfigurationReader(System.getProperty("app.configFile",
 				DEFAULT_CONFIG_FILE_PATH));
 	}
