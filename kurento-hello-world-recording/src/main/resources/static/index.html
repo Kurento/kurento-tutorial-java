@@ -49,10 +49,12 @@
 	</header>
 	<div class="container">
 		<div class="page-header">
-			<h1>Tutorial 1: Hello World (WebRTC in loopback)</h1>
+			<h1>Tutorial: Hello World (WebRTC in loopback) with recording</h1>
 			<p>
 				This application shows a <i>WebRtcEndpoint</i> connected to itself
-				(loopback). Take a look to the <a href="img/pipeline.png"
+				(loopback) where the media sent to server is recorded and then played
+				using <a href="https://github.com/Kurento/kurento-java/tree/master/kurento-repository">
+				Kurento Repository</a>. Take a look to the <a href="img/pipeline.png"
 					data-toggle="lightbox" data-title="Hello World Media Pipeline"
 					data-footer="WebRtcEnpoint in loopback">Media Pipeline</a>. To run
 				this demo follow these steps:
@@ -64,6 +66,7 @@
 				<li>Grant the access to the camera and microphone. After the
 					SDP negotiation the loopback should start.
 				<li>Click on <i>Stop</i> to finish the communication.
+				<li>Click on <i>Play</i> to replay the recorded media.
 				</li>
 			</ol>
 		</div>
