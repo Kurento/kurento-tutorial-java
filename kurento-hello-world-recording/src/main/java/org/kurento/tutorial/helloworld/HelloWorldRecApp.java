@@ -16,7 +16,7 @@ package org.kurento.tutorial.helloworld;
 import org.kurento.client.KurentoClient;
 import org.kurento.commons.PropertiesManager;
 import org.kurento.repository.rest.RepositoryRestApi;
-import org.kurento.repository.rest.RestServiceProvider;
+import org.kurento.repository.rest.RepositoryRestApiProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -40,8 +40,8 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
 	final static String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
 
-	final static String REPOSITORY_SERVER_URI = System.getProperty(
-			"repository.uri", DEFAULT_REPOSITORY_SERVER_URI);
+	final static String REPOSITORY_SERVER_URI = System
+			.getProperty("repository.uri", DEFAULT_REPOSITORY_SERVER_URI);
 	final static String KMS_WS_URI = System.getProperty("kms.ws.uri",
 			DEFAULT_KMS_WS_URI);
 
@@ -52,8 +52,8 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 
 	@Bean
 	public KurentoClient kurentoClient() {
-		return KurentoClient.create(PropertiesManager.getProperty("kms.ws.uri",
-				KMS_WS_URI));
+		return KurentoClient.create(
+				PropertiesManager.getProperty("kms.ws.uri", KMS_WS_URI));
 	}
 
 	@Override
@@ -63,10 +63,10 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 
 	@Bean
 	public RepositoryRestApi repositoryServiceProvider() {
-		if (REPOSITORY_SERVER_URI.startsWith("file://"))
+		if (REPOSITORY_SERVER_URI.startsWith("file://")) {
 			return null;
-		return RestServiceProvider.create(REPOSITORY_SERVER_URI)
-				.getRestService();
+		}
+		return RepositoryRestApiProvider.create(REPOSITORY_SERVER_URI);
 	}
 
 	@Bean
