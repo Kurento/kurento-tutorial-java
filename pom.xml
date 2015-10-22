@@ -46,6 +46,20 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<version.kurento-datachannelexample>0.0.1-SNAPSHOT</version.kurento-datachannelexample>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.kurento.module</groupId>
+				<artifactId>datachannelexample</artifactId>
+				<version>${version.kurento-datachannelexample}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<modules>
 		<module>kurento-hello-world</module>
 		<module>kurento-magic-mirror</module>

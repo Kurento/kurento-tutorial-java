@@ -1,0 +1,28 @@
+{
+  "name": "${project.artifactId}",
+  "version": "${project.version}",
+  "description": "${project.description}",
+  "authors": [
+    "Kurento <info@kurento.org>"
+  ],
+  "main": "index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "LGPL",
+  "homepage": "http://www.kurento.org/",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.0",
+    "ekko-lightbox": "~3.1.4",
+    "adapter.js": "*",
+    "demo-console": "1.5.1"
+  }
+}
