@@ -141,7 +141,7 @@ function resgisterResponse(message) {
 		document.getElementById('peer').focus();
 	} else {
 		setRegisterState(NOT_REGISTERED);
-		var errorMessage = message.message ? message.message
+		var errorMessage = message.response ? message.response
 				: 'Unknown reason for register rejection.';
 		console.log(errorMessage);
 		document.getElementById('name').focus();
