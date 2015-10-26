@@ -19,7 +19,6 @@ import static org.kurento.tutorial.one2onecalladv.CallMediaPipeline.RECORDING_PA
 
 import java.io.IOException;
 
-import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.KurentoClient;
@@ -56,8 +55,8 @@ public class PlayMediaPipeline {
 
 		// Media Elements (WebRtcEndpoint, PlayerEndpoint)
 		webRtc = new WebRtcEndpoint.Builder(pipeline).build();
-		player = new PlayerEndpoint.Builder(pipeline, RECORDING_PATH + user
-				+ RECORDING_EXT).build();
+		player = new PlayerEndpoint.Builder(pipeline,
+				RECORDING_PATH + user + RECORDING_EXT).build();
 
 		// Connection
 		player.connect(webRtc);
@@ -67,12 +66,6 @@ public class PlayMediaPipeline {
 			@Override
 			public void onEvent(ErrorEvent event) {
 				log.info("ErrorEvent: {}", event.getDescription());
-				sendPlayEnd(session);
-			}
-		});
-		player.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-			@Override
-			public void onEvent(EndOfStreamEvent event) {
 				sendPlayEnd(session);
 			}
 		});
@@ -107,4 +100,9 @@ public class PlayMediaPipeline {
 	public WebRtcEndpoint getWebRtc() {
 		return webRtc;
 	}
+
+	public PlayerEndpoint getPlayer() {
+		return player;
+	}
+
 }
