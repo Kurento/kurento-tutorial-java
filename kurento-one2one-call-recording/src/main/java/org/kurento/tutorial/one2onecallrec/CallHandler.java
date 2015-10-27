@@ -98,7 +98,7 @@ public class CallHandler extends TextWebSocketHandler {
 			break;
 		}
 		case "stop":
-			stopCommunication(session);
+			stop(session);
 			releasePipeline(user);
 		case "stopPlay":
 			releasePipeline(user);
@@ -255,7 +255,7 @@ public class CallHandler extends TextWebSocketHandler {
 		}
 	}
 
-	public void stopCommunication(WebSocketSession session) throws IOException {
+	public void stop(WebSocketSession session) throws IOException {
 		// Both users can stop the communication. A 'stopCommunication'
 		// message will be sent to the other peer.
 		UserSession stopperUser = registry.getBySession(session);
@@ -360,7 +360,7 @@ public class CallHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session,
 			CloseStatus status) throws Exception {
-		stopCommunication(session);
+		stop(session);
 		registry.removeBySession(session);
 	}
 
