@@ -125,4 +125,9 @@ public class UserSession {
 	public void setPlayingWebRtcEndpoint(WebRtcEndpoint playingWebRtcEndpoint) {
 		this.playingWebRtcEndpoint = playingWebRtcEndpoint;
 	}
+
+	public void clear() {
+		this.webRtcEndpoint = null;
+		this.candidateList.clear();
+	}
 }
