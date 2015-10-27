@@ -259,13 +259,21 @@ public class CallHandler extends TextWebSocketHandler {
 		// Both users can stop the communication. A 'stopCommunication'
 		// message will be sent to the other peer.
 		UserSession stopperUser = registry.getBySession(session);
-		UserSession stoppedUser = (stopperUser.getCallingFrom() != null)
-				? registry.getByName(stopperUser.getCallingFrom())
-				: registry.getByName(stopperUser.getCallingTo());
+		if (stopperUser != null) {
+			UserSession stoppedUser = (stopperUser.getCallingFrom() != null)
+					? registry.getByName(stopperUser.getCallingFrom())
+					: stopperUser.getCallingTo() != null
+							? registry.getByName(stopperUser.getCallingTo())
+							: null;
 
-		JsonObject message = new JsonObject();
-		message.addProperty("id", "stopCommunication");
-		stoppedUser.sendMessage(message);
+			if (stoppedUser != null) {
+				JsonObject message = new JsonObject();
+				message.addProperty("id", "stopCommunication");
+				stoppedUser.sendMessage(message);
+				stoppedUser.clear();
+			}
+			stopperUser.clear();
+		}
 	}
 
 	public void releasePipeline(UserSession session) {
