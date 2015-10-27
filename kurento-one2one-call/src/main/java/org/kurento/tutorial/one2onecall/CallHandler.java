@@ -306,6 +306,7 @@ public class CallHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session,
 			CloseStatus status) throws Exception {
+		stop(session);
 		registry.removeBySession(session);
 	}
 
