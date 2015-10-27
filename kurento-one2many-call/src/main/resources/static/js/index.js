@@ -20,6 +20,7 @@ var webRtcPeer;
 window.onload = function() {
 	console = new Console();
 	video = document.getElementById('video');
+	disableStopButton();
 }
 
 window.onbeforeunload = function() {
@@ -92,6 +93,8 @@ function presenter() {
 					}
 					webRtcPeer.generateOffer(onOfferPresenter);
 				});
+
+		enableStopButton();
 	}
 }
 
@@ -121,6 +124,8 @@ function viewer() {
 					}
 					this.generateOffer(onOfferViewer);
 				});
+
+		enableStopButton();
 	}
 }
 
@@ -159,6 +164,30 @@ function dispose() {
 		webRtcPeer = null;
 	}
 	hideSpinner(video);
+
+	disableStopButton();
+}
+
+function disableStopButton() {
+	enableButton('#presenter', 'presenter()');
+	enableButton('#viewer', 'viewer()');
+	disableButton('#stop');
+}
+
+function enableStopButton() {
+	disableButton('#presenter');
+	disableButton('#viewer');
+	enableButton('#stop', 'stop()');
+}
+
+function disableButton(id) {
+	$(id).attr('disabled', true);
+	$(id).removeAttr('onclick');
+}
+
+function enableButton(id, functionName) {
+	$(id).attr('disabled', false);
+	$(id).attr('onclick', functionName);
 }
 
 function sendMessage(message) {
