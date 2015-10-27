@@ -110,4 +110,9 @@ public class UserSession {
 			candidateList.add(e);
 		}
 	}
+
+	public void clear() {
+		this.webRtcEndpoint = null;
+		this.candidateList.clear();
+	}
 }
