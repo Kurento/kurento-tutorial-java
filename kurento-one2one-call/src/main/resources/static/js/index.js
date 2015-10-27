@@ -30,15 +30,14 @@ const REGISTERED = 2;
 function setRegisterState(nextState) {
 	switch (nextState) {
 	case NOT_REGISTERED:
-		$('#register').attr('disabled', false);
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', true);
+		enableButton('#register', 'register()');
+		setCallState(NO_CALL);
 		break;
 	case REGISTERING:
-		$('#register').attr('disabled', true);
+		disableButton('#register');
 		break;
 	case REGISTERED:
-		$('#register').attr('disabled', true);
+		disableButton('#register');
 		setCallState(NO_CALL);
 		break;
 	default:
@@ -55,16 +54,19 @@ const IN_CALL = 2;
 function setCallState(nextState) {
 	switch (nextState) {
 	case NO_CALL:
-		$('#call').attr('disabled', false);
-		$('#terminate').attr('disabled', true);
+		enableButton('#call', 'call()');
+		disableButton('#terminate');
+		disableButton('#play');
 		break;
 	case PROCESSING_CALL:
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', true);
+		disableButton('#call');
+		disableButton('#terminate');
+		disableButton('#play');
 		break;
 	case IN_CALL:
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', false);
+		disableButton('#call');
+		enableButton('#terminate', 'stop()');
+		disableButton('#play');
 		break;
 	default:
 		return;
@@ -310,6 +312,16 @@ function hideSpinner() {
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
 	}
+}
+
+function disableButton(id) {
+	$(id).attr('disabled', true);
+	$(id).removeAttr('onclick');
+}
+
+function enableButton(id, functionName) {
+	$(id).attr('disabled', false);
+	$(id).attr('onclick', functionName);
 }
 
 /**
