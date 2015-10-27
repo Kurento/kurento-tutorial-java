@@ -28,14 +28,14 @@ const REGISTERED = 2;
 function setRegisterState(nextState) {
 	switch (nextState) {
 	case NOT_REGISTERED:
-		$('#register').attr('disabled', false);
+		enableButton('#register', 'register()');
 		setCallState(DISABLED);
 		break;
 	case REGISTERING:
-		$('#register').attr('disabled', true);
+		disableButton('#register');
 		break;
 	case REGISTERED:
-		$('#register').attr('disabled', true);
+		disableButton('#register');
 		setCallState(NO_CALL);
 		break;
 	default:
@@ -54,34 +54,40 @@ const IN_PLAY = 4;
 function setCallState(nextState) {
 	switch (nextState) {
 	case NO_CALL:
-		$('#call').attr('disabled', false);
-		$('#terminate').attr('disabled', true);
-		$('#play').attr('disabled', true);
+		enableButton('#call', 'call()');
+		disableButton('#terminate');
+		disableButton('#play');
 		break;
 	case DISABLED:
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', true);
-		$('#play').attr('disabled', true);
-		break;
-	case IN_CALL:
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', false);
-		$('#play').attr('disabled', true);
+		disableButton('#call');
+		disableButton('#terminate');
+		disableButton('#play');
 		break;
 	case POST_CALL:
-		$('#call').attr('disabled', false);
-		$('#terminate').attr('disabled', true);
-		$('#play').attr('disabled', false);
+		enableButton('#call', 'call()');
+		disableButton('#terminate');
+		enableButton('#play', 'play()');
 		break;
+	case IN_CALL:
 	case IN_PLAY:
-		$('#call').attr('disabled', true);
-		$('#terminate').attr('disabled', false);
-		$('#play').attr('disabled', true);
+		disableButton('#call');
+		enableButton('#terminate', 'stop()');
+		disableButton('#play');
 		break;
 	default:
 		return;
 	}
 	callState = nextState;
+}
+
+function disableButton(id) {
+	$(id).attr('disabled', true);
+	$(id).removeAttr('onclick');
+}
+
+function enableButton(id, functionName) {
+	$(id).attr('disabled', false);
+	$(id).attr('onclick', functionName);
 }
 
 window.onload = function() {
