@@ -46,20 +46,6 @@
 		</developer>
 	</developers>
 
-	<properties>
-		<version.kurento-platedetector>${version.kurento-java}</version.kurento-platedetector>
-	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.kurento.module</groupId>
-				<artifactId>platedetector</artifactId>
-				<version>${version.kurento-platedetector}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<modules>
 		<module>kurento-hello-world</module>
 		<module>kurento-magic-mirror</module>
