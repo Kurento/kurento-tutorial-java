@@ -75,6 +75,7 @@
 		<module>kurento-pointerdetector</module>
                 <module>kurento-show-data-channel</module>
                 <module>kurento-send-data-channel</module>
+                <module>kurento-metadata-example</module>
 	</modules>
 
 </project>
