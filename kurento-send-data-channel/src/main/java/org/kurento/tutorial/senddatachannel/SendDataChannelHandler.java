@@ -80,18 +80,17 @@ public class SendDataChannelHandler extends TextWebSocketHandler {
 
 			UserSession user = users.get(session.getId());
 			if (user != null) {
-				IceCandidate candidate = new IceCandidate(jsonCandidate.get(
-						"candidate").getAsString(), jsonCandidate.get("sdpMid")
-						.getAsString(), jsonCandidate.get("sdpMLineIndex")
-						.getAsInt());
+				IceCandidate candidate = new IceCandidate(
+						jsonCandidate.get("candidate").getAsString(),
+						jsonCandidate.get("sdpMid").getAsString(),
+						jsonCandidate.get("sdpMLineIndex").getAsInt());
 				user.addCandidate(candidate);
 			}
 			break;
 		}
 		default:
-			sendError(session,
-					"Invalid message with id "
-							+ jsonMessage.get("id").getAsString());
+			sendError(session, "Invalid message with id "
+					+ jsonMessage.get("id").getAsString());
 			break;
 		}
 	}
@@ -106,13 +105,14 @@ public class SendDataChannelHandler extends TextWebSocketHandler {
 					.useDataChannels().build();
 			user.setWebRtcEndpoint(webRtcEndpoint);
 			PlayerEndpoint player = new PlayerEndpoint.Builder(pipeline,
-					"http://files.kurento.org/video/barcodes.webm").build();
+					"http://files.kurento.org/video/filter/barcodes.webm")
+							.build();
 			user.setPlayer(player);
 			users.put(session.getId(), user);
 
 			// ICE candidates
-			webRtcEndpoint
-					.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+			webRtcEndpoint.addOnIceCandidateListener(
+					new EventListener<OnIceCandidateEvent>() {
 						@Override
 						public void onEvent(OnIceCandidateEvent event) {
 							JsonObject response = new JsonObject();
