@@ -76,6 +76,7 @@
                 <module>kurento-show-data-channel</module>
                 <module>kurento-send-data-channel</module>
                 <module>kurento-metadata-example</module>
+		<module>kurento-player</module>
 	</modules>
 
 </project>
