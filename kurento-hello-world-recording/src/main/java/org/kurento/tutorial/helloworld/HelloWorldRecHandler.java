@@ -31,7 +31,7 @@ import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
-import org.kurento.repository.rest.RepositoryRestApi;
+import org.kurento.repository.RepositoryClient;
 import org.kurento.repository.service.pojo.RepositoryItemPlayer;
 import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 	private KurentoClient kurento;
 
 	@Autowired
-	private RepositoryRestApi repositoryRestApi;
+	private RepositoryClient repositoryClient;
 
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message)
@@ -136,10 +136,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 		try {
 			// 0. Repository logic
 			RepositoryItemRecorder repoItem = null;
-			if (repositoryRestApi != null) {
+			if (repositoryClient != null) {
 				try {
 					Map<String, String> metadata = Collections.emptyMap();
-					repoItem = repositoryRestApi.createRepositoryItem(metadata);
+					repoItem = repositoryClient.createRepositoryItem(metadata);
 				} catch (Exception e) {
 					log.warn("Unable to create kurento repository items", e);
 				}
@@ -153,7 +153,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 				repoItem.setUrl(filePath);
 			}
 			log.info("Media will be recorded {}by KMS: id={} , url={}",
-					(repositoryRestApi == null ? "locally" : ""),
+					(repositoryClient == null ? "locally" : ""),
 					repoItem.getId(), repoItem.getUrl());
 
 			// 1. Media logic (webRtcEndpoint in loopback)
@@ -220,7 +220,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 		try {
 			// 0. Repository logic
 			RepositoryItemPlayer itemPlayer = null;
-			if (repositoryRestApi != null) {
+			if (repositoryClient != null) {
 				try {
 					Date stopTimestamp = user.getStopTimestamp();
 					if (stopTimestamp != null) {
@@ -238,7 +238,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 					} else
 						log.warn("No stop timeout was found, repository endpoint might not be ready");
 					itemPlayer =
-							repositoryRestApi.getReadEndpoint(user
+							repositoryClient.getReadEndpoint(user
 									.getRepoItem().getId());
 				} catch (Exception e) {
 					log.warn("Unable to obtain kurento repository endpoint", e);
@@ -249,7 +249,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 				itemPlayer.setUrl(user.getRepoItem().getUrl());
 			}
 			log.debug("Playing from {}: id={}, url={}",
-					(repositoryRestApi == null ? "disk" : "repository"),
+					(repositoryClient == null ? "disk" : "repository"),
 					itemPlayer.getId(), itemPlayer.getUrl());
 
 			// 1. Media logic

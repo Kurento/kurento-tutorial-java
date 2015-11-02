@@ -15,8 +15,8 @@ package org.kurento.tutorial.helloworld;
 
 import org.kurento.client.KurentoClient;
 import org.kurento.commons.PropertiesManager;
-import org.kurento.repository.rest.RepositoryRestApi;
-import org.kurento.repository.rest.RepositoryRestApiProvider;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.RepositoryClientProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -62,11 +62,11 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 	}
 
 	@Bean
-	public RepositoryRestApi repositoryServiceProvider() {
+	public RepositoryClient repositoryServiceProvider() {
 		if (REPOSITORY_SERVER_URI.startsWith("file://")) {
 			return null;
 		}
-		return RepositoryRestApiProvider.create(REPOSITORY_SERVER_URI);
+		return RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
 	}
 
 	@Bean
