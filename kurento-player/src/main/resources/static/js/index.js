@@ -182,6 +182,7 @@ function setState(nextState) {
 		disableButton('#pause');
 		disableButton('#stop');
 		enableButton('#videourl');
+		enableButton("[name='mode']");
 		break;
 
 	case I_CAN_STOP:
@@ -189,6 +190,7 @@ function setState(nextState) {
 		enableButton('#pause', 'pause()');
 		enableButton('#stop', 'stop()');
 		disableButton('#videourl');
+		disableButton("[name='mode']");
 		break;
 
 	case I_AM_STARTING:
@@ -196,6 +198,7 @@ function setState(nextState) {
 		disableButton('#pause');
 		disableButton('#stop');
 		disableButton('#videourl');
+		disableButton("[name='mode']");
 		break;
 
 	default:
