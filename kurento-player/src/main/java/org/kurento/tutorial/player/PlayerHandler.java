@@ -91,7 +91,8 @@ public class PlayerHandler extends TextWebSocketHandler {
 	private void start(final WebSocketSession session, JsonObject jsonMessage) {
 		// 1. Media pipeline
 		PlayerMediaPipeline playerMediaPipeline = new PlayerMediaPipeline();
-		playerMediaPipeline.initMediaPipeline(kurento);
+		String videourl = jsonMessage.get("videourl").getAsString();
+		playerMediaPipeline.initMediaPipeline(kurento, videourl);
 		pipelines.put(session.getId(), playerMediaPipeline);
 
 		// 2. WebRtcEndpoint
@@ -103,8 +104,8 @@ public class PlayerHandler extends TextWebSocketHandler {
 		response.addProperty("sdpAnswer", sdpAnswer);
 		sendMessage(session, response.toString());
 
-		playerMediaPipeline.gatherCandidates(
-				new EventListener<OnIceCandidateEvent>() {
+		playerMediaPipeline
+				.gatherCandidates(new EventListener<OnIceCandidateEvent>() {
 					@Override
 					public void onEvent(OnIceCandidateEvent event) {
 						JsonObject response = new JsonObject();
