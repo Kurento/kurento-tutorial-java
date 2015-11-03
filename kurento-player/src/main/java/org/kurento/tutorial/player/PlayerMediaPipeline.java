@@ -33,17 +33,16 @@ import org.kurento.client.WebRtcEndpoint;
 public class PlayerMediaPipeline {
 
 	private final static String PLAY_URL_PROP = "demo.play.url";
-	private final static String PLAY_URL_DEFAULT = "http://files.kurento.org/video/10sec/smpte.webm";
 
 	private WebRtcEndpoint webRtcEndpoint;
 	private MediaPipeline mediaPipeline;
 	private PlayerEndpoint playerEndpoint;
 
-	public void initMediaPipeline(KurentoClient kurento) {
+	public void initMediaPipeline(KurentoClient kurento, String videourl) {
 		mediaPipeline = kurento.createMediaPipeline();
 		webRtcEndpoint = new WebRtcEndpoint.Builder(mediaPipeline).build();
 		playerEndpoint = new PlayerEndpoint.Builder(mediaPipeline,
-				System.getProperty(PLAY_URL_PROP, PLAY_URL_DEFAULT)).build();
+				System.getProperty(PLAY_URL_PROP, videourl)).build();
 		playerEndpoint.connect(webRtcEndpoint);
 	}
 

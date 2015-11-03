@@ -104,9 +104,11 @@ function onOffer(error, offerSdp) {
 	if (error)
 		return console.error('Error generating the offer');
 	console.info('Invoking SDP offer callback function ' + location.host);
+
 	var message = {
 		id : 'start',
-		sdpOffer : offerSdp
+		sdpOffer : offerSdp,
+		videourl : document.getElementById('videourl').value
 	}
 	sendMessage(message);
 }
@@ -179,18 +181,21 @@ function setState(nextState) {
 		enableButton('#start', 'start()');
 		disableButton('#pause');
 		disableButton('#stop');
+		enableButton('#videourl');
 		break;
 
 	case I_CAN_STOP:
 		disableButton('#start');
 		enableButton('#pause', 'pause()');
 		enableButton('#stop', 'stop()');
+		disableButton('#videourl');
 		break;
 
 	case I_AM_STARTING:
 		disableButton('#start');
 		disableButton('#pause');
 		disableButton('#stop');
+		disableButton('#videourl');
 		break;
 
 	default:
@@ -226,7 +231,9 @@ function disableButton(id) {
 
 function enableButton(id, functionName) {
 	$(id).attr('disabled', false);
-	$(id).attr('onclick', functionName);
+	if (functionName) {
+		$(id).attr('onclick', functionName);
+	}
 }
 
 function showSpinner() {
