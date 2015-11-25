@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.kurento.tutorial</groupId>
 		<artifactId>kurento-tutorial</artifactId>
-		<version>6.1.1-SNAPSHOT</version>
+		<version>6.2.0</version>
 	</parent>
 
 	<artifactId>kurento-group-call</artifactId>
@@ -62,7 +62,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
-		
+
 		<!-- Kurento -->
 		<dependency>
 			<groupId>org.kurento</groupId>
@@ -192,5 +192,5 @@
 			<id>no-assembly</id>
 		</profile>
 	</profiles>
-	
+
 </project>
