@@ -5,7 +5,7 @@
     <parent>
             <groupId>org.kurento.tutorial</groupId>
             <artifactId>kurento-tutorial</artifactId>
-            <version>6.1.1-SNAPSHOT</version>
+            <version>6.2.0</version>
     </parent>
 
 	<artifactId>kurento-crowddetector</artifactId>
@@ -44,10 +44,10 @@
 
 	<properties>
 		<demo.port>9081</demo.port>
-		
+
 		<!-- Main class -->
 		<start-class>org.kurento.demo.CrowdDetectorApp</start-class>
-		
+
 	</properties>
 
 	<build>
@@ -130,7 +130,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<resources>			
+		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>false</filtering>
