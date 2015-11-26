@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.kurento.tutorial</groupId>
 		<artifactId>kurento-tutorial</artifactId>
-		<version>6.2.0</version>
+		<version>6.2.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>kurento-one2many-call</artifactId>
@@ -103,6 +103,7 @@
 					<executable>bower</executable>
 					<arguments>
 						<argument>install</argument>
+						<argument>--allow-root</argument>
 					</arguments>
 					<mainClass>${start-class}</mainClass>
 				</configuration>
