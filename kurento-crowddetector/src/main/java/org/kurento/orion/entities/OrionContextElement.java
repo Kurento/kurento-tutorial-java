@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -20,78 +21,54 @@ import java.util.List;
 
 /**
  * A context element from Orion.
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
- * 
+ *
  */
 public class OrionContextElement {
 
-	private String type;
+  private String type;
 
-	private boolean isPattern;
-	private String id;
-	private final List<OrionAttribute<?>> attributes = newArrayList();
+  private boolean isPattern;
+  private String id;
+  private final List<OrionAttribute<?>> attributes = newArrayList();
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+  public String getType() {
+    return type;
+  }
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
+  public void setType(String type) {
+    this.type = type;
+  }
 
-	/**
-	 * @return the isPattern
-	 */
-	public boolean isPattern() {
-		return isPattern;
-	}
+  public boolean isPattern() {
+    return isPattern;
+  }
 
-	/**
-	 * @param isPattern
-	 *            the isPattern to set
-	 */
-	public void setPattern(boolean isPattern) {
-		this.isPattern = isPattern;
-	}
+  public void setPattern(boolean isPattern) {
+    this.isPattern = isPattern;
+  }
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	/**
-	 * @return the attributes
-	 */
-	public List<OrionAttribute<?>> getAttributes() {
-		return attributes;
-	}
+  public List<OrionAttribute<?>> getAttributes() {
+    return attributes;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		sb.append(" Type: ").append(type).append("\n");
-		sb.append(" Id: ").append(id).append("\n");
-		sb.append(" IsPattern: ").append(isPattern).append("\n");
+    sb.append(" Type: ").append(type).append("\n");
+    sb.append(" Id: ").append(id).append("\n");
+    sb.append(" IsPattern: ").append(isPattern).append("\n");
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

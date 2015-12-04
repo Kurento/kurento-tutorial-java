@@ -12,51 +12,39 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Query context response object
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  */
 public class QueryContextResponse extends AbstractOrionResponse {
 
-	/**
-	 * 
-	 */
-	@SerializedName("contextElement")
-	private OrionContextElement element;
+  @SerializedName("contextElement")
+  private OrionContextElement element;
 
-	/**
-	 * 
-	 */
-	public QueryContextResponse() {
-	}
+  public QueryContextResponse() {
+  }
 
-	/**
-	 * @return the element
-	 */
-	public OrionContextElement getElement() {
-		return element;
-	}
+  public OrionContextElement getElement() {
+    return element;
+  }
 
-	/**
-	 * @param element
-	 *            the element to set
-	 */
-	public void setElement(OrionContextElement element) {
-		this.element = element;
-	}
+  public void setElement(OrionContextElement element) {
+    this.element = element;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		sb.append(element).append("\n");
-		sb.append(super.toString());
+    sb.append(element).append("\n");
+    sb.append(super.toString());
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

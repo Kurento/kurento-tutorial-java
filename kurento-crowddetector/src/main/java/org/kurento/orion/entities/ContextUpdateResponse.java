@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import java.util.List;
@@ -21,42 +22,34 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Context update response object
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  */
 public class ContextUpdateResponse {
 
-	@SerializedName("contextResponses")
-	private List<OrionContextElementResponse> contextElements;
+  @SerializedName("contextResponses")
+  private List<OrionContextElementResponse> contextElements;
 
-	public ContextUpdateResponse(OrionContextElementResponse... contextElements) {
-		this.contextElements = ImmutableList.copyOf(contextElements);
-	}
+  public ContextUpdateResponse(OrionContextElementResponse... contextElements) {
+    this.contextElements = ImmutableList.copyOf(contextElements);
+  }
 
-	/**
-	 * @return the contextElements
-	 */
-	public List<OrionContextElementResponse> getContextElements() {
-		return contextElements;
-	}
+  public List<OrionContextElementResponse> getContextElements() {
+    return contextElements;
+  }
 
-	/**
-	 * @param contextElements
-	 *            the contextElements to set
-	 */
-	public void setContextElements(
-			List<OrionContextElementResponse> contextElements) {
-		this.contextElements = contextElements;
-	}
+  public void setContextElements(List<OrionContextElementResponse> contextElements) {
+    this.contextElements = contextElements;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		for (OrionContextElementResponse response : contextElements) {
-			sb.append(response).append("\n");
-		}
+    for (OrionContextElementResponse response : contextElements) {
+      sb.append(response).append("\n");
+    }
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

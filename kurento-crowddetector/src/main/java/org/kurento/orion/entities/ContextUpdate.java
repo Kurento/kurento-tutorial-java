@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import java.util.List;
@@ -21,65 +22,50 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Context update request object
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  */
 public class ContextUpdate {
 
-	public static enum ContextUpdateAction {
-		UPDATE, DELETE, APPEND;
-	}
+  public static enum ContextUpdateAction {
+    UPDATE, DELETE, APPEND;
+  }
 
-	@SerializedName("contextElements")
-	private List<OrionContextElement> contextElements;
+  @SerializedName("contextElements")
+  private List<OrionContextElement> contextElements;
 
-	@SerializedName("updateAction")
-	private ContextUpdateAction updateAction;
+  @SerializedName("updateAction")
+  private ContextUpdateAction updateAction;
 
-	public ContextUpdate(ContextUpdateAction updateAction,
-			OrionContextElement... contextElements) {
-		this.updateAction = updateAction;
-		this.contextElements = ImmutableList.copyOf(contextElements);
-	}
+  public ContextUpdate(ContextUpdateAction updateAction, OrionContextElement... contextElements) {
+    this.updateAction = updateAction;
+    this.contextElements = ImmutableList.copyOf(contextElements);
+  }
 
-	/**
-	 * @return the contextElements
-	 */
-	public List<OrionContextElement> getContextElements() {
-		return contextElements;
-	}
+  public List<OrionContextElement> getContextElements() {
+    return contextElements;
+  }
 
-	/**
-	 * @param contextElements
-	 *            the contextElements to set
-	 */
-	public void setContextElements(List<OrionContextElement> contextElements) {
-		this.contextElements = contextElements;
-	}
+  public void setContextElements(List<OrionContextElement> contextElements) {
+    this.contextElements = contextElements;
+  }
 
-	/**
-	 * @return the updateAction
-	 */
-	public ContextUpdateAction getUpdateAction() {
-		return updateAction;
-	}
+  public ContextUpdateAction getUpdateAction() {
+    return updateAction;
+  }
 
-	/**
-	 * @param updateAction
-	 *            the updateAction to set
-	 */
-	public void setUpdateAction(ContextUpdateAction updateAction) {
-		this.updateAction = updateAction;
-	}
+  public void setUpdateAction(ContextUpdateAction updateAction) {
+    this.updateAction = updateAction;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		for (OrionContextElement element : contextElements) {
-			sb.append(element).append("\n");
-		}
-		sb.append(updateAction);
-		return sb.toString();
-	}
+    for (OrionContextElement element : contextElements) {
+      sb.append(element).append("\n");
+    }
+    sb.append(updateAction);
+    return sb.toString();
+  }
 }

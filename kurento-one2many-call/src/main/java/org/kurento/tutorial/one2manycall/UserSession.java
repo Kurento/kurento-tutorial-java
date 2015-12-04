@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.one2manycall;
 
 import java.io.IOException;
@@ -33,35 +34,33 @@ import com.google.gson.JsonObject;
  */
 public class UserSession {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(UserSession.class);
+  private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
-	private final WebSocketSession session;
-	private WebRtcEndpoint webRtcEndpoint;
+  private final WebSocketSession session;
+  private WebRtcEndpoint webRtcEndpoint;
 
-	public UserSession(WebSocketSession session) {
-		this.session = session;
-	}
+  public UserSession(WebSocketSession session) {
+    this.session = session;
+  }
 
-	public WebSocketSession getSession() {
-		return session;
-	}
+  public WebSocketSession getSession() {
+    return session;
+  }
 
-	public void sendMessage(JsonObject message) throws IOException {
-		log.debug("Sending message from user with session Id '{}': {}",
-				session.getId(), message);
-		session.sendMessage(new TextMessage(message.toString()));
-	}
+  public void sendMessage(JsonObject message) throws IOException {
+    log.debug("Sending message from user with session Id '{}': {}", session.getId(), message);
+    session.sendMessage(new TextMessage(message.toString()));
+  }
 
-	public WebRtcEndpoint getWebRtcEndpoint() {
-		return webRtcEndpoint;
-	}
+  public WebRtcEndpoint getWebRtcEndpoint() {
+    return webRtcEndpoint;
+  }
 
-	public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
-		this.webRtcEndpoint = webRtcEndpoint;
-	}
+  public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
+    this.webRtcEndpoint = webRtcEndpoint;
+  }
 
-	public void addCandidate(IceCandidate i) {
-		webRtcEndpoint.addIceCandidate(i);
-	}
+  public void addCandidate(IceCandidate candidate) {
+    webRtcEndpoint.addIceCandidate(candidate);
+  }
 }

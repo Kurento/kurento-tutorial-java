@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.one2onecalladv;
 
 import java.io.IOException;
@@ -29,105 +30,104 @@ import com.google.gson.JsonObject;
 
 /**
  * User session.
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author Micael Gallego (micael.gallego@gmail.com)
  * @since 5.0.0
  */
 public class UserSession {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(UserSession.class);
+  private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
-	private final String name;
-	private final WebSocketSession session;
+  private final String name;
+  private final WebSocketSession session;
 
-	private String sdpOffer;
-	private String callingTo;
-	private String callingFrom;
-	private WebRtcEndpoint webRtcEndpoint;
-	private WebRtcEndpoint playingWebRtcEndpoint;
-	private final List<IceCandidate> candidateList = new ArrayList<IceCandidate>();
+  private String sdpOffer;
+  private String callingTo;
+  private String callingFrom;
+  private WebRtcEndpoint webRtcEndpoint;
+  private WebRtcEndpoint playingWebRtcEndpoint;
+  private final List<IceCandidate> candidateList = new ArrayList<>();
 
-	public UserSession(WebSocketSession session, String name) {
-		this.session = session;
-		this.name = name;
-	}
+  public UserSession(WebSocketSession session, String name) {
+    this.session = session;
+    this.name = name;
+  }
 
-	public WebSocketSession getSession() {
-		return session;
-	}
+  public WebSocketSession getSession() {
+    return session;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public String getSdpOffer() {
-		return sdpOffer;
-	}
+  public String getSdpOffer() {
+    return sdpOffer;
+  }
 
-	public void setSdpOffer(String sdpOffer) {
-		this.sdpOffer = sdpOffer;
-	}
+  public void setSdpOffer(String sdpOffer) {
+    this.sdpOffer = sdpOffer;
+  }
 
-	public String getCallingTo() {
-		return callingTo;
-	}
+  public String getCallingTo() {
+    return callingTo;
+  }
 
-	public void setCallingTo(String callingTo) {
-		this.callingTo = callingTo;
-	}
+  public void setCallingTo(String callingTo) {
+    this.callingTo = callingTo;
+  }
 
-	public String getCallingFrom() {
-		return callingFrom;
-	}
+  public String getCallingFrom() {
+    return callingFrom;
+  }
 
-	public void setCallingFrom(String callingFrom) {
-		this.callingFrom = callingFrom;
-	}
+  public void setCallingFrom(String callingFrom) {
+    this.callingFrom = callingFrom;
+  }
 
-	public void sendMessage(JsonObject message) throws IOException {
-		log.debug("Sending message from user '{}': {}", name, message);
-		session.sendMessage(new TextMessage(message.toString()));
-	}
+  public void sendMessage(JsonObject message) throws IOException {
+    log.debug("Sending message from user '{}': {}", name, message);
+    session.sendMessage(new TextMessage(message.toString()));
+  }
 
-	public String getSessionId() {
-		return session.getId();
-	}
+  public String getSessionId() {
+    return session.getId();
+  }
 
-	public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
-		this.webRtcEndpoint = webRtcEndpoint;
+  public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
+    this.webRtcEndpoint = webRtcEndpoint;
 
-		if (this.webRtcEndpoint != null) {
-			for (IceCandidate e : candidateList) {
-				this.webRtcEndpoint.addIceCandidate(e);
-			}
-			this.candidateList.clear();
-		}
-	}
+    if (this.webRtcEndpoint != null) {
+      for (IceCandidate e : candidateList) {
+        this.webRtcEndpoint.addIceCandidate(e);
+      }
+      this.candidateList.clear();
+    }
+  }
 
-	public void addCandidate(IceCandidate e) {
-		if (this.webRtcEndpoint != null) {
-			this.webRtcEndpoint.addIceCandidate(e);
-		} else {
-			candidateList.add(e);
-		}
+  public void addCandidate(IceCandidate candidate) {
+    if (this.webRtcEndpoint != null) {
+      this.webRtcEndpoint.addIceCandidate(candidate);
+    } else {
+      candidateList.add(candidate);
+    }
 
-		if (this.playingWebRtcEndpoint != null) {
-			this.playingWebRtcEndpoint.addIceCandidate(e);
-		}
-	}
+    if (this.playingWebRtcEndpoint != null) {
+      this.playingWebRtcEndpoint.addIceCandidate(candidate);
+    }
+  }
 
-	public WebRtcEndpoint getPlayingWebRtcEndpoint() {
-		return playingWebRtcEndpoint;
-	}
+  public WebRtcEndpoint getPlayingWebRtcEndpoint() {
+    return playingWebRtcEndpoint;
+  }
 
-	public void setPlayingWebRtcEndpoint(WebRtcEndpoint playingWebRtcEndpoint) {
-		this.playingWebRtcEndpoint = playingWebRtcEndpoint;
-	}
+  public void setPlayingWebRtcEndpoint(WebRtcEndpoint playingWebRtcEndpoint) {
+    this.playingWebRtcEndpoint = playingWebRtcEndpoint;
+  }
 
-	public void clear() {
-		this.webRtcEndpoint = null;
-		this.candidateList.clear();
-	}
+  public void clear() {
+    this.webRtcEndpoint = null;
+    this.candidateList.clear();
+  }
 }

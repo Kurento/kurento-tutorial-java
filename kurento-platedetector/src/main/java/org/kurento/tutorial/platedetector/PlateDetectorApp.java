@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.platedetector;
 
 import org.kurento.client.KurentoClient;
@@ -35,25 +36,24 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class PlateDetectorApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
 
-	@Bean
-	public PlateDetectorHandler handler() {
-		return new PlateDetectorHandler();
-	}
+  @Bean
+  public PlateDetectorHandler handler() {
+    return new PlateDetectorHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(System.getProperty("kms.ws.uri",
-				DEFAULT_KMS_WS_URI));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/platedetector");
-	}
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/platedetector");
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(PlateDetectorApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(PlateDetectorApp.class).run(args);
+  }
 }

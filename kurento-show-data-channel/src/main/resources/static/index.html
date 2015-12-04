@@ -37,7 +37,7 @@
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-1">
-					<ul class="nav navbar-nav navbar-right">						
+					<ul class="nav navbar-nav navbar-right">
 					</ul>
 				</div>
 			</div>
@@ -52,7 +52,8 @@
 				<h3>Local stream</h3>
 				<video id="videoInput" autoplay width="480px" height="360px"
 					poster="img/webrtc.png"></video>
-				<textarea id="dataChannelSend" disabled placeholder="Enter the text to send"></textarea>
+				<textarea id="dataChannelSend" disabled
+					placeholder="Enter the text to send"></textarea>
 			</div>
 			<div class="col-md-2">
 				<a id="start" href="#" class="btn btn-success"
@@ -60,10 +61,10 @@
 					class="glyphicon glyphicon-play"></span> Start</a><br /> <br /> <a
 					id="stop" href="#" class="btn btn-danger"
 					onclick="stop(); return false;"><span
-					class="glyphicon glyphicon-stop"></span> Stop</a>
-					<br/><br/><br/>
-					<a id="send" href="#" class="btn btn-success">
-            			<span class="glyphicon glyphicon-forward"></span> Send</a>
+					class="glyphicon glyphicon-stop"></span> Stop</a> <br /> <br /> <br />
+				<a id="send" href="#" class="btn btn-success"> <span
+					class="glyphicon glyphicon-forward"></span> Send
+				</a>
 			</div>
 			<div class="col-md-5">
 				<h3>Remote stream</h3>

@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.helloworld;
 
 import org.kurento.client.KurentoClient;
@@ -25,7 +26,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 /**
  * Hello World (WebRTC in loobpack) main class.
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 5.0.0
  */
@@ -34,24 +35,24 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class HelloWorldApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
 
-	@Bean
-	public HelloWorldHandler handler() {
-		return new HelloWorldHandler();
-	}
+  @Bean
+  public HelloWorldHandler handler() {
+    return new HelloWorldHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/helloworld");
-	}
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/helloworld");
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(HelloWorldApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(HelloWorldApp.class).run(args);
+  }
 }

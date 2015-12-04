@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.player;
 
 import org.kurento.client.KurentoClient;
@@ -32,26 +33,25 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @SpringBootApplication
 public class PlayerApp implements WebSocketConfigurer {
 
-	final static String KMS_WS_URI_PROP = "kms.ws.uri";
-	final static String KMS_WS_URI_DEFAULT = "ws://localhost:8888/kurento";
+  static final String KMS_WS_URI_PROP = "kms.ws.uri";
+  static final String KMS_WS_URI_DEFAULT = "ws://localhost:8888/kurento";
 
-	@Bean
-	public PlayerHandler handler() {
-		return new PlayerHandler();
-	}
+  @Bean
+  public PlayerHandler handler() {
+    return new PlayerHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(
-				System.getProperty(KMS_WS_URI_PROP, KMS_WS_URI_DEFAULT));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty(KMS_WS_URI_PROP, KMS_WS_URI_DEFAULT));
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/player");
-	}
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/player");
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(PlayerApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(PlayerApp.class).run(args);
+  }
 }

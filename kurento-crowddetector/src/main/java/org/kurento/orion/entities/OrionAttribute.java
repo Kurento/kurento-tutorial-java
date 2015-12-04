@@ -12,87 +12,62 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 /**
  * Attribute to be used in context elements and queries
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  * @param <T>
- *            The type of attribute
- * 
+ *          The type of attribute
+ *
  */
 public class OrionAttribute<T> {
 
-	private String name;
-	private String type;
-	private T value;
+  private String name;
+  private String type;
+  private T value;
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+  public String getType() {
+    return type;
+  }
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
+  public void setType(String type) {
+    this.type = type;
+  }
 
-	/**
-	 * @return the value
-	 */
-	public T getValue() {
-		return value;
-	}
+  public T getValue() {
+    return value;
+  }
 
-	/**
-	 * @param value
-	 *            the value to set
-	 */
-	public void setValue(T value) {
-		this.value = value;
-	}
+  public void setValue(T value) {
+    this.value = value;
+  }
 
-	/**
-	 * @param name
-	 * @param type
-	 * @param value
-	 */
-	public OrionAttribute(String name, String type, T value) {
-		super();
-		this.name = name;
-		this.type = type;
-		this.value = value;
-	}
+  public OrionAttribute(String name, String type, T value) {
+    super();
+    this.name = name;
+    this.type = type;
+    this.value = value;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		sb.append(" Name: ").append(name).append("\n");
-		sb.append(" Type: ").append(type).append("\n");
-		sb.append(" Value: ").append(value).append("\n");
+    sb.append(" Name: ").append(name).append("\n");
+    sb.append(" Type: ").append(type).append("\n");
+    sb.append(" Value: ").append(value).append("\n");
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }
