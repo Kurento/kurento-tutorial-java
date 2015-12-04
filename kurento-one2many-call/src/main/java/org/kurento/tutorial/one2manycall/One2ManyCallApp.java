@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.one2manycall;
 
 import org.kurento.client.KurentoClient;
@@ -34,25 +35,24 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class One2ManyCallApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
 
-	@Bean
-	public CallHandler callHandler() {
-		return new CallHandler();
-	}
+  @Bean
+  public CallHandler callHandler() {
+    return new CallHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(System.getProperty("kms.ws.uri",
-				DEFAULT_KMS_WS_URI));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+  }
 
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(callHandler(), "/call");
-	}
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(callHandler(), "/call");
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(One2ManyCallApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(One2ManyCallApp.class).run(args);
+  }
 
 }

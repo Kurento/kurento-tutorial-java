@@ -12,19 +12,19 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 /**
- * Interface common to all objects that represent an Orion context element
- * response
+ * Interface common to all objects that represent an Orion context element response
  * 
  * @author Ivan Gracia (izanmail@gmail.com)
  *
  */
 public interface OrionResponse {
 
-	StatusCode getStatus();
+  StatusCode getStatus();
 
-	void setStatus(StatusCode status);
+  void setStatus(StatusCode status);
 
 }

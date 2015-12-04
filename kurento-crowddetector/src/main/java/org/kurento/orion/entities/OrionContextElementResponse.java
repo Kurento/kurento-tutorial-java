@@ -12,43 +12,37 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Context element with a status code
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
- * 
+ *
  */
 public class OrionContextElementResponse extends AbstractOrionResponse {
 
-	@SerializedName("contextElement")
-	private OrionContextElement contextElement;
+  @SerializedName("contextElement")
+  private OrionContextElement contextElement;
 
-	/**
-	 * @return the contextElement
-	 */
-	public OrionContextElement getContextElement() {
-		return contextElement;
-	}
+  public OrionContextElement getContextElement() {
+    return contextElement;
+  }
 
-	/**
-	 * @param contextElement
-	 *            the contextElement to set
-	 */
-	public void setContextElement(OrionContextElement contextElement) {
-		this.contextElement = contextElement;
-	}
+  public void setContextElement(OrionContextElement contextElement) {
+    this.contextElement = contextElement;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		sb.append(contextElement).append("\n");
-		sb.append(super.toString());
+    sb.append(contextElement).append("\n");
+    sb.append(super.toString());
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

@@ -12,80 +12,60 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Status object, that holds the result of the request.
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  *
  */
 public final class StatusCode {
 
-	@SerializedName("code")
-	private int code;
+  @SerializedName("code")
+  private int code;
 
-	@SerializedName("reasonPhrase")
-	private String reason;
+  @SerializedName("reasonPhrase")
+  private String reason;
 
-	@SerializedName("details")
-	private String details;
+  @SerializedName("details")
+  private String details;
 
-	/**
-	 * @return the code
-	 */
-	public int getCode() {
-		return code;
-	}
+  public int getCode() {
+    return code;
+  }
 
-	/**
-	 * @param code
-	 *            the code to set
-	 */
-	public void setCode(int code) {
-		this.code = code;
-	}
+  public void setCode(int code) {
+    this.code = code;
+  }
 
-	/**
-	 * @return the reason
-	 */
-	public String getReason() {
-		return reason;
-	}
+  public String getReason() {
+    return reason;
+  }
 
-	/**
-	 * @param reason
-	 *            the reason to set
-	 */
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
 
-	/**
-	 * @return the details
-	 */
-	public String getDetails() {
-		return details;
-	}
+  public String getDetails() {
+    return details;
+  }
 
-	/**
-	 * @param details
-	 *            the details to set
-	 */
-	public void setDetails(String details) {
-		this.details = details;
-	}
+  public void setDetails(String details) {
+    this.details = details;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-		sb.append(" Code: ").append(code).append("\n");
-		sb.append(" Reason: ").append(reason).append("\n");
-		sb.append(" Details: ").append(details).append("\n");
+    sb.append(" Code: ").append(code).append("\n");
+    sb.append(" Reason: ").append(reason).append("\n");
+    sb.append(" Details: ").append(details).append("\n");
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

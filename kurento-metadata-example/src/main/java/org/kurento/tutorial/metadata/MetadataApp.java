@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.metadata;
 
 import org.kurento.client.KurentoClient;
@@ -35,26 +36,25 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class MetadataApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
-	final static String DEFAULT_APP_SERVER_URL = "http://localhost:8080";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  static final String DEFAULT_APP_SERVER_URL = "http://localhost:8080";
 
-	@Bean
-	public MetadataHandler handler() {
-		return new MetadataHandler();
-	}
+  @Bean
+  public MetadataHandler handler() {
+    return new MetadataHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(System.getProperty("kms.ws.uri",
-				DEFAULT_KMS_WS_URI));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/metadata");
-	}
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/metadata");
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(MetadataApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(MetadataApp.class).run(args);
+  }
 }

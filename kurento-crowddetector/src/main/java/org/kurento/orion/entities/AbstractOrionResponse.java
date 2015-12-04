@@ -12,39 +12,36 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Abstract response having an {@link StatusCode} object, common to all Orion
- * responses. The only exception is the {@link ContextUpdateResponse}, which
- * holds a list of objects, each one of them having its own status code.
- * 
+ * Abstract response having an {@link StatusCode} object, common to all Orion responses. The only
+ * exception is the {@link ContextUpdateResponse}, which holds a list of objects, each one of them
+ * having its own status code.
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  *
  */
 class AbstractOrionResponse implements OrionResponse {
 
-	@SerializedName("statusCode")
-	private StatusCode statusCode;
+  @SerializedName("statusCode")
+  private StatusCode statusCode;
 
-	@Override
-	public StatusCode getStatus() {
-		return this.statusCode;
-	}
+  @Override
+  public StatusCode getStatus() {
+    return this.statusCode;
+  }
 
-	/**
-	 * @param statusCode
-	 *            the statusCode to set
-	 */
-	@Override
-	public void setStatus(StatusCode statusCode) {
-		this.statusCode = statusCode;
-	}
+  @Override
+  public void setStatus(StatusCode statusCode) {
+    this.statusCode = statusCode;
+  }
 
-	@Override
-	public String toString() {
-		return statusCode.toString();
-	}
+  @Override
+  public String toString() {
+    return statusCode.toString();
+  }
 }

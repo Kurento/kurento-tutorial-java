@@ -73,9 +73,9 @@
 		<module>kurento-crowddetector</module>
 		<module>kurento-chroma</module>
 		<module>kurento-pointerdetector</module>
-    <module>kurento-show-data-channel</module>
-    <module>kurento-send-data-channel</module>
-    <module>kurento-metadata-example</module>
+		<module>kurento-show-data-channel</module>
+		<module>kurento-send-data-channel</module>
+		<module>kurento-metadata-example</module>
 		<module>kurento-player</module>
 	</modules>
 

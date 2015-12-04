@@ -1,3 +1,4 @@
+
 package org.kurento.demo;
 
 import java.io.IOException;
@@ -19,37 +20,36 @@ import com.google.gson.stream.JsonReader;
 
 public class ConfigurationReader {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(ConfigurationReader.class);
-	private static final Gson gson = new GsonBuilder().create();
+  private static final Logger log = LoggerFactory.getLogger(ConfigurationReader.class);
+  private static final Gson gson = new GsonBuilder().create();
 
-	private JsonObject configFile;
+  private JsonObject configFile;
 
-	public ConfigurationReader(String configFileName) throws IOException {
+  public ConfigurationReader(String configFileName) throws IOException {
 
-		String configFile = ClassPath.get(configFileName).toString();
+    String configFile = ClassPath.get(configFileName).toString();
 
-		Path configFilePath = Paths.get(configFile);
+    Path configFilePath = Paths.get(configFile);
 
-		if (configFilePath == null) {
-			log.debug("File not found {}", configFileName);
-		}
+    if (configFilePath == null) {
+      log.debug("File not found {}", configFileName);
+    }
 
-		try (JsonReader reader = new JsonReader(Files
-				.newBufferedReader(configFilePath, StandardCharsets.UTF_8))) {
-			reader.setLenient(true);
-			this.configFile = gson.fromJson(reader, JsonObject.class);
+    try (JsonReader reader = new JsonReader(
+        Files.newBufferedReader(configFilePath, StandardCharsets.UTF_8))) {
+      reader.setLenient(true);
+      this.configFile = gson.fromJson(reader, JsonObject.class);
 
-		} catch (NoSuchFileException e) {
-			log.warn("Configuration file {} not found", configFilePath);
-		} catch (IOException e) {
-			log.error("Error opening config file {}", configFilePath, e);
-		} catch (JsonParseException e) {
-			log.error("Error parsing configuration file {}", configFilePath, e);
-		}
-	}
+    } catch (NoSuchFileException e) {
+      log.warn("Configuration file {} not found", configFilePath);
+    } catch (IOException e) {
+      log.error("Error opening config file {}", configFilePath, e);
+    } catch (JsonParseException e) {
+      log.error("Error parsing configuration file {}", configFilePath, e);
+    }
+  }
 
-	public JsonObject getConfig() {
-		return this.configFile;
-	}
+  public JsonObject getConfig() {
+    return this.configFile;
+  }
 }

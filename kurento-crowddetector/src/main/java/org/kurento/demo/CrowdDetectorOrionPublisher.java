@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.demo;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -35,160 +36,136 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class CrowdDetectorOrionPublisher {
 
-	public static final String LEVEL_ATTR = "Level";
-	public static final String PERCENTAGE_ATTR = "Percentage";
-	public static final String DIRECTION_ATTR = "Direction";
+  public static final String LEVEL_ATTR = "Level";
+  public static final String PERCENTAGE_ATTR = "Percentage";
+  public static final String DIRECTION_ATTR = "Direction";
 
-	@Autowired
-	private OrionConnector orionConnector;
+  @Autowired
+  private OrionConnector orionConnector;
 
-	/**
-	 * Publi
-	 *
-	 * @param event
-	 */
-	public void publishEvent(CrowdDetectorDirectionEvent event) {
-		OrionContextElement contextElement = directionEventToContextElement(event);
-		this.orionConnector.updateContextElements(contextElement);
-	}
+  public void publishEvent(CrowdDetectorDirectionEvent event) {
+    OrionContextElement contextElement = directionEventToContextElement(event);
+    this.orionConnector.updateContextElements(contextElement);
+  }
 
-	/**
-	 * Publi
-	 *
-	 * @param event
-	 */
-	public void publishEvent(CrowdDetectorFluidityEvent event) {
-		OrionContextElement contextElement = fluidityEventToContextElement(event);
-		this.orionConnector.updateContextElements(contextElement);
-	}
+  public void publishEvent(CrowdDetectorFluidityEvent event) {
+    OrionContextElement contextElement = fluidityEventToContextElement(event);
+    this.orionConnector.updateContextElements(contextElement);
+  }
 
-	/**
-	 * Publi
-	 *
-	 * @param event
-	 */
-	public void publishEvent(CrowdDetectorOccupancyEvent event) {
-		OrionContextElement contextElement = occupancyEventToContextElement(event);
-		this.orionConnector.updateContextElements(contextElement);
-	}
+  public void publishEvent(CrowdDetectorOccupancyEvent event) {
+    OrionContextElement contextElement = occupancyEventToContextElement(event);
+    this.orionConnector.updateContextElements(contextElement);
+  }
 
-	public void registerRoisInOrion(Collection<RegionOfInterest> rois) {
+  public void registerRoisInOrion(Collection<RegionOfInterest> rois) {
 
-		List<OrionContextElement> events = newArrayListWithCapacity(rois.size());
+    List<OrionContextElement> events = newArrayListWithCapacity(rois.size());
 
-		for (RegionOfInterest roi : rois) {
-			events.add(occupancyEventToContextElement(roi.getId()));
-			events.add(directionEventToContextElement(roi.getId()));
-			events.add(fluidityEventToContextElement(roi.getId()));
-		}
+    for (RegionOfInterest roi : rois) {
+      events.add(occupancyEventToContextElement(roi.getId()));
+      events.add(directionEventToContextElement(roi.getId()));
+      events.add(fluidityEventToContextElement(roi.getId()));
+    }
 
-		this.orionConnector.registerContextElements(events
-				.toArray(new OrionContextElement[events.size()]));
-	}
+    this.orionConnector
+        .registerContextElements(events.toArray(new OrionContextElement[events.size()]));
+  }
 
-	private static OrionContextElement occupancyEventToContextElement(
-			String roiID) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement occupancyEventToContextElement(String roiId) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(roiID);
-		contextElement.setPattern(false);
-		contextElement.setType(CrowdDetectorOccupancyEvent.class
-				.getSimpleName());
+    contextElement.setId(roiId);
+    contextElement.setPattern(false);
+    contextElement.setType(CrowdDetectorOccupancyEvent.class.getSimpleName());
 
-		OrionAttribute<Integer> attrLevel = new OrionAttribute<>(LEVEL_ATTR,
-				Integer.class.getSimpleName(), Integer.valueOf(0));
-		OrionAttribute<Float> attrPercentage = new OrionAttribute<>(
-				PERCENTAGE_ATTR, Float.class.getSimpleName(), 0F);
-		contextElement.getAttributes().add(attrLevel);
-		contextElement.getAttributes().add(attrPercentage);
+    OrionAttribute<Integer> attrLevel =
+        new OrionAttribute<>(LEVEL_ATTR, Integer.class.getSimpleName(), Integer.valueOf(0));
+    OrionAttribute<Float> attrPercentage =
+        new OrionAttribute<>(PERCENTAGE_ATTR, Float.class.getSimpleName(), 0F);
+    contextElement.getAttributes().add(attrLevel);
+    contextElement.getAttributes().add(attrPercentage);
 
-		return contextElement;
-	}
+    return contextElement;
+  }
 
-	private static OrionContextElement occupancyEventToContextElement(
-			CrowdDetectorOccupancyEvent event) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement occupancyEventToContextElement(
+      CrowdDetectorOccupancyEvent event) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(event.getRoiID());
-		contextElement.setType(event.getClass().getSimpleName());
+    contextElement.setId(event.getRoiID());
+    contextElement.setType(event.getClass().getSimpleName());
 
-		OrionAttribute<Integer> attrLevel = new OrionAttribute<>(LEVEL_ATTR,
-				Integer.class.getSimpleName(), event.getOccupancyLevel());
-		OrionAttribute<Float> attrPercentage = new OrionAttribute<>(
-				PERCENTAGE_ATTR, Float.class.getSimpleName(),
-				event.getOccupancyPercentage());
-		contextElement.getAttributes().add(attrLevel);
-		contextElement.getAttributes().add(attrPercentage);
+    OrionAttribute<Integer> attrLevel =
+        new OrionAttribute<>(LEVEL_ATTR, Integer.class.getSimpleName(), event.getOccupancyLevel());
+    OrionAttribute<Float> attrPercentage = new OrionAttribute<>(PERCENTAGE_ATTR,
+        Float.class.getSimpleName(), event.getOccupancyPercentage());
+    contextElement.getAttributes().add(attrLevel);
+    contextElement.getAttributes().add(attrPercentage);
 
-		return contextElement;
-	}
+    return contextElement;
+  }
 
-	private static OrionContextElement fluidityEventToContextElement(
-			String roiID) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement fluidityEventToContextElement(String roiId) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(roiID);
-		contextElement.setPattern(false);
-		contextElement
-				.setType(CrowdDetectorFluidityEvent.class.getSimpleName());
+    contextElement.setId(roiId);
+    contextElement.setPattern(false);
+    contextElement.setType(CrowdDetectorFluidityEvent.class.getSimpleName());
 
-		OrionAttribute<Integer> attrLevel = new OrionAttribute<>(LEVEL_ATTR,
-				Integer.class.getSimpleName(), Integer.valueOf(0));
-		OrionAttribute<Float> attrPercentage = new OrionAttribute<>(
-				PERCENTAGE_ATTR, Float.class.getSimpleName(), 0F);
-		contextElement.getAttributes().add(attrLevel);
-		contextElement.getAttributes().add(attrPercentage);
+    OrionAttribute<Integer> attrLevel =
+        new OrionAttribute<>(LEVEL_ATTR, Integer.class.getSimpleName(), Integer.valueOf(0));
+    OrionAttribute<Float> attrPercentage =
+        new OrionAttribute<>(PERCENTAGE_ATTR, Float.class.getSimpleName(), 0F);
+    contextElement.getAttributes().add(attrLevel);
+    contextElement.getAttributes().add(attrPercentage);
 
-		return contextElement;
-	}
+    return contextElement;
+  }
 
-	private static OrionContextElement fluidityEventToContextElement(
-			CrowdDetectorFluidityEvent event) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement fluidityEventToContextElement(
+      CrowdDetectorFluidityEvent event) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(event.getRoiID());
-		contextElement.setType(event.getClass().getSimpleName());
+    contextElement.setId(event.getRoiID());
+    contextElement.setType(event.getClass().getSimpleName());
 
-		OrionAttribute<Integer> attrLevel = new OrionAttribute<>(LEVEL_ATTR,
-				Integer.class.getSimpleName(), event.getFluidityLevel());
-		OrionAttribute<Float> attrPercentage = new OrionAttribute<>(
-				PERCENTAGE_ATTR, Float.class.getSimpleName(),
-				event.getFluidityPercentage());
-		contextElement.getAttributes().add(attrLevel);
-		contextElement.getAttributes().add(attrPercentage);
+    OrionAttribute<Integer> attrLevel =
+        new OrionAttribute<>(LEVEL_ATTR, Integer.class.getSimpleName(), event.getFluidityLevel());
+    OrionAttribute<Float> attrPercentage = new OrionAttribute<>(PERCENTAGE_ATTR,
+        Float.class.getSimpleName(), event.getFluidityPercentage());
+    contextElement.getAttributes().add(attrLevel);
+    contextElement.getAttributes().add(attrPercentage);
 
-		return contextElement;
-	}
+    return contextElement;
+  }
 
-	private static OrionContextElement directionEventToContextElement(
-			String roiID) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement directionEventToContextElement(String roiId) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(roiID);
-		contextElement.setPattern(false);
-		contextElement.setType(CrowdDetectorDirectionEvent.class
-				.getSimpleName());
+    contextElement.setId(roiId);
+    contextElement.setPattern(false);
+    contextElement.setType(CrowdDetectorDirectionEvent.class.getSimpleName());
 
-		OrionAttribute<Float> directionAttribute = new OrionAttribute<>(
-				DIRECTION_ATTR, Float.class.getSimpleName(), Float.valueOf(0));
+    OrionAttribute<Float> directionAttribute =
+        new OrionAttribute<>(DIRECTION_ATTR, Float.class.getSimpleName(), Float.valueOf(0));
 
-		contextElement.getAttributes().add(directionAttribute);
-		return contextElement;
-	}
+    contextElement.getAttributes().add(directionAttribute);
+    return contextElement;
+  }
 
-	private static OrionContextElement directionEventToContextElement(
-			CrowdDetectorDirectionEvent event) {
-		OrionContextElement contextElement = new OrionContextElement();
+  private static OrionContextElement directionEventToContextElement(
+      CrowdDetectorDirectionEvent event) {
+    OrionContextElement contextElement = new OrionContextElement();
 
-		contextElement.setId(event.getRoiID());
-		contextElement.setType(event.getClass().getSimpleName());
+    contextElement.setId(event.getRoiID());
+    contextElement.setType(event.getClass().getSimpleName());
 
-		OrionAttribute<Float> directionAttribute = new OrionAttribute<>(
-				DIRECTION_ATTR, Float.class.getSimpleName(),
-				event.getDirectionAngle());
+    OrionAttribute<Float> directionAttribute = new OrionAttribute<>(DIRECTION_ATTR,
+        Float.class.getSimpleName(), event.getDirectionAngle());
 
-		contextElement.getAttributes().add(directionAttribute);
-		return contextElement;
-	}
+    contextElement.getAttributes().add(directionAttribute);
+    return contextElement;
+  }
 
 }

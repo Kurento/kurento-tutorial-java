@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.player;
 
 import org.kurento.client.EndOfStreamEvent;
@@ -26,58 +27,57 @@ import org.kurento.client.WebRtcEndpoint;
 
 /**
  * Media pipeline per user.
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 6.1.1
  */
 public class PlayerMediaPipeline {
 
-	private final static String PLAY_URL_PROP = "demo.play.url";
+  private static final String PLAY_URL_PROP = "demo.play.url";
 
-	private WebRtcEndpoint webRtcEndpoint;
-	private MediaPipeline mediaPipeline;
-	private PlayerEndpoint playerEndpoint;
+  private WebRtcEndpoint webRtcEndpoint;
+  private MediaPipeline mediaPipeline;
+  private PlayerEndpoint playerEndpoint;
 
-	public void initMediaPipeline(KurentoClient kurento, String videourl) {
-		mediaPipeline = kurento.createMediaPipeline();
-		webRtcEndpoint = new WebRtcEndpoint.Builder(mediaPipeline).build();
-		playerEndpoint = new PlayerEndpoint.Builder(mediaPipeline,
-				System.getProperty(PLAY_URL_PROP, videourl)).build();
-		playerEndpoint.connect(webRtcEndpoint);
-	}
+  public void initMediaPipeline(KurentoClient kurento, String videourl) {
+    mediaPipeline = kurento.createMediaPipeline();
+    webRtcEndpoint = new WebRtcEndpoint.Builder(mediaPipeline).build();
+    playerEndpoint =
+        new PlayerEndpoint.Builder(mediaPipeline, System.getProperty(PLAY_URL_PROP, videourl))
+            .build();
+    playerEndpoint.connect(webRtcEndpoint);
+  }
 
-	public void gatherCandidates(
-			EventListener<OnIceCandidateEvent> eventListener) {
-		webRtcEndpoint.addOnIceCandidateListener(eventListener);
-		webRtcEndpoint.gatherCandidates();
-	}
+  public void gatherCandidates(EventListener<OnIceCandidateEvent> eventListener) {
+    webRtcEndpoint.addOnIceCandidateListener(eventListener);
+    webRtcEndpoint.gatherCandidates();
+  }
 
-	public String processOffer(String sdpOffer) {
-		return webRtcEndpoint.processOffer(sdpOffer);
-	}
+  public String processOffer(String sdpOffer) {
+    return webRtcEndpoint.processOffer(sdpOffer);
+  }
 
-	public void play(EventListener<ErrorEvent> error,
-			EventListener<EndOfStreamEvent> eos) {
-		playerEndpoint.addErrorListener(error);
-		playerEndpoint.addEndOfStreamListener(eos);
-		playerEndpoint.play();
+  public void play(EventListener<ErrorEvent> error, EventListener<EndOfStreamEvent> eos) {
+    playerEndpoint.addErrorListener(error);
+    playerEndpoint.addEndOfStreamListener(eos);
+    playerEndpoint.play();
 
-	}
+  }
 
-	public void pause() {
-		playerEndpoint.pause();
-	}
+  public void play() {
+    playerEndpoint.play();
+  }
 
-	public void play() {
-		playerEndpoint.play();
-	}
+  public void pause() {
+    playerEndpoint.pause();
+  }
 
-	public void release() {
-		playerEndpoint.release();
-	}
+  public void release() {
+    playerEndpoint.release();
+  }
 
-	public void addIceCandidate(IceCandidate candidate) {
-		webRtcEndpoint.addIceCandidate(candidate);
-	}
+  public void addIceCandidate(IceCandidate candidate) {
+    webRtcEndpoint.addIceCandidate(candidate);
+  }
 
 }

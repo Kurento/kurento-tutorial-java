@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.helloworld;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * Map of users registered in the system. This class has a concurrent hash map
- * to store users, using its name as key in the map.
+ * Map of users registered in the system. This class has a concurrent hash map to store users, using
+ * its name as key in the map.
  * 
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author Micael Gallego (micael.gallego@gmail.com)
@@ -28,30 +29,30 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class UserRegistry {
 
-	private ConcurrentHashMap<String, UserSession> usersBySessionId = new ConcurrentHashMap<String, UserSession>();
+  private ConcurrentHashMap<String, UserSession> usersBySessionId = new ConcurrentHashMap<>();
 
-	public void register(UserSession user) {
-		usersBySessionId.put(user.getId(), user);
-	}
+  public void register(UserSession user) {
+    usersBySessionId.put(user.getId(), user);
+  }
 
-	public UserSession getById(String id) {
-		return usersBySessionId.get(id);
-	}
+  public UserSession getById(String id) {
+    return usersBySessionId.get(id);
+  }
 
-	public UserSession getBySession(WebSocketSession session) {
-		return usersBySessionId.get(session.getId());
-	}
+  public UserSession getBySession(WebSocketSession session) {
+    return usersBySessionId.get(session.getId());
+  }
 
-	public boolean exists(String id) {
-		return usersBySessionId.keySet().contains(id);
-	}
+  public boolean exists(String id) {
+    return usersBySessionId.keySet().contains(id);
+  }
 
-	public UserSession removeBySession(WebSocketSession session) {
-		final UserSession user = getBySession(session);
-		if (user != null) {
-			usersBySessionId.remove(session.getId());
-		}
-		return user;
-	}
+  public UserSession removeBySession(WebSocketSession session) {
+    final UserSession user = getBySession(session);
+    if (user != null) {
+      usersBySessionId.remove(session.getId());
+    }
+    return user;
+  }
 
 }

@@ -302,22 +302,46 @@ input[type=button]:active, input[type=submit]:active {
 -webkit-transform
 
 
+
+
+
+
 :
+
+
 
  
 
+
+
 translateX
+
+
+
+
 
 
 (200%);
 transform
 
 
+
+
+
+
 :
+
+
 
  
 
+
+
 translateX
+
+
+
+
 
 
 (200%);
@@ -334,22 +358,46 @@ keyframes disapear { 50% {
 -webkit-transform
 
 
+
+
+
+
 :
+
+
 
  
 
+
+
 translateX
+
+
+
+
 
 
 (200%);
 transform
 
 
+
+
+
+
 :
+
+
 
  
 
+
+
 translateX
+
+
+
+
 
 
 (200%);

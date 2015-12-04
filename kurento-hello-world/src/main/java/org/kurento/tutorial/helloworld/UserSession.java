@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.tutorial.helloworld;
 
 import org.kurento.client.IceCandidate;
@@ -20,38 +21,38 @@ import org.kurento.client.WebRtcEndpoint;
 
 /**
  * User session.
- * 
+ *
  * @author David Fernandez (d.fernandezlop@gmail.com)
  * @since 6.0.0
  */
 public class UserSession {
-	private WebRtcEndpoint webRtcEndpoint;
-	private MediaPipeline mediaPipeline;
+  private WebRtcEndpoint webRtcEndpoint;
+  private MediaPipeline mediaPipeline;
 
-	public UserSession() {
-	}
+  public UserSession() {
+  }
 
-	public WebRtcEndpoint getWebRtcEndpoint() {
-		return webRtcEndpoint;
-	}
+  public WebRtcEndpoint getWebRtcEndpoint() {
+    return webRtcEndpoint;
+  }
 
-	public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
-		this.webRtcEndpoint = webRtcEndpoint;
-	}
+  public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
+    this.webRtcEndpoint = webRtcEndpoint;
+  }
 
-	public MediaPipeline getMediaPipeline() {
-		return mediaPipeline;
-	}
+  public MediaPipeline getMediaPipeline() {
+    return mediaPipeline;
+  }
 
-	public void setMediaPipeline(MediaPipeline mediaPipeline) {
-		this.mediaPipeline = mediaPipeline;
-	}
+  public void setMediaPipeline(MediaPipeline mediaPipeline) {
+    this.mediaPipeline = mediaPipeline;
+  }
 
-	public void addCandidate(IceCandidate i) {
-		webRtcEndpoint.addIceCandidate(i);
-	}
+  public void addCandidate(IceCandidate candidate) {
+    webRtcEndpoint.addIceCandidate(candidate);
+  }
 
-	public void release() {
-		this.mediaPipeline.release();
-	}
+  public void release() {
+    this.mediaPipeline.release();
+  }
 }

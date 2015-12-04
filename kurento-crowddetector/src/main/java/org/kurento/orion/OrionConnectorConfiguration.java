@@ -12,60 +12,40 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion;
 
 /**
  * @author Ivan Gracia (igracia@kurento.org)
- * 
+ *
  */
 public class OrionConnectorConfiguration {
 
-	private String orionHost = "130.206.85.186";
-	private int orionPort = 1026;
-	private String orionScheme = "http";
+  private String orionHost = "130.206.85.186";
+  private int orionPort = 1026;
+  private String orionScheme = "http";
 
-	/**
-	 * @return the orionHost
-	 */
-	public String getOrionHost() {
-		return this.orionHost;
-	}
+  public String getOrionHost() {
+    return this.orionHost;
+  }
 
-	/**
-	 * @param orionHost
-	 *            the orionHost to set
-	 */
-	public void setOrionHost(String orionHost) {
-		this.orionHost = orionHost;
-	}
+  public void setOrionHost(String orionHost) {
+    this.orionHost = orionHost;
+  }
 
-	/**
-	 * @return the orionPort
-	 */
-	public int getOrionPort() {
-		return this.orionPort;
-	}
+  public int getOrionPort() {
+    return this.orionPort;
+  }
 
-	/**
-	 * @param orionPort
-	 *            the orionPort to set
-	 */
-	public void setOrionPort(int orionPort) {
-		this.orionPort = orionPort;
-	}
+  public void setOrionPort(int orionPort) {
+    this.orionPort = orionPort;
+  }
 
-	/**
-	 * @return the orionSchema
-	 */
-	public String getOrionScheme() {
-		return this.orionScheme;
-	}
+  public String getOrionScheme() {
+    return this.orionScheme;
+  }
 
-	/**
-	 * @param orionSchema
-	 *            the orionSchema to set
-	 */
-	public void setOrionScheme(String orionSchema) {
-		this.orionScheme = orionSchema;
-	}
+  public void setOrionScheme(String orionSchema) {
+    this.orionScheme = orionSchema;
+  }
 }

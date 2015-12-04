@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.demo;
 
 import java.io.IOException;
@@ -39,52 +40,50 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class CrowdDetectorApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
-	static final String DEFAULT_CONFIG_FILE_PATH = "/config/configuration.conf.json";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  static final String DEFAULT_CONFIG_FILE_PATH = "/config/configuration.conf.json";
 
-	@Bean
-	public ConfigurationReader init() throws IOException {
-		return new ConfigurationReader(System.getProperty("app.configFile",
-				DEFAULT_CONFIG_FILE_PATH));
-	}
+  @Bean
+  public ConfigurationReader init() throws IOException {
+    return new ConfigurationReader(System.getProperty("app.configFile", DEFAULT_CONFIG_FILE_PATH));
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(System.getProperty("kms.ws.uri",
-				DEFAULT_KMS_WS_URI));
-	}
-	
-	@Bean
-	public OrionConnector orionConnector() {
-		return new OrionConnector();
-	}
-	
-	@Bean
-	public OrionConnectorConfiguration orionConnectorConfiguration() {
-		return new OrionConnectorConfiguration();
-	}
-	
-	@Bean
-	public CrowdDetectorOrionPublisher crowdDetectorOrionPublisher() {
-		return new CrowdDetectorOrionPublisher();
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+  }
 
-	@Bean
-	public Pipeline pipeline() {
-		return new Pipeline();
-	}
+  @Bean
+  public OrionConnector orionConnector() {
+    return new OrionConnector();
+  }
 
-	@Bean
-	public CrowdDetectorHandler handler() {
-		return new CrowdDetectorHandler();
-	}
+  @Bean
+  public OrionConnectorConfiguration orionConnectorConfiguration() {
+    return new OrionConnectorConfiguration();
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/crowddetector");
-	}
+  @Bean
+  public CrowdDetectorOrionPublisher crowdDetectorOrionPublisher() {
+    return new CrowdDetectorOrionPublisher();
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(CrowdDetectorApp.class).run(args);
-	}
+  @Bean
+  public Pipeline pipeline() {
+    return new Pipeline();
+  }
+
+  @Bean
+  public CrowdDetectorHandler handler() {
+    return new CrowdDetectorHandler();
+  }
+
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/crowddetector");
+  }
+
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(CrowdDetectorApp.class).run(args);
+  }
 }

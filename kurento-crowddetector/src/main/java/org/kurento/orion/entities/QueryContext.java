@@ -12,6 +12,7 @@
  * Lesser General Public License for more details.
  *
  */
+
 package org.kurento.orion.entities;
 
 import java.util.List;
@@ -21,75 +22,56 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Query context request object
- * 
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  */
 public class QueryContext {
-	/**
-	 * 
-	 */
-	@SerializedName("entities")
-	private List<OrionContextElement> entities;
-	/**
-	 * 
-	 */
-	@SerializedName("updateAction")
-	private List<OrionAttribute<?>> attributes;
 
-	public QueryContext(List<OrionContextElement> entities,
-			OrionAttribute<?>... attributes) {
-		this.attributes = ImmutableList.copyOf(attributes);
-		this.entities = ImmutableList.copyOf(entities);
-	}
+  @SerializedName("entities")
+  private List<OrionContextElement> entities;
 
-	public QueryContext(List<OrionContextElement> entities) {
-		this.entities = ImmutableList.copyOf(entities);
-		this.attributes = ImmutableList.of();
-	}
+  @SerializedName("updateAction")
+  private List<OrionAttribute<?>> attributes;
 
-	public QueryContext(OrionContextElement entity) {
-		this.entities = ImmutableList.of(entity);
-		this.attributes = ImmutableList.of();
-	}
+  public QueryContext(List<OrionContextElement> entities, OrionAttribute<?>... attributes) {
+    this.attributes = ImmutableList.copyOf(attributes);
+    this.entities = ImmutableList.copyOf(entities);
+  }
 
-	/**
-	 * @return the entities
-	 */
-	public List<OrionContextElement> getEntities() {
-		return entities;
-	}
+  public QueryContext(List<OrionContextElement> entities) {
+    this.entities = ImmutableList.copyOf(entities);
+    this.attributes = ImmutableList.of();
+  }
 
-	/**
-	 * @param entities
-	 *            the entities to set
-	 */
-	public void setEntities(List<OrionContextElement> entities) {
-		this.entities = entities;
-	}
+  public QueryContext(OrionContextElement entity) {
+    this.entities = ImmutableList.of(entity);
+    this.attributes = ImmutableList.of();
+  }
 
-	/**
-	 * @return the attributes
-	 */
-	public List<OrionAttribute<?>> getAttributes() {
-		return attributes;
-	}
+  public List<OrionContextElement> getEntities() {
+    return entities;
+  }
 
-	/**
-	 * @param attributes
-	 *            the attributes to set
-	 */
-	public void setAttributes(List<OrionAttribute<?>> attributes) {
-		this.attributes = attributes;
-	}
+  public void setEntities(List<OrionContextElement> entities) {
+    this.entities = entities;
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+  public List<OrionAttribute<?>> getAttributes() {
+    return attributes;
+  }
 
-		for (OrionContextElement element : entities) {
-			sb.append(element).append("\n");
-		}
+  public void setAttributes(List<OrionAttribute<?>> attributes) {
+    this.attributes = attributes;
+  }
 
-		return sb.toString();
-	}
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    for (OrionContextElement element : entities) {
+      sb.append(element).append("\n");
+    }
+
+    return sb.toString();
+  }
 }

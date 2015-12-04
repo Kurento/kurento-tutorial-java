@@ -11,6 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package org.kurento.tutorial.helloworld;
 
 import org.kurento.client.KurentoClient;
@@ -37,44 +38,42 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableAutoConfiguration
 public class HelloWorldRecApp implements WebSocketConfigurer {
 
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
-	final static String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
+  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+  static final String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
 
-	final static String REPOSITORY_SERVER_URI = System
-			.getProperty("repository.uri", DEFAULT_REPOSITORY_SERVER_URI);
-	final static String KMS_WS_URI = System.getProperty("kms.ws.uri",
-			DEFAULT_KMS_WS_URI);
+  static final String REPOSITORY_SERVER_URI = System.getProperty("repository.uri",
+      DEFAULT_REPOSITORY_SERVER_URI);
+  static final String KMS_WS_URI = System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI);
 
-	@Bean
-	public HelloWorldRecHandler handler() {
-		return new HelloWorldRecHandler();
-	}
+  @Bean
+  public HelloWorldRecHandler handler() {
+    return new HelloWorldRecHandler();
+  }
 
-	@Bean
-	public KurentoClient kurentoClient() {
-		return KurentoClient.create(
-				PropertiesManager.getProperty("kms.ws.uri", KMS_WS_URI));
-	}
+  @Bean
+  public KurentoClient kurentoClient() {
+    return KurentoClient.create(PropertiesManager.getProperty("kms.ws.uri", KMS_WS_URI));
+  }
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler(), "/helloworld");
-	}
+  @Override
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    registry.addHandler(handler(), "/helloworld");
+  }
 
-	@Bean
-	public RepositoryClient repositoryServiceProvider() {
-		if (REPOSITORY_SERVER_URI.startsWith("file://")) {
-			return null;
-		}
-		return RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
-	}
+  @Bean
+  public RepositoryClient repositoryServiceProvider() {
+    if (REPOSITORY_SERVER_URI.startsWith("file://")) {
+      return null;
+    }
+    return RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
+  }
 
-	@Bean
-	public UserRegistry registry() {
-		return new UserRegistry();
-	}
+  @Bean
+  public UserRegistry registry() {
+    return new UserRegistry();
+  }
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplication(HelloWorldRecApp.class).run(args);
-	}
+  public static void main(String[] args) throws Exception {
+    new SpringApplication(HelloWorldRecApp.class).run(args);
+  }
 }
