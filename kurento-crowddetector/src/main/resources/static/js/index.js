@@ -13,7 +13,7 @@
  *
  */
 
-var ws = new WebSocket('ws://' + location.host + '/crowddetector');
+var ws = new WebSocket('wss://' + location.host + '/crowddetector');
 var videoOutput;
 var webRtcPeer;
 var state = null;
