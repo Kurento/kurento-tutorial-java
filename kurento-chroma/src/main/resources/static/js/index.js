@@ -13,7 +13,7 @@
  *
  */
 
-var ws = new WebSocket('ws://' + location.host + '/chroma');
+var ws = new WebSocket('wss://' + location.host + '/chroma');
 var videoInput;
 var videoOutput;
 var webRtcPeer;

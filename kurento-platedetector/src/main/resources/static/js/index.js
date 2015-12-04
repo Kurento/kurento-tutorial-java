@@ -13,7 +13,7 @@
  *
  */
 
-var ws = new WebSocket('ws://' + location.host + '/platedetector');
+var ws = new WebSocket('wss://' + location.host + '/platedetector');
 var videoInput;
 var videoOutput;
 var webRtcPeer;

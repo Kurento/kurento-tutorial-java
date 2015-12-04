@@ -13,7 +13,7 @@
  *
  */
 
-var ws = new WebSocket('ws://' + location.host + '/player');
+var ws = new WebSocket('wss://' + location.host + '/player');
 var video;
 var webRtcPeer;
 var state = null;
