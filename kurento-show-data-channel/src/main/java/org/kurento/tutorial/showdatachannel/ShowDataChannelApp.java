@@ -15,17 +15,9 @@
 
 package org.kurento.tutorial.showdatachannel;
 
-import static org.kurento.commons.PropertiesManager.getProperty;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.connector.Connector;
-import org.apache.tomcat.util.descriptor.web.SecurityCollection;
-import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -45,38 +37,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class ShowDataChannelApp implements WebSocketConfigurer {
 
   private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
-  static final String DEFAULT_APP_SERVER_URL = "http://localhost:8080";
-
-  private static final int SECURE_PORT = getProperty("ws.secureport", 8443);
-  private static final int PLAIN_PORT = getProperty("ws.port", 8080);
-
-  @Bean
-  public EmbeddedServletContainerFactory servletContainer() {
-    TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory() {
-      @Override
-      protected void postProcessContext(Context context) {
-        SecurityConstraint securityConstraint = new SecurityConstraint();
-        securityConstraint.setUserConstraint("CONFIDENTIAL");
-        SecurityCollection collection = new SecurityCollection();
-        collection.addPattern("/*");
-        securityConstraint.addCollection(collection);
-        context.addConstraint(securityConstraint);
-      }
-    };
-
-    tomcat.addAdditionalTomcatConnectors(initiateHttpConnector());
-    return tomcat;
-  }
-
-  private Connector initiateHttpConnector() {
-    Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-    connector.setScheme("http");
-    connector.setPort(PLAIN_PORT);
-    connector.setSecure(false);
-    connector.setRedirectPort(SECURE_PORT);
-
-    return connector;
-  }
+  static final String DEFAULT_APP_SERVER_URL = "https://localhost:8443";
 
   @Bean
   public ShowDataChannelHandler handler() {
