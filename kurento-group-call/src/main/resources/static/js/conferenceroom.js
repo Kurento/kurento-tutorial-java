@@ -13,7 +13,7 @@
  *
  */
 
-var ws = new WebSocket('ws://' + location.host + '/groupcall');
+var ws = new WebSocket('wss://' + location.host + '/groupcall');
 var participants = {};
 var name;
 
