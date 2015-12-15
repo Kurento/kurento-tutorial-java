@@ -14,6 +14,11 @@ available in the Kurento repositories, so it is possible to install it with apt-
 This demo allows sending text from browser to the media server through data channels.
 That text will be shown in the loopback video.
 
+Running this tutorial
+---------------------
+
+In order to run this tutorial, please read the following [instructions].
+
 What is Kurento
 ---------------
 
@@ -113,3 +118,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [readthedocs.org]: http://kurento.readthedocs.org/
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-10-show-datachannel.html

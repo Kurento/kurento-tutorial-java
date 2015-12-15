@@ -25,6 +25,8 @@ with the default value `ws://localhost:8888/kurento`.
 Running the tutorial
 --------------------
 
+In order to run this tutorial, please read the following [instructions].
+
 After cloning the tutorial, it can be executed directly from the terminal by 
 using Maven's `exec` plugin (`[...]` are optional):
 
@@ -148,3 +150,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [apiary.io]: http://docs.streamoriented.apiary.io/
 [repository]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server
 [repository-cfg]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server#configuration
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-1-helloworld.html

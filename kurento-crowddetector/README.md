@@ -5,7 +5,8 @@ Copyright © 2013-2016 [Kurento]. Licensed under [LGPL v2.1 License].
 kurento-crowddetector
 =====================
 
-Kurento Java Tutorial: WebRTC in loopback with chroma filter.
+Kurento Java Tutorial: WebRTC in mirror (loopback) with a crowd detector filter. This filter detects people 
+agglomeration in video streams.
 
 Running this tutorial
 ---------------------

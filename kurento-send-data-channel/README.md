@@ -15,6 +15,11 @@ This demo plays a video and it detects QR codes into the images. The info about 
 is sent through data channels from the Kurento media server to the browser. The browser shows
 the info in a text form.
 
+Running this tutorial
+---------------------
+
+In order to run this tutorial, please read the following [instructions].
+
 What is Kurento
 ---------------
 
@@ -114,3 +119,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [readthedocs.org]: http://kurento.readthedocs.org/
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-9-send-datachannel.html

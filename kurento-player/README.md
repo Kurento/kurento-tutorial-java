@@ -7,6 +7,11 @@ kurento-player
 
 Kurento Java Tutorial: Play of a video through WebRTC.
 
+Running this tutorial
+---------------------
+
+In order to run this tutorial, please read the following [instructions].
+
 What is Kurento
 ---------------
 
@@ -106,3 +111,5 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [readthedocs.org]: http://kurento.readthedocs.org/
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
+
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-8-player.html
