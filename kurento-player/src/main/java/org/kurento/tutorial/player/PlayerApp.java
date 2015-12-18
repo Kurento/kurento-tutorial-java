@@ -33,9 +33,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @SpringBootApplication
 public class PlayerApp implements WebSocketConfigurer {
 
-  private static final String KMS_WS_URI_PROP = "kms.ws.uri";
-  private static final String KMS_WS_URI_DEFAULT = "ws://localhost:8888/kurento";
-
   @Bean
   public PlayerHandler handler() {
     return new PlayerHandler();
@@ -43,7 +40,7 @@ public class PlayerApp implements WebSocketConfigurer {
 
   @Bean
   public KurentoClient kurentoClient() {
-    return KurentoClient.create(System.getProperty(KMS_WS_URI_PROP, KMS_WS_URI_DEFAULT));
+    return KurentoClient.create();
   }
 
   @Override

@@ -17,9 +17,8 @@ package org.kurento.tutorial.magicmirror;
 
 import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
@@ -30,12 +29,10 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 5.0.0
  */
-@Configuration
+@SpringBootApplication
 @EnableWebSocket
-@EnableAutoConfiguration
 public class MagicMirrorApp implements WebSocketConfigurer {
 
-  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
   static final String DEFAULT_APP_SERVER_URL = "https://localhost:8443";
 
   @Bean
@@ -45,7 +42,7 @@ public class MagicMirrorApp implements WebSocketConfigurer {
 
   @Bean
   public KurentoClient kurentoClient() {
-    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+    return KurentoClient.create();
   }
 
   @Override
