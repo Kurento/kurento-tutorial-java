@@ -17,9 +17,8 @@ package org.kurento.tutorial.groupcall;
 
 import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
@@ -29,12 +28,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  * @author Ivan Gracia (izanmail@gmail.com)
  * @since 4.3.1
  */
-@Configuration
+@SpringBootApplication
 @EnableWebSocket
-@EnableAutoConfiguration
 public class GroupCallApp implements WebSocketConfigurer {
-
-  private static final String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
 
   @Bean
   public UserRegistry registry() {
@@ -53,7 +49,7 @@ public class GroupCallApp implements WebSocketConfigurer {
 
   @Bean
   public KurentoClient kurentoClient() {
-    return KurentoClient.create(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));
+    return KurentoClient.create();
   }
 
   public static void main(String[] args) throws Exception {
