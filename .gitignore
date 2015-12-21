@@ -5,7 +5,7 @@ target
 .settings
 *orig
 .springBeans
-*repository/
+*/repository/
 *tmp/
 *backup
 *Backup

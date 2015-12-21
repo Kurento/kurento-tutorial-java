@@ -69,6 +69,7 @@
 		<module>kurento-one2many-call</module>
 		<module>kurento-group-call</module>
 		<module>kurento-hello-world-recording</module>
+		<module>kurento-hello-world-repository</module>
 		<module>kurento-platedetector</module>
 		<module>kurento-crowddetector</module>
 		<module>kurento-chroma</module>
