@@ -69,8 +69,7 @@ function start() {
 	showSpinner(video);
 
 	var mode = $('input[name="mode"]:checked').val();
-	console
-			.log('Creating WebRtcPeer in " + mode + " mode and generating local sdp offer ...');
+	console.log('Creating WebRtcPeer in ' + mode + ' mode and generating local sdp offer ...');
 
 	// Video and audio by default
 	var userMediaConstraints = {

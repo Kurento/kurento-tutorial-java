@@ -15,6 +15,10 @@
 package org.kurento.tutorial.helloworld;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
 
 import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
@@ -23,12 +27,14 @@ import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
-import org.kurento.client.MediaType;
 import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.service.pojo.RepositoryItemPlayer;
+import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +53,17 @@ import com.google.gson.JsonObject;
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author David Fernandez (d.fernandezlop@gmail.com)
  * @author Radu Tom Vlad (rvlad@naevatec.com)
- * @author Ivan Gracia (igracia@kurento.org)
  * @since 6.1.1
  */
 public class HelloWorldRecHandler extends TextWebSocketHandler {
 
-  private static final String RECORDER_FILE_PATH = "file:///tmp/HelloWorldRecorded.webm";
+  // slightly larger timeout
+  private static final int REPOSITORY_DISCONNECT_TIMEOUT = 5500;
+
+  private static final String RECORDING_EXT = ".webm";
 
   private final Logger log = LoggerFactory.getLogger(HelloWorldRecHandler.class);
+  private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
   private static final Gson gson = new GsonBuilder().create();
 
   @Autowired
@@ -62,6 +71,9 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 
   @Autowired
   private KurentoClient kurento;
+
+  @Autowired
+  private RepositoryClient repositoryClient;
 
   @Override
   public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -114,23 +126,38 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 
   private void start(final WebSocketSession session, JsonObject jsonMessage) {
     try {
+      // 0. Repository logic
+      RepositoryItemRecorder repoItem = null;
+      if (repositoryClient != null) {
+        try {
+          Map<String, String> metadata = Collections.emptyMap();
+          repoItem = repositoryClient.createRepositoryItem(metadata);
+        } catch (Exception e) {
+          log.warn("Unable to create kurento repository items", e);
+        }
+      } else {
+        String now = df.format(new Date());
+        String filePath = HelloWorldRecApp.REPOSITORY_SERVER_URI + now + RECORDING_EXT;
+        repoItem = new RepositoryItemRecorder();
+        repoItem.setId(now);
+        repoItem.setUrl(filePath);
+      }
+      log.info("Media will be recorded {}by KMS: id={} , url={}",
+          (repositoryClient == null ? "locally" : ""), repoItem.getId(), repoItem.getUrl());
 
       // 1. Media logic (webRtcEndpoint in loopback)
       MediaPipeline pipeline = kurento.createMediaPipeline();
       WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
       webRtcEndpoint.connect(webRtcEndpoint);
-
-      MediaProfileSpecType profile = getMediaProfileFromMessage(jsonMessage);
-
-      RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, RECORDER_FILE_PATH)
-          .withMediaProfile(profile).build();
-
-      connectAccordingToProfile(webRtcEndpoint, recorder, profile);
+      RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, repoItem.getUrl())
+          .withMediaProfile(MediaProfileSpecType.WEBM).build();
+      webRtcEndpoint.connect(recorder);
 
       // 2. Store user session
       UserSession user = new UserSession(session);
       user.setMediaPipeline(pipeline);
       user.setWebRtcEndpoint(webRtcEndpoint);
+      user.setRepoItem(repoItem);
       registry.register(user);
 
       // 3. SDP negotiation
@@ -171,49 +198,44 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
     }
   }
 
-  private MediaProfileSpecType getMediaProfileFromMessage(JsonObject jsonMessage) {
-
-    MediaProfileSpecType profile;
-    switch (jsonMessage.get("mode").getAsString()) {
-      case "audio-only":
-        profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
-        break;
-      case "video-only":
-        profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
-        break;
-      default:
-        profile = MediaProfileSpecType.WEBM;
-    }
-
-    return profile;
-  }
-
-  private void connectAccordingToProfile(WebRtcEndpoint webRtcEndpoint, RecorderEndpoint recorder,
-      MediaProfileSpecType profile) {
-    switch (profile) {
-      case WEBM:
-        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-        break;
-      case WEBM_AUDIO_ONLY:
-        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-        break;
-      case WEBM_VIDEO_ONLY:
-        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-        break;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported profile for this tutorial: " + profile);
-    }
-  }
-
   private void play(UserSession user, final WebSocketSession session, JsonObject jsonMessage) {
     try {
+      // 0. Repository logic
+      RepositoryItemPlayer itemPlayer = null;
+      if (repositoryClient != null) {
+        try {
+          Date stopTimestamp = user.getStopTimestamp();
+          if (stopTimestamp != null) {
+            Date now = new Date();
+            long diff = now.getTime() - stopTimestamp.getTime();
+            if (diff >= 0 && diff < REPOSITORY_DISCONNECT_TIMEOUT) {
+              log.info(
+                  "Waiting for {}ms before requesting the repository read endpoint "
+                      + "(requires {}ms before upload is considered terminated "
+                      + "and only {}ms have passed)",
+                  REPOSITORY_DISCONNECT_TIMEOUT - diff, REPOSITORY_DISCONNECT_TIMEOUT, diff);
+              Thread.sleep(REPOSITORY_DISCONNECT_TIMEOUT - diff);
+            }
+          } else {
+            log.warn("No stop timeout was found, repository endpoint might not be ready");
+          }
+          itemPlayer = repositoryClient.getReadEndpoint(user.getRepoItem().getId());
+        } catch (Exception e) {
+          log.warn("Unable to obtain kurento repository endpoint", e);
+        }
+      } else {
+        itemPlayer = new RepositoryItemPlayer();
+        itemPlayer.setId(user.getRepoItem().getId());
+        itemPlayer.setUrl(user.getRepoItem().getUrl());
+      }
+      log.debug("Playing from {}: id={}, url={}",
+          (repositoryClient == null ? "disk" : "repository"), itemPlayer.getId(),
+          itemPlayer.getUrl());
 
       // 1. Media logic
       final MediaPipeline pipeline = kurento.createMediaPipeline();
       WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
-      PlayerEndpoint player = new PlayerEndpoint.Builder(pipeline, RECORDER_FILE_PATH).build();
+      PlayerEndpoint player = new PlayerEndpoint.Builder(pipeline, itemPlayer.getUrl()).build();
       player.connect(webRtcEndpoint);
 
       // Player listeners

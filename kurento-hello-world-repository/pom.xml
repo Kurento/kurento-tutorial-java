@@ -8,11 +8,11 @@
 		<version>6.2.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>kurento-hello-world-recording</artifactId>
+	<artifactId>kurento-hello-world-repository</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Tutorial 7 - Hello World with Recording</name>
-	<description>Hello World (WebRTC in loopback) with Recording</description>
+	<name>Kurento Java Tutorial 8 - Hello World with Repository Recording</name>
+	<description>Hello World (WebRTC in loopback) with Reposittory Recording</description>
 
 	<licenses>
 		<license>
@@ -54,6 +54,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -68,6 +74,10 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-utils-js</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-repository-client</artifactId>
 		</dependency>
 	</dependencies>
 

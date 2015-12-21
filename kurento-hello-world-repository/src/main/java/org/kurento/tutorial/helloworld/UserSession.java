@@ -19,6 +19,7 @@ import java.util.Date;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
+import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -26,13 +27,13 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author David Fernandez (d.fernandezlop@gmail.com)
  * @author Radu Tom Vlad (rvlad@naevatec.com)
- * @author Ivan Gracia (igracia@kurento.org)
  * @since 6.1.1
  */
 public class UserSession {
   private String id;
   private WebRtcEndpoint webRtcEndpoint;
   private MediaPipeline mediaPipeline;
+  private RepositoryItemRecorder repoItem;
   private Date stopTimestamp;
 
   public UserSession(WebSocketSession session) {
@@ -61,6 +62,14 @@ public class UserSession {
 
   public void setMediaPipeline(MediaPipeline mediaPipeline) {
     this.mediaPipeline = mediaPipeline;
+  }
+
+  public RepositoryItemRecorder getRepoItem() {
+    return repoItem;
+  }
+
+  public void setRepoItem(RepositoryItemRecorder repoItem) {
+    this.repoItem = repoItem;
   }
 
   public void addCandidate(IceCandidate candidate) {
