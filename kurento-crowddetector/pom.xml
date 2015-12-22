@@ -11,7 +11,7 @@
 	<artifactId>kurento-crowddetector</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Demos: CrowdDetector Filter </name>
+	<name>Kurento Java Module - CrowdDetector Filter </name>
 	<description>A Crowd Detector Filter using RTSP conexion to the camera. The video will be recorded.</description>
 
 	<licenses>

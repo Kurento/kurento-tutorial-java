@@ -130,6 +130,7 @@ Mailing List] and through [StackOverflow] using the tags *kurento* and
 
 Before asking for support, please read first the [Kurento Netiquette Guidelines]
 
+
 [documentation]: http://www.kurento.org/documentation
 [FIWARE]: http://www.fiware.org
 [GitHub Kurento bugtracker]: https://github.com/Kurento/bugtracker/issues
@@ -150,4 +151,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [apiary.io]: http://docs.streamoriented.apiary.io/
 [repository]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server
 [repository-cfg]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server#configuration
-[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-1-helloworld.html
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-repository.html

@@ -112,4 +112,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
 
-[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-8-player.html
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-player.html

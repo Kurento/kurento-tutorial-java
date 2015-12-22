@@ -44,7 +44,7 @@
 	</developers>
 
 	<properties>
-		<demo.port>8082</demo.port>
+		<demo.port>8094</demo.port>
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.metadata.MetadataApp</start-class>

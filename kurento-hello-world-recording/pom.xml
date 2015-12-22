@@ -11,7 +11,7 @@
 	<artifactId>kurento-hello-world-recording</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Tutorial 7 - Hello World with Recording</name>
+	<name>Kurento Java Tutorial - Hello World with Recording</name>
 	<description>Hello World (WebRTC in loopback) with Recording</description>
 
 	<licenses>
