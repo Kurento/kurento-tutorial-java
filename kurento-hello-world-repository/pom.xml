@@ -11,7 +11,7 @@
 	<artifactId>kurento-hello-world-repository</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Tutorial 8 - Hello World with Repository Recording</name>
+	<name>Kurento Java Tutorial - Hello World with Repository Recording</name>
 	<description>Hello World (WebRTC in loopback) with Reposittory Recording</description>
 
 	<licenses>
@@ -44,7 +44,7 @@
 	</developers>
 
 	<properties>
-		<demo.port>8087</demo.port>
+		<demo.port>8088</demo.port>
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.helloworld.HelloWorldRecApp</start-class>

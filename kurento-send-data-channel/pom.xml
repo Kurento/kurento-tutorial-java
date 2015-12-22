@@ -44,7 +44,7 @@
 	</developers>
 
 	<properties>
-		<demo.port>8082</demo.port>
+		<demo.port>8095</demo.port>
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.senddatachannel.SendDataChannelApp</start-class>

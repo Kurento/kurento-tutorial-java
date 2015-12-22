@@ -11,7 +11,7 @@
 	<artifactId>kurento-group-call</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Tutorial 6 - Group Call</name>
+	<name>Kurento Java Tutorial - Group Call</name>
 	<description>WebRTC many to many video call</description>
 
 	<url>http://www.kurento.org/docs/${project.version}</url>

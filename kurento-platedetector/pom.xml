@@ -11,7 +11,7 @@
 	<artifactId>kurento-platedetector</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Kurento Java Module Tutorial 4 - Plate Detector</name>
+	<name>Kurento Java Module Tutorial - Plate Detector</name>
 	<description>WebRTC in loopback with a plate detector filter</description>
 
 	<licenses>

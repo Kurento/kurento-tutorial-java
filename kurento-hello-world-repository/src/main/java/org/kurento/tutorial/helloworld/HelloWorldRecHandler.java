@@ -105,9 +105,9 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
         if (user != null) {
-          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-              jsonCandidate.get("sdpMid").getAsString(),
-              jsonCandidate.get("sdpMLineIndex").getAsInt());
+          IceCandidate candidate =
+              new IceCandidate(jsonCandidate.get("candidate").getAsString(), jsonCandidate.get(
+                  "sdpMid").getAsString(), jsonCandidate.get("sdpMLineIndex").getAsInt());
           user.addCandidate(candidate);
         }
         break;
@@ -149,8 +149,9 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       MediaPipeline pipeline = kurento.createMediaPipeline();
       WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
       webRtcEndpoint.connect(webRtcEndpoint);
-      RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, repoItem.getUrl())
-          .withMediaProfile(MediaProfileSpecType.WEBM).build();
+      RecorderEndpoint recorder =
+          new RecorderEndpoint.Builder(pipeline, repoItem.getUrl()).withMediaProfile(
+              MediaProfileSpecType.WEBM).build();
       webRtcEndpoint.connect(recorder);
 
       // 2. Store user session
@@ -209,11 +210,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
             Date now = new Date();
             long diff = now.getTime() - stopTimestamp.getTime();
             if (diff >= 0 && diff < REPOSITORY_DISCONNECT_TIMEOUT) {
-              log.info(
-                  "Waiting for {}ms before requesting the repository read endpoint "
-                      + "(requires {}ms before upload is considered terminated "
-                      + "and only {}ms have passed)",
-                  REPOSITORY_DISCONNECT_TIMEOUT - diff, REPOSITORY_DISCONNECT_TIMEOUT, diff);
+              log.info("Waiting for {}ms before requesting the repository read endpoint "
+                  + "(requires {}ms before upload is considered terminated "
+                  + "and only {}ms have passed)", REPOSITORY_DISCONNECT_TIMEOUT - diff,
+                  REPOSITORY_DISCONNECT_TIMEOUT, diff);
               Thread.sleep(REPOSITORY_DISCONNECT_TIMEOUT - diff);
             }
           } else {

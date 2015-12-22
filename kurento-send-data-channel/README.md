@@ -119,4 +119,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [readthedocs.org]: http://kurento.readthedocs.org/
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
-[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-9-send-datachannel.html
+[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-send-datachannel.html
