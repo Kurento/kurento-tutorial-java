@@ -2,9 +2,10 @@
 
 Copyright © 2013-2016 [Kurento]. Licensed under [LGPL v2.1 License].
 
-kurento-hello-world-recording
+kurento-hello-world-repository
 =============================
-Kurento Java Tutorial: Hello World (WebRTC in loopback) with recording.
+Kurento Java Tutorial: Hello World (WebRTC in loopback) with recording, 
+and metadata storage thorugh the Repository API.
 
 Requires a running instance of [Kurento Repository Server][repository] so that
 the streamed media (from webcam and microphone) is recorded and played by 
