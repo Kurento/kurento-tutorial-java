@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.kurento.tutorial</groupId>
 		<artifactId>kurento-tutorial</artifactId>
-		<version>6.2.1</version>
+		<version>6.2.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>kurento-hello-world-repository</artifactId>
