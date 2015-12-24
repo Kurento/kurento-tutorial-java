@@ -48,7 +48,7 @@ public class SendDataChannelApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/senddatachannel");
+    registry.addHandler(handler(), "/senddatachannel").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

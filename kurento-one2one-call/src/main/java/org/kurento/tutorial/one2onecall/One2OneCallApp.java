@@ -51,7 +51,7 @@ public class One2OneCallApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(callHandler(), "/call");
+    registry.addHandler(callHandler(), "/call").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

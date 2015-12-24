@@ -77,7 +77,7 @@ public class CrowdDetectorApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/crowddetector");
+    registry.addHandler(handler(), "/crowddetector").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

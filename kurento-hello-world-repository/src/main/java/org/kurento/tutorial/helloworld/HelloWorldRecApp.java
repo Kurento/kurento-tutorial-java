@@ -52,7 +52,7 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/helloworld");
+    registry.addHandler(handler(), "/helloworld").setAllowedOrigins("*");
   }
 
   @Bean

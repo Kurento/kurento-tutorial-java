@@ -46,7 +46,7 @@ public class PointerDetectorApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/pointerdetector");
+    registry.addHandler(handler(), "/pointerdetector").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

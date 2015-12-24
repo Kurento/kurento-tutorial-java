@@ -48,7 +48,7 @@ public class ShowDataChannelApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/showdatachannel");
+    registry.addHandler(handler(), "/showdatachannel").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

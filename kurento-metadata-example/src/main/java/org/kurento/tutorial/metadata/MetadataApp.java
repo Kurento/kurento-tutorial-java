@@ -48,7 +48,7 @@ public class MetadataApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/metadata");
+    registry.addHandler(handler(), "/metadata").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

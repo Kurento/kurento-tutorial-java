@@ -46,7 +46,7 @@ public class PlateDetectorApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/platedetector");
+    registry.addHandler(handler(), "/platedetector").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {
