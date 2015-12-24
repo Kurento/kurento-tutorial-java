@@ -47,7 +47,7 @@ public class MagicMirrorApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/magicmirror");
+    registry.addHandler(handler(), "/magicmirror").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {

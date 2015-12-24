@@ -48,7 +48,7 @@ public class ChromaApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/chroma");
+    registry.addHandler(handler(), "/chroma").setAllowedOrigins("*");
   }
 
   public static void main(String[] args) throws Exception {
