@@ -48,7 +48,7 @@
 	</developers>
 
 	<properties>
-		<version.kurento-datachannelexample>6.2.1-SNAPSHOT</version.kurento-datachannelexample>
+		<version.kurento-datachannelexample>6.2.0</version.kurento-datachannelexample>
 	</properties>
 
 	<dependencyManagement>
