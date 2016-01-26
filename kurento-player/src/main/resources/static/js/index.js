@@ -17,6 +17,7 @@ var ws = new WebSocket('wss://' + location.host + '/player');
 var video;
 var webRtcPeer;
 var state = null;
+var isSeekable = false;
 
 var I_CAN_START = 0;
 var I_CAN_STOP = 1;
@@ -49,11 +50,22 @@ ws.onmessage = function(message) {
 	case 'playEnd':
 		playEnd();
 		break;
+	case 'videoInfo':
+		showVideoData(parsedMessage);
+		break;
 	case 'iceCandidate':
 		webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
 			if (error)
 				return console.error('Error adding candidate: ' + error);
 		});
+		break;
+	case 'seek':
+		console.log (parsedMessage.message);
+		break;
+	case 'position':
+		document.getElementById("videoPosition").value = parsedMessage.position;
+		break;
+	case 'iceCandidate':
 		break;
 	default:
 		if (state == I_AM_STARTING) {
@@ -174,6 +186,38 @@ function playEnd() {
 	hideSpinner(video);
 }
 
+function doSeek() {
+	var message = {
+		id : 'doSeek',
+		position: document.getElementById("seekPosition").value
+	}
+	sendMessage(message);
+}
+
+function getPosition() {
+	var message = {
+		id : 'getPosition'
+	}
+	sendMessage(message);
+}
+
+function showVideoData(parsedMessage) {
+	//Show video info
+	isSeekable = parsedMessage.isSeekable;
+	if (isSeekable) {
+		document.getElementById('isSeekable').value = "true";
+		enableButton('#doSeek', 'doSeek()');
+	} else {
+		document.getElementById('isSeekable').value = "false";
+	}
+
+	document.getElementById('initSeek').value = parsedMessage.initSeekable;
+	document.getElementById('endSeek').value = parsedMessage.endSeekable;
+	document.getElementById('duration').value = parsedMessage.videoDuration;
+
+	enableButton('#getPosition', 'getPosition()');
+}
+
 function setState(nextState) {
 	switch (nextState) {
 	case I_CAN_START:
@@ -182,6 +226,8 @@ function setState(nextState) {
 		disableButton('#stop');
 		enableButton('#videourl');
 		enableButton("[name='mode']");
+		disableButton('#getPosition');
+		disableButton('#doSeek');
 		break;
 
 	case I_CAN_STOP:
@@ -197,6 +243,8 @@ function setState(nextState) {
 		disableButton('#pause');
 		disableButton('#stop');
 		disableButton('#videourl');
+		disableButton('#getPosition');
+		disableButton('#doSeek');
 		disableButton("[name='mode']");
 		break;
 

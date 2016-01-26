@@ -21,8 +21,10 @@ import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.MediaStateChangedEvent;
 import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.PlayerEndpoint;
+import org.kurento.client.VideoInfo;
 import org.kurento.client.WebRtcEndpoint;
 
 /**
@@ -53,6 +55,10 @@ public class PlayerMediaPipeline {
     webRtcEndpoint.gatherCandidates();
   }
 
+  public void addMediaConnectedListener(EventListener<MediaStateChangedEvent> eventListener) {
+    webRtcEndpoint.addMediaStateChangedListener(eventListener);
+  }
+
   public String processOffer(String sdpOffer) {
     return webRtcEndpoint.processOffer(sdpOffer);
   }
@@ -78,6 +84,18 @@ public class PlayerMediaPipeline {
 
   public void addIceCandidate(IceCandidate candidate) {
     webRtcEndpoint.addIceCandidate(candidate);
+  }
+
+  public VideoInfo getVideoInfo() {
+    return playerEndpoint.getVideoInfo();
+  }
+
+  public void doSeek(long position) {
+    playerEndpoint.setPosition(position);
+  }
+
+  public long getPosition() {
+    return playerEndpoint.getPosition();
   }
 
 }
