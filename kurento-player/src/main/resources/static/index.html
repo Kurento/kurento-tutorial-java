@@ -67,6 +67,10 @@
 				</li>
 				<li>Click on <i>Stop</i> to finish the playback.
 				</li>
+				<li>Click on <i>Do Seek</i> to perform a seek at the position indicated in the previous text field (in milliseconds).
+				</li>
+				<li>Click on <i>Get Position</i> to get the playback position in milliseconds.
+				</li>
 			</ol>
 		</div>
 		<div class="row">
@@ -94,8 +98,65 @@
 				<div class="row">
 					<div class="col-md-12">
 						<input type="text" id="videourl"
-							value="http://files.kurento.org/video/10sec/smpte.webm"
+							value="http://files.kurento.org/video/format/sintel.webm"
 							style="width: 100%">
+					</div>
+				</div>
+
+				<br>
+				<div class="row">
+					<div class="col-md-6">
+						<span> Is seekable </span>
+					</div>
+					<div class="col-md-6">
+						<input type="text" id="isSeekable" style="width: 100%" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<span>Seek init (ms)</span>
+					</div>
+					<div class="col-md-6">
+						<input type="text" id="initSeek" style="width: 100%" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<span> Seek end (ms)</span>
+					</div>
+					<div class="col-md-6">
+						<input type="text" id="endSeek"	style="width: 100%" disabled>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<span> Video duration (ms)</span>
+					</div>
+					<div class="col-md-6">
+						<input type="text" id="duration" style="width: 100%" disabled>
+					</div>
+				</div>
+				<br>
+				<div class="row">
+					<div class="col-md-3">
+						<span> Go to</span>
+					</div>
+					<div class="col-md-9">
+						<input type="text" id="seekPosition" style="width: 50%" >
+						<span> ms</span>
+						<a id="doSeek" href="#" class="btn btn-primary"><span
+							class="glyphicon glyphicon-forward"></span> Do Seek </a>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-3">
+						<span> Video position</span>
+					</div>
+					<div class="col-md-9">
+						<input type="text" id="videoPosition" style="width: 50%" disabled><span> ms</span>
+						<a id="getPosition" href="#" class="btn btn-primary"><span
+							class="glyphicon glyphicon-time"></span> Get Position </a>
 					</div>
 				</div>
 

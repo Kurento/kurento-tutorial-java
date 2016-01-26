@@ -23,7 +23,11 @@ import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
+import org.kurento.client.MediaState;
+import org.kurento.client.MediaStateChangedEvent;
 import org.kurento.client.OnIceCandidateEvent;
+import org.kurento.client.VideoInfo;
+import org.kurento.commons.exception.KurentoException;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +75,13 @@ public class PlayerHandler extends TextWebSocketHandler {
           pause(sessionId);
           break;
         case "resume":
-          resume(sessionId);
+          resume(session);
+          break;
+        case "doSeek":
+          doSeek(session, jsonMessage);
+          break;
+        case "getPosition":
+          getPosition(session);
           break;
         case "onIceCandidate":
           onIceCandidate(sessionId, jsonMessage);
@@ -88,7 +98,7 @@ public class PlayerHandler extends TextWebSocketHandler {
 
   private void start(final WebSocketSession session, JsonObject jsonMessage) {
     // 1. Media pipeline
-    PlayerMediaPipeline playerMediaPipeline = new PlayerMediaPipeline();
+    final PlayerMediaPipeline playerMediaPipeline = new PlayerMediaPipeline();
     String videourl = jsonMessage.get("videourl").getAsString();
     playerMediaPipeline.initMediaPipeline(kurento, videourl);
     pipelines.put(session.getId(), playerMediaPipeline);
@@ -112,6 +122,24 @@ public class PlayerHandler extends TextWebSocketHandler {
       }
     });
 
+    playerMediaPipeline.addMediaConnectedListener(new EventListener<MediaStateChangedEvent>() {
+      @Override
+      public void onEvent(MediaStateChangedEvent event) {
+
+        if (event.getNewState() == MediaState.CONNECTED) {
+          VideoInfo videoInfo = playerMediaPipeline.getVideoInfo();
+
+          JsonObject response = new JsonObject();
+          response.addProperty("id", "videoInfo");
+          response.addProperty("isSeekable", videoInfo.getIsSeekable());
+          response.addProperty("initSeekable", videoInfo.getSeekableInit());
+          response.addProperty("endSeekable", videoInfo.getSeekableEnd());
+          response.addProperty("videoDuration", videoInfo.getDuration());
+          sendMessage(session, response.toString());
+        }
+      }
+    });
+
     // 3. PlayEndpoint
     playerMediaPipeline.play(new EventListener<ErrorEvent>() {
       @Override
@@ -126,7 +154,6 @@ public class PlayerHandler extends TextWebSocketHandler {
         sendPlayEnd(session);
       }
     });
-
   }
 
   private void pause(String sessionId) {
@@ -135,9 +162,19 @@ public class PlayerHandler extends TextWebSocketHandler {
     }
   }
 
-  private void resume(String sessionId) {
-    if (pipelines.containsKey(sessionId)) {
-      pipelines.get(sessionId).play();
+  private void resume(final WebSocketSession session) {
+    if (pipelines.containsKey(session.getId())) {
+      pipelines.get(session.getId()).play();
+
+      VideoInfo videoInfo = pipelines.get(session.getId()).getVideoInfo();
+
+      JsonObject response = new JsonObject();
+      response.addProperty("id", "videoInfo");
+      response.addProperty("isSeekable", videoInfo.getIsSeekable());
+      response.addProperty("initSeekable", videoInfo.getSeekableInit());
+      response.addProperty("endSeekable", videoInfo.getSeekableEnd());
+      response.addProperty("videoDuration", videoInfo.getDuration());
+      sendMessage(session, response.toString());
     }
   }
 
@@ -145,6 +182,35 @@ public class PlayerHandler extends TextWebSocketHandler {
     if (pipelines.containsKey(sessionId)) {
       pipelines.get(sessionId).release();
       pipelines.remove(sessionId);
+    }
+  }
+
+  private void doSeek(final WebSocketSession session, JsonObject jsonMessage) {
+    String sessionId = session.getId();
+
+    if (pipelines.containsKey(sessionId)) {
+      try {
+        pipelines.get(sessionId).doSeek(jsonMessage.get("position").getAsLong());
+      } catch (KurentoException e) {
+        log.debug("The seek cannot be performed");
+        JsonObject response = new JsonObject();
+        response.addProperty("id", "seek");
+        response.addProperty("message", "Seek failed");
+        sendMessage(session, response.toString());
+      }
+    }
+  }
+
+  private void getPosition(final WebSocketSession session) {
+    String sessionId = session.getId();
+
+    if (pipelines.containsKey(sessionId)) {
+      long position = pipelines.get(sessionId).getPosition();
+
+      JsonObject response = new JsonObject();
+      response.addProperty("id", "position");
+      response.addProperty("position", position);
+      sendMessage(session, response.toString());
     }
   }
 
