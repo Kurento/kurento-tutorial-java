@@ -67,7 +67,7 @@
 				</li>
 				<li>Click on <i>Stop</i> to finish the playback.
 				</li>
-				<li>Click on <i>Do Seek</i> to perform a seek at the position
+				<li>Click on <i>Seek</i> to perform a seek at the position
 					indicated in the previous text field (in milliseconds).
 				</li>
 				<li>Click on <i>Get Position</i> to get the playback position
@@ -144,9 +144,9 @@
 						<span> Go to</span>
 					</div>
 					<div class="col-md-9">
-						<input type="text" id="seekPosition" style="width: 50%">
-						<span> ms</span> <a id="doSeek" href="#" class="btn btn-primary"><span
-							class="glyphicon glyphicon-forward"></span> Do Seek </a>
+						<input type="text" id="seekPosition" style="width: 50%"> <span>
+							ms</span> <a id="doSeek" href="#" class="btn btn-warning"><span
+							class="glyphicon glyphicon-forward"></span> Seek </a>
 					</div>
 				</div>
 
@@ -156,14 +156,14 @@
 					</div>
 					<div class="col-md-9">
 						<input type="text" id="videoPosition" style="width: 50%" disabled><span>
-							ms</span> <a id="getPosition" href="#" class="btn btn-primary"><span
+							ms</span> <a id="getPosition" href="#" class="btn btn-info"><span
 							class="glyphicon glyphicon-time"></span> Get Position </a>
 					</div>
 				</div>
 
 				<br> <label class="control-label" for="console">Console</label><br>
 				<br>
-				<div id="console" class="democonsole">
+				<div id="console" class="democonsole" style="height: 142px;">
 					<ul></ul>
 				</div>
 			</div>
