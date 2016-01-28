@@ -33,11 +33,14 @@
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle" data-toggle="collapse"
 						data-target=".navbar-collapse"></button>
-					<a class="navbar-brand" href=".">Kurento Tutorial</a>
+					<a class="navbar-brand" href="">Kurento Tutorial</a>
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav navbar-right">
+						<li><a
+							href="https://github.com/Kurento/kurento-tutorial-java/tree/master/kurento-send-data-channel"><span
+								class="glyphicon glyphicon-file"></span> Source Code</a></li>
 					</ul>
 				</div>
 			</div>
@@ -46,32 +49,62 @@
 	<div class="container">
 		<div class="page-header">
 			<h1>Tutorial: WebRTC Send Data Channels</h1>
-		</div>
-		<div class="row">
-			<div class="col-md-7">
-				<h3>Remote stream</h3>
-				<video id="videoOutput" autoplay width="480px" height="360px"
-					poster="img/webrtc.png"></video>
-				<span> Info received from Media Server: <textarea
-						id="dataChannelReceive" disabled></textarea></span>
-			</div>
-			<div class="col-md-5">
-				<a id="start" href="#" class="btn btn-success"
-					onclick="start(); return false;"><span
-					class="glyphicon glyphicon-play"></span> Start</a><br /> <br /> <a
-					id="stop" href="#" class="btn btn-danger"
-					onclick="stop(); return false;"><span
-					class="glyphicon glyphicon-stop"></span> Stop</a>
-			</div>
+			<p>
+				This application shows an example on the use of <b>WebRTC Data
+					Channels</b> with Kurento. The <a href="img/pipeline.png"
+					data-toggle="lightbox" data-title="WebRTC Send Data Channels"
+					data-footer="A PlayerEndpoint feeds with media a KmsSendData Media Element, which is connected to a WebRtcEndpont in receive-only mode.">Media
+					Pipeline</a> is composed by a <i>PlayerEndpoint</i> which feeds <a
+					href="http://files.kurento.org/video/filter/barcodes.webm"
+					target="_blank">media</a> a <i>KmsSendData</i>. This Media Element
+				is a test element aimed to show the capabilities of Kurento Media
+				Server for Data Channels. Internally it is composed by a <i>ZBarFilter</i>,
+				which is another Media Element that detects Bar/QR codes in a media
+				stream. This information is sent as WebRTC Data Channel Metadata by
+				<i>KmsSendData</i> to the last element of the pipeline, i.e. a <i>WebRtcEndpoint</i>.
+				In the client side the WebRtcPeer is setup in receive-only mode, and
+				the received data is shown in the GUI. To run this demo follow these
+				steps:
+			</p>
+			<ol>
+				<li>Open this page with a browser compliant with WebRTC.</li>
+				<li>Click on <i>Start</i> button.
+				</li>
+				<li>Watch the received data on the text area labeled as <i>Data
+						received</i></li>
+				<li>Click on <i>Stop</i> to finish the communication (or wait
+					until the video ends).
+				</li>
+			</ol>
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<label class="control-label" for="console">Console</label><br>
+				<h3>Remote stream</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<video id="videoOutput" autoplay width="480px" height="360px"
+					poster="img/webrtc.png"></video>
+
+			</div>
+			<div class="col-md-7">
+				<a id="start" href="#" class="btn btn-success"
+					onclick="start(); return false;"><span
+					class="glyphicon glyphicon-play"></span> Start</a> <a id="stop"
+					href="#" class="btn btn-danger" onclick="stop(); return false;"><span
+					class="glyphicon glyphicon-stop"></span> Stop</a> <br> <br> <label
+					class="control-label" for="dataChannelReceive">Data
+					received</label><br>
+				<textarea id="dataChannelReceive" class="form-control" rows="5"
+					readonly="readonly"></textarea>
+				<br> <label class="control-label" for="console">Console</label><br>
 				<br>
 				<div id="console" class="democonsole">
 					<ul></ul>
 				</div>
 			</div>
+
 		</div>
 	</div>
 
@@ -79,7 +112,7 @@
 		<div class="foot-fixed-bottom">
 			<div class="container text-center">
 				<hr />
-				<div class="row">&copy; 2014-2015 Kurento</div>
+				<div class="row">&copy; 2014-2016 Kurento</div>
 				<div class="row">
 					<div class="col-md-4">
 						<a href="http://www.urjc.es"><img src="img/urjc.gif"
