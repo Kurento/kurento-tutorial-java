@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 Kurento (http://kurento.org/)
+ * (C) Copyright 2014-2016 Kurento (http://kurento.org/)
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -25,8 +25,8 @@ const I_AM_STARTING = 2;
 
 var chanId = 0;
 
-function getChannelName () {
-  return "TestChannel" + chanId++;
+function getChannelName() {
+	return "TestChannel" + chanId++;
 }
 
 window.onload = function() {
@@ -62,6 +62,9 @@ ws.onmessage = function(message) {
 			}
 		});
 		break;
+	case 'playEnd':
+		playEnd();
+		break;
 	default:
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
@@ -77,27 +80,28 @@ function start() {
 	showSpinner(videoOutput);
 
 	var servers = null;
-    var configuration = null;
-    var peerConnection = new RTCPeerConnection(servers, configuration);
+	var configuration = null;
+	var peerConnection = new RTCPeerConnection(servers, configuration);
 
-    console.log("Creating channel");
-    var dataConstraints = null;
+	console.log("Creating channel");
+	var dataConstraints = null;
 
-    channel = peerConnection.createDataChannel(getChannelName (), dataConstraints);
-	
-    channel.onmessage = onMessage;
+	channel = peerConnection.createDataChannel(getChannelName(),
+			dataConstraints);
 
-    var dataChannelReceive = document.getElementById('dataChannelReceive');
+	channel.onmessage = onMessage;
 
-    function onMessage (event) {
-      console.log("Received data " + event["data"]);
-      dataChannelReceive.value = event["data"];
-    }
-    
-   	console.log("Creating WebRtcPeer and generating local sdp offer ...");
+	var dataChannelReceive = document.getElementById('dataChannelReceive');
+
+	function onMessage(event) {
+		console.log("Received data " + event["data"]);
+		dataChannelReceive.value = event["data"];
+	}
+
+	console.log("Creating WebRtcPeer and generating local sdp offer ...");
 
 	var options = {
-		peerConnection: peerConnection,
+		peerConnection : peerConnection,
 		remoteVideo : videoOutput,
 		onicecandidate : onIceCandidate
 	}
@@ -110,13 +114,12 @@ function start() {
 			});
 }
 
-function closeChannels(){
-
-	if(channel){
-	  channel.close();
-	  $('#dataChannelSend').disabled = true;
-	  $('#send').attr('disabled', true);
-	  channel = null;
+function closeChannels() {
+	if (channel) {
+		channel.close();
+		$('#dataChannelSend').disabled = true;
+		$('#send').attr('disabled', true);
+		channel = null;
 	}
 }
 
@@ -159,8 +162,8 @@ function stop() {
 	console.log("Stopping video call ...");
 	setState(I_CAN_START);
 	if (webRtcPeer) {
-	    closeChannels();
-	    
+		closeChannels();
+
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 
@@ -169,6 +172,11 @@ function stop() {
 		}
 		sendMessage(message);
 	}
+	hideSpinner(videoOutput);
+}
+
+function playEnd() {
+	setState(I_CAN_START);
 	hideSpinner(videoOutput);
 }
 

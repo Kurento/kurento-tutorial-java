@@ -18,6 +18,8 @@ package org.kurento.tutorial.senddatachannel;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.kurento.client.EndOfStreamEvent;
+import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
@@ -62,31 +64,31 @@ public class SendDataChannelHandler extends TextWebSocketHandler {
     log.debug("Incoming message: {}", jsonMessage);
 
     switch (jsonMessage.get("id").getAsString()) {
-      case "start":
-        start(session, jsonMessage);
-        break;
-      case "stop": {
-        UserSession user = users.remove(session.getId());
-        if (user != null) {
-          user.release();
-        }
-        break;
+    case "start":
+      start(session, jsonMessage);
+      break;
+    case "stop": {
+      UserSession user = users.remove(session.getId());
+      if (user != null) {
+        user.release();
       }
-      case "onIceCandidate": {
-        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+      break;
+    }
+    case "onIceCandidate": {
+      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
-        UserSession user = users.get(session.getId());
-        if (user != null) {
-          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-              jsonCandidate.get("sdpMid").getAsString(),
-              jsonCandidate.get("sdpMLineIndex").getAsInt());
-          user.addCandidate(candidate);
-        }
-        break;
+      UserSession user = users.get(session.getId());
+      if (user != null) {
+        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+            jsonCandidate.get("sdpMid").getAsString(),
+            jsonCandidate.get("sdpMLineIndex").getAsInt());
+        user.addCandidate(candidate);
       }
-      default:
-        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-        break;
+      break;
+    }
+    default:
+      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+      break;
     }
   }
 
@@ -103,6 +105,22 @@ public class SendDataChannelHandler extends TextWebSocketHandler {
           "http://files.kurento.org/video/filter/barcodes.webm").build();
       user.setPlayer(player);
       users.put(session.getId(), user);
+
+      player.addErrorListener(new EventListener<ErrorEvent>() {
+        @Override
+        public void onEvent(ErrorEvent event) {
+          log.info("ErrorEvent: {}", event.getDescription());
+          sendPlayEnd(session);
+        }
+      });
+
+      player.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
+        @Override
+        public void onEvent(EndOfStreamEvent event) {
+          log.info("EndOfStreamEvent: {}", event.getTimestamp());
+          sendPlayEnd(session);
+        }
+      });
 
       // ICE candidates
       webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
@@ -148,11 +166,25 @@ public class SendDataChannelHandler extends TextWebSocketHandler {
   }
 
   private void sendError(WebSocketSession session, String message) {
-    try {
+    if (users.containsKey(session.getId())) {
       JsonObject response = new JsonObject();
       response.addProperty("id", "error");
       response.addProperty("message", message);
-      session.sendMessage(new TextMessage(response.toString()));
+      sendMessage(session, response.toString());
+    }
+  }
+
+  public void sendPlayEnd(WebSocketSession session) {
+    if (users.containsKey(session.getId())) {
+      JsonObject response = new JsonObject();
+      response.addProperty("id", "playEnd");
+      sendMessage(session, response.toString());
+    }
+  }
+
+  private synchronized void sendMessage(WebSocketSession session, String message) {
+    try {
+      session.sendMessage(new TextMessage(message));
     } catch (IOException e) {
       log.error("Exception sending message", e);
     }
