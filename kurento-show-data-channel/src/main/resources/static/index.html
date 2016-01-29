@@ -33,11 +33,14 @@
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle" data-toggle="collapse"
 						data-target=".navbar-collapse"></button>
-					<a class="navbar-brand" href=".">Kurento Tutorial</a>
+					<a class="navbar-brand" href="">Kurento Tutorial</a>
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav navbar-right">
+						<li><a
+							href="https://github.com/Kurento/kurento-tutorial-java/tree/master/kurento-show-data-channel"><span
+								class="glyphicon glyphicon-file"></span> Source Code</a></li>
 					</ul>
 				</div>
 			</div>
@@ -46,14 +49,44 @@
 	<div class="container">
 		<div class="page-header">
 			<h1>Tutorial: WebRTC Show Data Channels</h1>
+			<p>
+				This application shows an example on the use of <b>WebRTC Data
+					Channels</b> with Kurento. The <a href="img/pipeline.png"
+					data-toggle="lightbox" data-title="WebRTC Send Data Channels"
+					data-footer="A PlayerEndpoint feeds with media a KmsSendData Media Element, which is connected to a WebRtcEndpont in receive-only mode.">Media
+					Pipeline</a> is composed by a <i>WebRtcEndpoint</i> connected to a <i>KmsShowData</i>.
+				This Media Element is a test element aimed to show the capabilities
+				of Kurento Media Server for Data Channels. Internally it is able to
+				read the data received on the Data Channels. In addition it uses a <i>GStreamerFilter</i>
+				configured to overlay the read text in the media stream. Finally,
+				the <i>KmsShowData</i> is connected again to the same <i>WebRtcEndpoint</i>,
+				closing the loopback. In the client side the WebRtcPeer is setup in
+				receive-only mode, and the user is able to introduce text that is
+				sent to the server by means of Data Channels Metadata. To run this
+				demo follow these steps:
+			</p>
+			<ol>
+				<li>Open this page with a browser compliant with WebRTC and
+					click on <i>Start</i> button.
+				</li>
+				<li>Write something on the text area labeled as <i>Text to
+						be sent</i> and click on <i>Send</i> button
+				</li>
+				<li>This text should be sent to the server and overlayed on the
+					remote stream.</li>
+				<li>Click on <i>Stop</i> to finish the communication.
+				</li>
+			</ol>
 		</div>
 		<div class="row">
 			<div class="col-md-5">
 				<h3>Local stream</h3>
 				<video id="videoInput" autoplay width="480px" height="360px"
 					poster="img/webrtc.png"></video>
-				<textarea id="dataChannelSend" disabled
-					placeholder="Enter the text to send"></textarea>
+				<br> <label class="control-label" for="dataChannelSend">Text
+					to be sent</label><br>
+				<textarea id="dataChannelSend" class="form-control" disabled
+					style="height: 100px;" placeholder="Enter the text to send"></textarea>
 			</div>
 			<div class="col-md-2">
 				<a id="start" href="#" class="btn btn-success"
@@ -62,7 +95,7 @@
 					id="stop" href="#" class="btn btn-danger"
 					onclick="stop(); return false;"><span
 					class="glyphicon glyphicon-stop"></span> Stop</a> <br /> <br /> <br />
-				<a id="send" href="#" class="btn btn-success"> <span
+				<a id="send" href="#" class="btn btn-primary"> <span
 					class="glyphicon glyphicon-forward"></span> Send
 				</a>
 			</div>
@@ -70,11 +103,7 @@
 				<h3>Remote stream</h3>
 				<video id="videoOutput" autoplay width="480px" height="360px"
 					poster="img/webrtc.png"></video>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
-				<label class="control-label" for="console">Console</label><br>
+				<br> <label class="control-label" for="console">Console</label><br>
 				<br>
 				<div id="console" class="democonsole">
 					<ul></ul>
