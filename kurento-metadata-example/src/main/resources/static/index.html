@@ -33,11 +33,14 @@
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle" data-toggle="collapse"
 						data-target=".navbar-collapse"></button>
-					<a class="navbar-brand" href=".">Kurento Tutorial</a>
+					<a class="navbar-brand" href="">Kurento Tutorial</a>
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav navbar-right">
+						<li><a
+							href="https://github.com/Kurento/kurento-tutorial-java/tree/master/kurento-metadata-example"><span
+								class="glyphicon glyphicon-file"></span> Source Code</a></li>
 					</ul>
 				</div>
 			</div>
@@ -46,6 +49,29 @@
 	<div class="container">
 		<div class="page-header">
 			<h1>Tutorial: Metadata example</h1>
+			<p>
+				This application shows an example on the use of <b>Multisensory</b>
+				(i.e. a buffer of metadata synchronized with the media stream) in
+				Kurento. The <a href="img/pipeline.png" data-toggle="lightbox"
+					data-title="Multisensory support"
+					data-footer="A WebRtcEndpoint is connected to KmsDetectFaces and then to a KmsShowFaces Media Element.">Media
+					Pipeline</a> implemented in this application is composed by a <i>WebRtcEndpoint</i>
+				connected first to a <i>KmsDetectFaces</i> Media Element, which
+				detects faces in a media stream. The data about the timing and
+				position of the detected faces is published in the metadata buffer.
+				This information is read by another Media Element called <i>KmsShowFaces</i>,
+				which draws a square at the time and position published in the
+				metadata buffer. To run this demo follow these steps:
+			</p>
+			<ol>
+				<li>Open this page with a browser compliant with WebRTC.</li>
+				<li>Click on <i>Start</i> button.
+				</li>
+				<li>Each detected face in the user media will be marked with a
+					green square.</li>
+				<li>Click on <i>Stop</i> to finish the communication.
+				</li>
+			</ol>
 		</div>
 		<div class="row">
 			<div class="col-md-5">
@@ -82,7 +108,7 @@
 		<div class="foot-fixed-bottom">
 			<div class="container text-center">
 				<hr />
-				<div class="row">&copy; 2014-2015 Kurento</div>
+				<div class="row">&copy; 2014-2016 Kurento</div>
 				<div class="row">
 					<div class="col-md-4">
 						<a href="http://www.urjc.es"><img src="img/urjc.gif"
