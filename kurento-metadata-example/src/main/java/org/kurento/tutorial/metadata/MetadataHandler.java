@@ -62,31 +62,31 @@ public class MetadataHandler extends TextWebSocketHandler {
     log.debug("Incoming message: {}", jsonMessage);
 
     switch (jsonMessage.get("id").getAsString()) {
-      case "start":
-        start(session, jsonMessage);
-        break;
-      case "stop": {
-        UserSession user = users.remove(session.getId());
-        if (user != null) {
-          user.release();
-        }
-        break;
+    case "start":
+      start(session, jsonMessage);
+      break;
+    case "stop": {
+      UserSession user = users.remove(session.getId());
+      if (user != null) {
+        user.release();
       }
-      case "onIceCandidate": {
-        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+      break;
+    }
+    case "onIceCandidate": {
+      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
-        UserSession user = users.get(session.getId());
-        if (user != null) {
-          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-              jsonCandidate.get("sdpMid").getAsString(),
-              jsonCandidate.get("sdpMLineIndex").getAsInt());
-          user.addCandidate(candidate);
-        }
-        break;
+      UserSession user = users.get(session.getId());
+      if (user != null) {
+        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+            jsonCandidate.get("sdpMid").getAsString(),
+            jsonCandidate.get("sdpMLineIndex").getAsInt());
+        user.addCandidate(candidate);
       }
-      default:
-        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-        break;
+      break;
+    }
+    default:
+      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+      break;
     }
   }
 
@@ -118,8 +118,8 @@ public class MetadataHandler extends TextWebSocketHandler {
       });
 
       // Media logic
-      KmsShowFaces showFaces = new KmsShowFaces.Builder(pipeline).build();
       KmsDetectFaces detectFaces = new KmsDetectFaces.Builder(pipeline).build();
+      KmsShowFaces showFaces = new KmsShowFaces.Builder(pipeline).build();
 
       webRtcEndpoint.connect(detectFaces);
       detectFaces.connect(showFaces);
