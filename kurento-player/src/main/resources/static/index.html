@@ -52,7 +52,7 @@
 				This web application consists on a video play through <a
 					href="http://www.webrtc.org/">WebRTC</a>. The <a
 					href="img/pipeline.png" data-toggle="lightbox"
-					data-title="Video Call 1 to N Media Pipeline"
+					data-title="Play of a video through WebRTC"
 					data-footer="A PlayerEndpoint connected to a WebRtcEnpoint in receive-only mode">Media
 					Pipeline</a> is composed by a <i>PlayerEndpoints</i> directly connected
 				to a <i>WebRtcEndpoint</i> in receive-only mode. To run this demo
@@ -67,9 +67,11 @@
 				</li>
 				<li>Click on <i>Stop</i> to finish the playback.
 				</li>
-				<li>Click on <i>Do Seek</i> to perform a seek at the position indicated in the previous text field (in milliseconds).
+				<li>Click on <i>Do Seek</i> to perform a seek at the position
+					indicated in the previous text field (in milliseconds).
 				</li>
-				<li>Click on <i>Get Position</i> to get the playback position in milliseconds.
+				<li>Click on <i>Get Position</i> to get the playback position
+					in milliseconds.
 				</li>
 			</ol>
 		</div>
@@ -125,7 +127,7 @@
 						<span> Seek end (ms)</span>
 					</div>
 					<div class="col-md-6">
-						<input type="text" id="endSeek"	style="width: 100%" disabled>
+						<input type="text" id="endSeek" style="width: 100%" disabled>
 					</div>
 				</div>
 				<div class="row">
@@ -142,9 +144,8 @@
 						<span> Go to</span>
 					</div>
 					<div class="col-md-9">
-						<input type="text" id="seekPosition" style="width: 50%" >
-						<span> ms</span>
-						<a id="doSeek" href="#" class="btn btn-primary"><span
+						<input type="text" id="seekPosition" style="width: 50%">
+						<span> ms</span> <a id="doSeek" href="#" class="btn btn-primary"><span
 							class="glyphicon glyphicon-forward"></span> Do Seek </a>
 					</div>
 				</div>
@@ -154,8 +155,8 @@
 						<span> Video position</span>
 					</div>
 					<div class="col-md-9">
-						<input type="text" id="videoPosition" style="width: 50%" disabled><span> ms</span>
-						<a id="getPosition" href="#" class="btn btn-primary"><span
+						<input type="text" id="videoPosition" style="width: 50%" disabled><span>
+							ms</span> <a id="getPosition" href="#" class="btn btn-primary"><span
 							class="glyphicon glyphicon-time"></span> Get Position </a>
 					</div>
 				</div>
