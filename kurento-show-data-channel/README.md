@@ -3,15 +3,17 @@
 Copyright © 2013-2016 [Kurento]. Licensed under [LGPL v2.1 License].
 
 kurento-show-data-channel
-====================
+=========================
 
-Kurento Java Tutorial: WebRTC in loopback with filter to show data received through data channel.
+Kurento Java Tutorial: WebRTC in loopback with filter to show data received
+through data channel.
 
-This tutorial shows how media server can receive data sent by browser through datachannels. Any message 
-sent by browser will be displayed  in the loopback video.
+This tutorial shows how media server can receive data sent by browser through
+datachannels. Any message sent by browser will be displayed  in the loopback
+video.
 
-This tutorial requires media server module kms-datachannelexample. You can install this module with command 
-sudo apt-get install kms-datachannelexample
+This tutorial requires media server module kms-datachannelexample. You can
+install this module with command `sudo apt-get install kms-datachannelexample`.
 
 Running this tutorial
 ---------------------

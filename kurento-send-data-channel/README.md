@@ -3,16 +3,17 @@
 Copyright © 2013-2016 [Kurento]. Licensed under [LGPL v2.1 License].
 
 kurento-send-data-channel
-====================
+=========================
 
-Kurento Java Tutorial: Player connected to a filter and a WebRTC to send data about QR 
-codes through data channel.
+Kurento Java Tutorial: Player connected to a filter and a WebRTC to send data
+about QR codes through data channel.
 
-This tutorial plays a video and detects QR codes in the images. Detection events are sent 
-through data channels from media server to browser so they can be shown as test messages to the user.
+This tutorial plays a video and detects QR codes in the images. Detection events
+are sent through data channels from media server to browser so they can be
+shown as test messages to the user.
 
-This tutorial requires media server module kms-datachannelexample. You can install this 
-module with command sudo apt-get install kms-datachannelexample.
+This tutorial requires media server module kms-datachannelexample. You can
+install this module with command `sudo apt-get install kms-datachannelexample`.
 
 
 Running this tutorial
@@ -40,6 +41,7 @@ The Kurento project provides detailed [documentation] including tutorials,
 installation and development guides. A simplified version of the documentation
 can be found on [readthedocs.org]. The [Open API specification] a.k.a. Kurento
 Protocol is also available on [apiary.io].
+
 
 Source
 ------
