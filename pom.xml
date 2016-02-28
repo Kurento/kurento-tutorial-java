@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-parent-pom</artifactId>
-		<version>6.4.0</version>
+		<version>6.4.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-tutorial</artifactId>
-	<version>6.4.0</version>
+	<version>6.4.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Kurento Java Client Tutorials</name>
