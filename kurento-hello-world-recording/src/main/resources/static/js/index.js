@@ -95,6 +95,12 @@ ws.onmessage = function(message) {
 				return console.error('Error adding candidate: ' + error);
 		});
 		break;
+	case 'stopped':
+		break;
+	case 'paused':
+		break;
+	case 'recording':
+		break;
 	default:
 		setState(NO_CALL);
 	onError('Unrecognized message', parsedMessage);

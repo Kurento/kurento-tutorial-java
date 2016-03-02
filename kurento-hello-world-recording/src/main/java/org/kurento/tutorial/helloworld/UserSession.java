@@ -15,10 +15,18 @@
 package org.kurento.tutorial.helloworld;
 
 import java.util.Date;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.ListenerSubscription;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.RecorderEndpoint;
+import org.kurento.client.StoppedEvent;
 import org.kurento.client.WebRtcEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
@@ -30,8 +38,12 @@ import org.springframework.web.socket.WebSocketSession;
  * @since 6.1.1
  */
 public class UserSession {
+
+  private final Logger log = LoggerFactory.getLogger(UserSession.class);
+
   private String id;
   private WebRtcEndpoint webRtcEndpoint;
+  private RecorderEndpoint recorderEndpoint;
   private MediaPipeline mediaPipeline;
   private Date stopTimestamp;
 
@@ -55,6 +67,10 @@ public class UserSession {
     this.webRtcEndpoint = webRtcEndpoint;
   }
 
+  public void setRecorderEndpoint(RecorderEndpoint recorderEndpoint) {
+    this.recorderEndpoint = recorderEndpoint;
+  }
+
   public MediaPipeline getMediaPipeline() {
     return mediaPipeline;
   }
@@ -69,6 +85,29 @@ public class UserSession {
 
   public Date getStopTimestamp() {
     return stopTimestamp;
+  }
+
+  public void stop() {
+    if (recorderEndpoint != null) {
+      final CountDownLatch stoppedCountDown = new CountDownLatch(1);
+      ListenerSubscription subscriptionId = recorderEndpoint
+          .addStoppedListener(new EventListener<StoppedEvent>() {
+
+            @Override
+            public void onEvent(StoppedEvent event) {
+              stoppedCountDown.countDown();
+            }
+          });
+      recorderEndpoint.stop();
+      try {
+        if (!stoppedCountDown.await(5, TimeUnit.SECONDS)) {
+          log.error("Error waiting for recorder to stop");
+        }
+      } catch (InterruptedException e) {
+        log.error("Exception while waiting for state change", e);
+      }
+      recorderEndpoint.removeStoppedListener(subscriptionId);
+    }
   }
 
   public void release() {

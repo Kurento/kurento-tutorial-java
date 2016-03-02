@@ -25,8 +25,11 @@ import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.MediaType;
 import org.kurento.client.OnIceCandidateEvent;
+import org.kurento.client.PausedEvent;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
+import org.kurento.client.RecordingEvent;
+import org.kurento.client.StoppedEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -81,6 +84,9 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         start(session, jsonMessage);
         break;
       case "stop":
+        if (user != null) {
+          user.stop();
+        }
       case "stopPlay":
         if (user != null) {
           user.release();
@@ -125,12 +131,64 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, RECORDER_FILE_PATH)
           .withMediaProfile(profile).build();
 
+      recorder.addRecordingListener(new EventListener<RecordingEvent>() {
+
+        @Override
+        public void onEvent(RecordingEvent event) {
+          JsonObject response = new JsonObject();
+          response.addProperty("id", "recording");
+          try {
+            synchronized (session) {
+              session.sendMessage(new TextMessage(response.toString()));
+            }
+          } catch (IOException e) {
+            log.error(e.getMessage());
+          }
+        }
+
+      });
+
+      recorder.addStoppedListener(new EventListener<StoppedEvent>() {
+
+        @Override
+        public void onEvent(StoppedEvent event) {
+          JsonObject response = new JsonObject();
+          response.addProperty("id", "stopped");
+          try {
+            synchronized (session) {
+              session.sendMessage(new TextMessage(response.toString()));
+            }
+          } catch (IOException e) {
+            log.error(e.getMessage());
+          }
+        }
+
+      });
+
+      recorder.addPausedListener(new EventListener<PausedEvent>() {
+
+        @Override
+        public void onEvent(PausedEvent event) {
+          JsonObject response = new JsonObject();
+          response.addProperty("id", "paused");
+          try {
+            synchronized (session) {
+              session.sendMessage(new TextMessage(response.toString()));
+            }
+          } catch (IOException e) {
+            log.error(e.getMessage());
+          }
+        }
+
+      });
+
       connectAccordingToProfile(webRtcEndpoint, recorder, profile);
 
       // 2. Store user session
       UserSession user = new UserSession(session);
       user.setMediaPipeline(pipeline);
       user.setWebRtcEndpoint(webRtcEndpoint);
+      user.setRecorderEndpoint(recorder);
       registry.register(user);
 
       // 3. SDP negotiation
