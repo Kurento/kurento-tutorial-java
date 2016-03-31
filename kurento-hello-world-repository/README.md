@@ -8,22 +8,24 @@
 Copyright © 2013-2016 [Kurento]. Licensed under [LGPL v2.1 License].
 
 kurento-hello-world-repository
-=============================
-Kurento Java Tutorial: Hello World (WebRTC in loopback) with recording, 
-and metadata storage thorugh the Repository API.
+==============================
+
+Kurento Java Tutorial: Hello World (WebRTC in loopback) with recording, and
+metadata storage thorugh the Repository API.
 
 Requires a running instance of [Kurento Repository Server][repository] so that
-the streamed media (from webcam and microphone) is recorded and played by 
+the streamed media (from webcam and microphone) is recorded and played by
 Kurento Media Server using a media repository. In turn, the repository will be
-backed up by a MongoDB database or by a filesystem (see the server's 
+backed up by a MongoDB database or by a filesystem (see the server's
 [configuration][repository-cfg]).
+
 
 Configuration
 -------------
 
-The tutorial has to know the repository's location so that it might access
-its Http REST API. This configuration property is `repository.uri` and has 
-the default value `http://localhost:7676`.
+The tutorial has to know the repository's location so that it might access its
+Http REST API. This configuration property is `repository.uri` and has the
+default value `http://localhost:7676`.
 
 Another required property is the URI of the Kurento Media Server, `kms.ws.uri`,
 with the default value `ws://localhost:8888/kurento`.
@@ -157,4 +159,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [apiary.io]: http://docs.streamoriented.apiary.io/
 [repository]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server
 [repository-cfg]: https://github.com/Kurento/kurento-java/tree/master/kurento-repository/kurento-repository-server#configuration
-[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-repository.html
+[instructions]: http://doc-kurento.readthedocs.org/en/stable/tutorials/java/tutorial-repository.html
