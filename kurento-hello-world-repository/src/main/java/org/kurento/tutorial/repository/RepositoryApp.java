@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 Kurento (http://kurento.org/)
+ * (C) Copyright 2014-2016 Kurento (http://kurento.org/)
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the GNU Lesser General Public License (LGPL)
@@ -11,8 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
-package org.kurento.tutorial.helloworld;
+package org.kurento.tutorial.repository;
 
 import org.kurento.client.KurentoClient;
 import org.kurento.repository.RepositoryClient;
@@ -25,7 +24,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 /**
- * Hello World (WebRTC in loopback with recording) main class.
+ * WebRTC in loopback with recording in repository capabilities main class.
  *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author Radu Tom Vlad (rvlad@naevatec.com)
@@ -33,16 +32,16 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  */
 @SpringBootApplication
 @EnableWebSocket
-public class HelloWorldRecApp implements WebSocketConfigurer {
+public class RepositoryApp implements WebSocketConfigurer {
 
-  static final String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
+  protected static final String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
 
-  static final String REPOSITORY_SERVER_URI = System.getProperty("repository.uri",
+  protected static final String REPOSITORY_SERVER_URI = System.getProperty("repository.uri",
       DEFAULT_REPOSITORY_SERVER_URI);
 
   @Bean
-  public HelloWorldRecHandler handler() {
-    return new HelloWorldRecHandler();
+  public RepositoryHandler handler() {
+    return new RepositoryHandler();
   }
 
   @Bean
@@ -52,15 +51,13 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/helloworld");
+    registry.addHandler(handler(), "/repository");
   }
 
   @Bean
   public RepositoryClient repositoryServiceProvider() {
-    if (REPOSITORY_SERVER_URI.startsWith("file://")) {
-      return null;
-    }
-    return RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
+    return REPOSITORY_SERVER_URI.startsWith("file://") ? null
+        : RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
   }
 
   @Bean
@@ -69,6 +66,6 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(HelloWorldRecApp.class).run(args);
+    new SpringApplication(RepositoryApp.class).run(args);
   }
 }
