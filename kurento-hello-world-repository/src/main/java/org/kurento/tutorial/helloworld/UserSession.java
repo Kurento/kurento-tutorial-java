@@ -11,7 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package org.kurento.tutorial.repository;
+package org.kurento.tutorial.helloworld;
 
 import java.util.Date;
 

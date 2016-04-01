@@ -12,9 +12,8 @@
  * Lesser General Public License for more details.
  *
  */
-package org.kurento.tutorial.repository;
+package org.kurento.tutorial.helloworld;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.web.socket.WebSocketSession;
@@ -29,7 +28,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class UserRegistry {
 
-  private Map<String, UserSession> usersBySessionId = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, UserSession> usersBySessionId = new ConcurrentHashMap<>();
 
   public void register(UserSession user) {
     usersBySessionId.put(user.getId(), user);
