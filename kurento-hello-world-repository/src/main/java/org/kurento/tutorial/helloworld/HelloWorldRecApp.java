@@ -11,7 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package org.kurento.tutorial.repository;
+package org.kurento.tutorial.helloworld;
 
 import org.kurento.client.KurentoClient;
 import org.kurento.repository.RepositoryClient;
@@ -32,7 +32,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  */
 @SpringBootApplication
 @EnableWebSocket
-public class RepositoryApp implements WebSocketConfigurer {
+public class HelloWorldRecApp implements WebSocketConfigurer {
 
   protected static final String DEFAULT_REPOSITORY_SERVER_URI = "http://localhost:7676";
 
@@ -40,8 +40,8 @@ public class RepositoryApp implements WebSocketConfigurer {
       DEFAULT_REPOSITORY_SERVER_URI);
 
   @Bean
-  public RepositoryHandler handler() {
-    return new RepositoryHandler();
+  public HelloWorldRecHandler handler() {
+    return new HelloWorldRecHandler();
   }
 
   @Bean
@@ -66,6 +66,6 @@ public class RepositoryApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(RepositoryApp.class).run(args);
+    new SpringApplication(HelloWorldRecApp.class).run(args);
   }
 }

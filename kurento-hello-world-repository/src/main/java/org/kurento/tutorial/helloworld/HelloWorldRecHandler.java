@@ -11,7 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package org.kurento.tutorial.repository;
+package org.kurento.tutorial.helloworld;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -54,14 +54,14 @@ import com.google.gson.JsonObject;
  * @author Radu Tom Vlad (rvlad@naevatec.com)
  * @since 6.1.1
  */
-public class RepositoryHandler extends TextWebSocketHandler {
+public class HelloWorldRecHandler extends TextWebSocketHandler {
 
   // slightly larger timeout
   private static final int REPOSITORY_DISCONNECT_TIMEOUT = 5500;
 
   private static final String RECORDING_EXT = ".webm";
 
-  private final Logger log = LoggerFactory.getLogger(RepositoryHandler.class);
+  private final Logger log = LoggerFactory.getLogger(HelloWorldRecHandler.class);
   private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
   private final Gson gson = new GsonBuilder().create();
 
@@ -136,7 +136,7 @@ public class RepositoryHandler extends TextWebSocketHandler {
         }
       } else {
         String now = df.format(new Date());
-        String filePath = RepositoryApp.REPOSITORY_SERVER_URI + now + RECORDING_EXT;
+        String filePath = HelloWorldRecApp.REPOSITORY_SERVER_URI + now + RECORDING_EXT;
         repoItem = new RepositoryItemRecorder();
         repoItem.setId(now);
         repoItem.setUrl(filePath);
