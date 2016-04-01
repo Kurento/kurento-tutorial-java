@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2015 Kurento (http://kurento.org/)
+ * (C) Copyright 2015-2016 Kurento (http://kurento.org/)
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the GNU Lesser General Public License (LGPL)
@@ -11,8 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
-package org.kurento.tutorial.helloworld;
+package org.kurento.tutorial.recording;
 
 import java.io.IOException;
 
@@ -80,35 +79,35 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
     }
 
     switch (jsonMessage.get("id").getAsString()) {
-      case "start":
-        start(session, jsonMessage);
-        break;
-      case "stop":
-        if (user != null) {
-          user.stop();
-        }
-      case "stopPlay":
-        if (user != null) {
-          user.release();
-        }
-        break;
-      case "play":
-        play(user, session, jsonMessage);
-        break;
-      case "onIceCandidate": {
-        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
-
-        if (user != null) {
-          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-              jsonCandidate.get("sdpMid").getAsString(),
-              jsonCandidate.get("sdpMLineIndex").getAsInt());
-          user.addCandidate(candidate);
-        }
-        break;
+    case "start":
+      start(session, jsonMessage);
+      break;
+    case "stop":
+      if (user != null) {
+        user.stop();
       }
-      default:
-        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-        break;
+    case "stopPlay":
+      if (user != null) {
+        user.release();
+      }
+      break;
+    case "play":
+      play(user, session, jsonMessage);
+      break;
+    case "onIceCandidate": {
+      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+
+      if (user != null) {
+        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+            jsonCandidate.get("sdpMid").getAsString(),
+            jsonCandidate.get("sdpMLineIndex").getAsInt());
+        user.addCandidate(candidate);
+      }
+      break;
+    }
+    default:
+      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+      break;
     }
   }
 
@@ -233,14 +232,14 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 
     MediaProfileSpecType profile;
     switch (jsonMessage.get("mode").getAsString()) {
-      case "audio-only":
-        profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
-        break;
-      case "video-only":
-        profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
-        break;
-      default:
-        profile = MediaProfileSpecType.WEBM;
+    case "audio-only":
+      profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
+      break;
+    case "video-only":
+      profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
+      break;
+    default:
+      profile = MediaProfileSpecType.WEBM;
     }
 
     return profile;
@@ -249,19 +248,18 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
   private void connectAccordingToProfile(WebRtcEndpoint webRtcEndpoint, RecorderEndpoint recorder,
       MediaProfileSpecType profile) {
     switch (profile) {
-      case WEBM:
-        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-        break;
-      case WEBM_AUDIO_ONLY:
-        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-        break;
-      case WEBM_VIDEO_ONLY:
-        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-        break;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported profile for this tutorial: " + profile);
+    case WEBM:
+      webRtcEndpoint.connect(recorder, MediaType.AUDIO);
+      webRtcEndpoint.connect(recorder, MediaType.VIDEO);
+      break;
+    case WEBM_AUDIO_ONLY:
+      webRtcEndpoint.connect(recorder, MediaType.AUDIO);
+      break;
+    case WEBM_VIDEO_ONLY:
+      webRtcEndpoint.connect(recorder, MediaType.VIDEO);
+      break;
+    default:
+      throw new UnsupportedOperationException("Unsupported profile for this tutorial: " + profile);
     }
   }
 
