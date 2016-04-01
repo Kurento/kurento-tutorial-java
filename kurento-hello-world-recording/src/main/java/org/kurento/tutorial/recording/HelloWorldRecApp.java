@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 Kurento (http://kurento.org/)
+ * (C) Copyright 2014-2016 Kurento (http://kurento.org/)
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the GNU Lesser General Public License (LGPL)
@@ -11,8 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
-package org.kurento.tutorial.helloworld;
+package org.kurento.tutorial.recording;
 
 import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
@@ -26,6 +25,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  * Hello World (WebRTC in loopback with recording) main class.
  *
  * @author Ivan Gracia (igracia@kurento.org)
+ * @author Boni Garcia (bgarcia@gsyc.es)
  * @since 6.2.1
  */
 @SpringBootApplication
@@ -44,7 +44,7 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(handler(), "/helloworld");
+    registry.addHandler(handler(), "/recording");
   }
 
   @Bean
