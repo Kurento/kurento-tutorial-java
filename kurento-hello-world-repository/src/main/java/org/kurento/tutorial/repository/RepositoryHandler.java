@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2015 Kurento (http://kurento.org/)
+ * (C) Copyright 2015-2016 Kurento (http://kurento.org/)
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the GNU Lesser General Public License (LGPL)
@@ -11,8 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
-package org.kurento.tutorial.helloworld;
+package org.kurento.tutorial.repository;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -48,23 +47,23 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 /**
- * Hello World with recording handler (application and media logic).
+ * Recording in repository handler (application and media logic).
  *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author David Fernandez (d.fernandezlop@gmail.com)
  * @author Radu Tom Vlad (rvlad@naevatec.com)
  * @since 6.1.1
  */
-public class HelloWorldRecHandler extends TextWebSocketHandler {
+public class RepositoryHandler extends TextWebSocketHandler {
 
   // slightly larger timeout
   private static final int REPOSITORY_DISCONNECT_TIMEOUT = 5500;
 
   private static final String RECORDING_EXT = ".webm";
 
-  private final Logger log = LoggerFactory.getLogger(HelloWorldRecHandler.class);
-  private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
-  private static final Gson gson = new GsonBuilder().create();
+  private final Logger log = LoggerFactory.getLogger(RepositoryHandler.class);
+  private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
+  private final Gson gson = new GsonBuilder().create();
 
   @Autowired
   private UserRegistry registry;
@@ -89,32 +88,32 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
     }
 
     switch (jsonMessage.get("id").getAsString()) {
-      case "start":
-        start(session, jsonMessage);
-        break;
-      case "stop":
-      case "stopPlay":
-        if (user != null) {
-          user.release();
-        }
-        break;
-      case "play":
-        play(user, session, jsonMessage);
-        break;
-      case "onIceCandidate": {
-        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
-
-        if (user != null) {
-          IceCandidate candidate =
-              new IceCandidate(jsonCandidate.get("candidate").getAsString(), jsonCandidate.get(
-                  "sdpMid").getAsString(), jsonCandidate.get("sdpMLineIndex").getAsInt());
-          user.addCandidate(candidate);
-        }
-        break;
+    case "start":
+      start(session, jsonMessage);
+      break;
+    case "stop":
+    case "stopPlay":
+      if (user != null) {
+        user.release();
       }
-      default:
-        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-        break;
+      break;
+    case "play":
+      play(user, session, jsonMessage);
+      break;
+    case "onIceCandidate": {
+      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+
+      if (user != null) {
+        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+            jsonCandidate.get("sdpMid").getAsString(),
+            jsonCandidate.get("sdpMLineIndex").getAsInt());
+        user.addCandidate(candidate);
+      }
+      break;
+    }
+    default:
+      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+      break;
     }
   }
 
@@ -137,21 +136,20 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         }
       } else {
         String now = df.format(new Date());
-        String filePath = HelloWorldRecApp.REPOSITORY_SERVER_URI + now + RECORDING_EXT;
+        String filePath = RepositoryApp.REPOSITORY_SERVER_URI + now + RECORDING_EXT;
         repoItem = new RepositoryItemRecorder();
         repoItem.setId(now);
         repoItem.setUrl(filePath);
       }
       log.info("Media will be recorded {}by KMS: id={} , url={}",
-          (repositoryClient == null ? "locally" : ""), repoItem.getId(), repoItem.getUrl());
+          (repositoryClient == null ? "locally " : ""), repoItem.getId(), repoItem.getUrl());
 
       // 1. Media logic (webRtcEndpoint in loopback)
       MediaPipeline pipeline = kurento.createMediaPipeline();
       WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
       webRtcEndpoint.connect(webRtcEndpoint);
-      RecorderEndpoint recorder =
-          new RecorderEndpoint.Builder(pipeline, repoItem.getUrl()).withMediaProfile(
-              MediaProfileSpecType.WEBM).build();
+      RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, repoItem.getUrl())
+          .withMediaProfile(MediaProfileSpecType.WEBM).build();
       webRtcEndpoint.connect(recorder);
 
       // 2. Store user session
@@ -210,10 +208,11 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
             Date now = new Date();
             long diff = now.getTime() - stopTimestamp.getTime();
             if (diff >= 0 && diff < REPOSITORY_DISCONNECT_TIMEOUT) {
-              log.info("Waiting for {}ms before requesting the repository read endpoint "
-                  + "(requires {}ms before upload is considered terminated "
-                  + "and only {}ms have passed)", REPOSITORY_DISCONNECT_TIMEOUT - diff,
-                  REPOSITORY_DISCONNECT_TIMEOUT, diff);
+              log.info(
+                  "Waiting for {}ms before requesting the repository read endpoint "
+                      + "(requires {}ms before upload is considered terminated "
+                      + "and only {}ms have passed)",
+                  REPOSITORY_DISCONNECT_TIMEOUT - diff, REPOSITORY_DISCONNECT_TIMEOUT, diff);
               Thread.sleep(REPOSITORY_DISCONNECT_TIMEOUT - diff);
             }
           } else {
