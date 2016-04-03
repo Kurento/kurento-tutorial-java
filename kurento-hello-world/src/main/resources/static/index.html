@@ -18,7 +18,11 @@
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="bower_components/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
-<script src="bower_components/adapter.js/adapter.js"></script>
+    <!-- not working, bower doesn't download right adapter.js -->
+<!--<script src="bower_components/adapter.js/src/js/adapter.js"></script>-->
+    <!-- workaround, add in bower.json "webrtc-adapter":"gh-pages" -->
+    <!-- don't use version adapter-1.x.x, then don't use adapter.js, because getUserMedia isn't defined -->
+    <script src="bower_components/webrtc-adapter/adapter-0.2.10.js"></script>
 <script src="bower_components/demo-console/index.js"></script>
 
 <script src="js/kurento-utils.js"></script>
