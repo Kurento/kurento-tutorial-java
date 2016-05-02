@@ -28,8 +28,6 @@ import javax.annotation.PostConstruct;
 import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
-import org.kurento.client.FilterType;
-import org.kurento.client.GStreamerFilter;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
@@ -68,7 +66,6 @@ public class Pipeline {
   private MediaPipeline pipe;
   private PlayerEndpoint playerEndpoint;
   private CrowdDetectorFilter crowdDetectorFilter;
-  private GStreamerFilter rateFilter;
   private String feedUrl;
   private List<RegionOfInterest> rois;
   private final Map<String, WebRtcEndpoint> webRtcEndpoints = new ConcurrentHashMap<>();
@@ -114,21 +111,16 @@ public class Pipeline {
       log.warn("Could not register ROIs in ORION");
     }
 
-    this.rateFilter =
-        new GStreamerFilter.Builder(this.pipe, "capsfilter caps=video/x-raw,framerate=15/1")
-            .withFilterType(FilterType.VIDEO).build();
-
     this.crowdDetectorFilter = new CrowdDetectorFilter.Builder(this.pipe, this.rois).build();
     this.crowdDetectorFilter.setProcessingWidth(640);
 
-    this.rateFilter.connect(this.crowdDetectorFilter);
     addOrionListeners();
 
     this.playerEndpoint = new PlayerEndpoint.Builder(this.pipe, this.feedUrl).build();
     addPlayerListeners();
     this.playing = true;
 
-    this.playerEndpoint.connect(this.rateFilter);
+    this.playerEndpoint.connect(this.crowdDetectorFilter);
     this.playerEndpoint.play();
   }
 
@@ -326,10 +318,6 @@ public class Pipeline {
     return this.crowdDetectorFilter;
   }
 
-  public GStreamerFilter getRateFilter() {
-    return this.rateFilter;
-  }
-
   public PlayerEndpoint getPlayerEndpoint() {
     return this.playerEndpoint;
   }
@@ -343,27 +331,22 @@ public class Pipeline {
 
     if (this.playerEndpoint != null) {
       log.debug("Releasing previous elements");
-      this.rateFilter.release();
       this.crowdDetectorFilter.release();
       this.playerEndpoint.release();
     }
 
     log.debug("Creating new elements");
-    this.rateFilter =
-        new GStreamerFilter.Builder(this.pipe, "capsfilter caps=video/x-raw,framerate=15/1")
-            .withFilterType(FilterType.VIDEO).build();
 
     this.crowdDetectorFilter = new CrowdDetectorFilter.Builder(this.pipe, this.rois).build();
     this.crowdDetectorFilter.setProcessingWidth(640);
 
-    this.rateFilter.connect(this.crowdDetectorFilter);
     addOrionListeners();
 
     this.playerEndpoint = new PlayerEndpoint.Builder(this.pipe, this.feedUrl).build();
     addPlayerListeners();
     this.playing = true;
 
-    this.playerEndpoint.connect(this.rateFilter);
+    this.playerEndpoint.connect(this.crowdDetectorFilter);
     this.playerEndpoint.play();
 
     log.debug("New player is now runing");
