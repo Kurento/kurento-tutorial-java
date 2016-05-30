@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-parent-pom</artifactId>
-		<version>6.4.1-SNAPSHOT</version>
+		<version>6.5.0</version>
 	</parent>
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-tutorial</artifactId>
-	<version>6.4.1-SNAPSHOT</version>
+	<version>6.5.0</version>
 	<packaging>pom</packaging>
 
 	<name>Kurento Java Client Tutorials</name>
@@ -48,7 +48,7 @@
 	</developers>
 
 	<properties>
-		<version.kurento-datachannelexample>6.2.0</version.kurento-datachannelexample>
+		<version.kurento-datachannelexample>6.5.0</version.kurento-datachannelexample>
 	</properties>
 
 	<dependencyManagement>
