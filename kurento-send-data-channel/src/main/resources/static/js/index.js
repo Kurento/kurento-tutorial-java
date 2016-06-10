@@ -71,7 +71,7 @@ ws.onmessage = function(message) {
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
-		onError('Unrecognized message', parsedMessage);
+	onError('Unrecognized message', parsedMessage);
 	}
 }
 
@@ -80,18 +80,6 @@ function start() {
 	// Disable start button
 	setState(I_AM_STARTING);
 	showSpinner(videoOutput);
-
-	var servers = null;
-	var configuration = null;
-	var peerConnection = new RTCPeerConnection(servers, configuration);
-
-	console.log("Creating channel");
-	var dataConstraints = null;
-
-	channel = peerConnection.createDataChannel(getChannelName(),
-			dataConstraints);
-
-	channel.onmessage = onMessage;
 
 	var dataChannelReceive = document.getElementById('dataChannelReceive');
 
@@ -103,26 +91,22 @@ function start() {
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
 
 	var options = {
-		peerConnection : peerConnection,
-		remoteVideo : videoOutput,
-		onicecandidate : onIceCandidate
+			remoteVideo : videoOutput,
+			dataChannelConfig: {
+				id : getChannelName(),
+				onmessage : onMessage,
+			},
+			dataChannels : true,
+			onicecandidate : onIceCandidate
 	}
+
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
 			function(error) {
-				if (error) {
-					return console.error(error);
-				}
-				webRtcPeer.generateOffer(onOffer);
-			});
-}
-
-function closeChannels() {
-	if (channel) {
-		channel.close();
-		$('#dataChannelSend').disabled = true;
-		$('#send').attr('disabled', true);
-		channel = null;
-	}
+		if (error) {
+			return console.error(error);
+		}
+		webRtcPeer.generateOffer(onOffer);
+	});
 }
 
 function onOffer(error, offerSdp) {
@@ -130,8 +114,8 @@ function onOffer(error, offerSdp) {
 		return console.error("Error generating the offer");
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
-		id : 'start',
-		sdpOffer : offerSdp
+			id : 'start',
+			sdpOffer : offerSdp
 	}
 	sendMessage(message);
 }
@@ -144,8 +128,8 @@ function onIceCandidate(candidate) {
 	console.log("Local candidate" + JSON.stringify(candidate));
 
 	var message = {
-		id : 'onIceCandidate',
-		candidate : candidate
+			id : 'onIceCandidate',
+			candidate : candidate
 	};
 	sendMessage(message);
 }
@@ -164,13 +148,12 @@ function stop() {
 	console.log("Stopping video call ...");
 	setState(I_CAN_START);
 	if (webRtcPeer) {
-		closeChannels();
 
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 
 		var message = {
-			id : 'stop'
+				id : 'stop'
 		}
 		sendMessage(message);
 	}
@@ -206,7 +189,7 @@ function setState(nextState) {
 
 	default:
 		onError("Unknown state " + nextState);
-		return;
+	return;
 	}
 	state = nextState;
 }

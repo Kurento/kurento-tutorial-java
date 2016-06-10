@@ -20,7 +20,6 @@ var videoInput;
 var videoOutput;
 var webRtcPeer;
 var state = null;
-var channel;
 
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
@@ -29,7 +28,7 @@ const I_AM_STARTING = 2;
 var chanId = 0;
 
 function getChannelName () {
-  return "TestChannel" + chanId++;
+	return "TestChannel" + chanId++;
 }
 
 window.onload = function() {
@@ -70,7 +69,7 @@ ws.onmessage = function(message) {
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
-		onError('Unrecognized message', parsedMessage);
+	onError('Unrecognized message', parsedMessage);
 	}
 }
 
@@ -80,67 +79,48 @@ function start() {
 	setState(I_AM_STARTING);
 	showSpinner(videoInput, videoOutput);
 
-	var servers = null;
-    var configuration = null;
-    var peerConnection = new RTCPeerConnection(servers, configuration);
+	var dataChannelSend = document.getElementById('dataChannelSend');
 
-    console.log("Creating channel");
-    var dataConstraints = null;
+	var sendButton = document.getElementById('send');
+	sendButton.addEventListener("click", function() {
+		var data = dataChannelSend.value;
+		console.log("Send button pressed. Sending data " + data);
+		webRtcPeer.send(data);
+		dataChannelSend.value = "";
+	});
 
-    channel = peerConnection.createDataChannel(getChannelName (), dataConstraints);
-	
-    channel.onopen = onSendChannelStateChange;
-    channel.onclose = onSendChannelStateChange;
+	function onOpen(event) {
+		dataChannelSend.disabled = false;
+		dataChannelSend.focus();
+		$('#send').attr('disabled', false);
+	}
 
-    function onSendChannelStateChange(){
-        if(!channel) return;
-        var readyState = channel.readyState;
-        console.log("sencChannel state changed to " + readyState);
-        if(readyState == 'open'){
-          dataChannelSend.disabled = false;
-          dataChannelSend.focus();
-          $('#send').attr('disabled', false);
-        } else {
-          dataChannelSend.disabled = true;
-          $('#send').attr('disabled', true);
-        }
-      }
-    
-    var sendButton = document.getElementById('send');
-    var dataChannelSend = document.getElementById('dataChannelSend');
+	function onClosed(event) {
+		dataChannelSend.disabled = true;
+		$('#send').attr('disabled', true);
+	}
 
-    sendButton.addEventListener("click", function(){
-        var data = dataChannelSend.value;
-        console.log("Send button pressed. Sending data " + data);
-        channel.send(data);
-        dataChannelSend.value = "";
-      });
-    
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
 
 	var options = {
-		peerConnection: peerConnection,
-		localVideo : videoInput,
-		remoteVideo : videoOutput,
-		onicecandidate : onIceCandidate
+			localVideo : videoInput,
+			remoteVideo : videoOutput,
+			dataChannelConfig: {
+				id : getChannelName(),
+				onopen : onOpen,
+				onclose : onClosed
+			},
+			dataChannels : true,
+			onicecandidate : onIceCandidate
 	}
+
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
 			function(error) {
-				if (error) {
-					return console.error(error);
-				}
-				webRtcPeer.generateOffer(onOffer);
-			});
-}
-
-function closeChannels(){
-
-	if(channel){
-	  channel.close();
-	  $('#dataChannelSend').disabled = true;
-	  $('#send').attr('disabled', true);
-	  channel = null;
-	}
+		if (error) {
+			return console.error(error);
+		}
+		webRtcPeer.generateOffer(onOffer);
+	});
 }
 
 function onOffer(error, offerSdp) {
@@ -148,8 +128,8 @@ function onOffer(error, offerSdp) {
 		return console.error("Error generating the offer");
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
-		id : 'start',
-		sdpOffer : offerSdp
+			id : 'start',
+			sdpOffer : offerSdp
 	}
 	sendMessage(message);
 }
@@ -162,8 +142,8 @@ function onIceCandidate(candidate) {
 	console.log("Local candidate" + JSON.stringify(candidate));
 
 	var message = {
-		id : 'onIceCandidate',
-		candidate : candidate
+			id : 'onIceCandidate',
+			candidate : candidate
 	};
 	sendMessage(message);
 }
@@ -182,13 +162,12 @@ function stop() {
 	console.log("Stopping video call ...");
 	setState(I_CAN_START);
 	if (webRtcPeer) {
-	    closeChannels();
-	    
+
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 
 		var message = {
-			id : 'stop'
+				id : 'stop'
 		}
 		sendMessage(message);
 	}
@@ -219,7 +198,7 @@ function setState(nextState) {
 
 	default:
 		onError("Unknown state " + nextState);
-		return;
+	return;
 	}
 	state = nextState;
 }
