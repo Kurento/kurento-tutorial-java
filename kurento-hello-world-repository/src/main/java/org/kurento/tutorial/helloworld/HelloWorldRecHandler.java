@@ -25,10 +25,10 @@ import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
 import org.kurento.client.WebRtcEndpoint;
@@ -90,32 +90,32 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
     }
 
     switch (jsonMessage.get("id").getAsString()) {
-    case "start":
-      start(session, jsonMessage);
-      break;
-    case "stop":
-    case "stopPlay":
-      if (user != null) {
-        user.release();
-      }
-      break;
-    case "play":
-      play(user, session, jsonMessage);
-      break;
-    case "onIceCandidate": {
-      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+      case "start":
+        start(session, jsonMessage);
+        break;
+      case "stop":
+      case "stopPlay":
+        if (user != null) {
+          user.release();
+        }
+        break;
+      case "play":
+        play(user, session, jsonMessage);
+        break;
+      case "onIceCandidate": {
+        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
-      if (user != null) {
-        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-            jsonCandidate.get("sdpMid").getAsString(),
-            jsonCandidate.get("sdpMLineIndex").getAsInt());
-        user.addCandidate(candidate);
+        if (user != null) {
+          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+              jsonCandidate.get("sdpMid").getAsString(),
+              jsonCandidate.get("sdpMLineIndex").getAsInt());
+          user.addCandidate(candidate);
+        }
+        break;
       }
-      break;
-    }
-    default:
-      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-      break;
+      default:
+        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+        break;
     }
   }
 
@@ -151,7 +151,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(pipeline).build();
       webRtcEndpoint.connect(webRtcEndpoint);
       RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, repoItem.getUrl())
-          .withMediaProfile(MediaProfileSpecType.WEBM).build();
+      .withMediaProfile(MediaProfileSpecType.WEBM).build();
       webRtcEndpoint.connect(recorder);
 
       // 2. Store user session
@@ -166,9 +166,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
       // 4. Gather ICE candidates
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -214,7 +215,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
                   "Waiting for {}ms before requesting the repository read endpoint "
                       + "(requires {}ms before upload is considered terminated "
                       + "and only {}ms have passed)",
-                  REPOSITORY_DISCONNECT_TIMEOUT - diff, REPOSITORY_DISCONNECT_TIMEOUT, diff);
+                      REPOSITORY_DISCONNECT_TIMEOUT - diff, REPOSITORY_DISCONNECT_TIMEOUT, diff);
               Thread.sleep(REPOSITORY_DISCONNECT_TIMEOUT - diff);
             }
           } else {
@@ -268,9 +269,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       response.addProperty("sdpAnswer", sdpAnswer);
 
       // 4. Gather ICE candidates
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));

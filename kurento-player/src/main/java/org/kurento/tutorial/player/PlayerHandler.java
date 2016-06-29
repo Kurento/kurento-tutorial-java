@@ -24,11 +24,11 @@ import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaState;
 import org.kurento.client.MediaStateChangedEvent;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.VideoInfo;
 import org.kurento.client.WebRtcEndpoint;
@@ -118,9 +118,10 @@ public class PlayerHandler extends TextWebSocketHandler {
 
     // 2. WebRtcEndpoint
     // ICE candidates
-    webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+    webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
       @Override
-      public void onEvent(OnIceCandidateEvent event) {
+      public void onEvent(IceCandidateFoundEvent event) {
         JsonObject response = new JsonObject();
         response.addProperty("id", "iceCandidate");
         response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -249,8 +250,9 @@ public class PlayerHandler extends TextWebSocketHandler {
 
     if (user != null) {
       JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
-      IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-          jsonCandidate.get("sdpMid").getAsString(), jsonCandidate.get("sdpMLineIndex").getAsInt());
+      IceCandidate candidate =
+          new IceCandidate(jsonCandidate.get("candidate").getAsString(), jsonCandidate
+              .get("sdpMid").getAsString(), jsonCandidate.get("sdpMLineIndex").getAsInt());
       user.getWebRtcEndpoint().addIceCandidate(candidate);
     }
   }

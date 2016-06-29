@@ -22,8 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +89,9 @@ public class CallHandler extends TextWebSocketHandler {
       case "onIceCandidate": {
         JsonObject candidate = jsonMessage.get("candidate").getAsJsonObject();
         if (user != null) {
-          IceCandidate cand = new IceCandidate(candidate.get("candidate").getAsString(),
-              candidate.get("sdpMid").getAsString(), candidate.get("sdpMLineIndex").getAsInt());
+          IceCandidate cand =
+              new IceCandidate(candidate.get("candidate").getAsString(), candidate.get("sdpMid")
+                  .getAsString(), candidate.get("sdpMLineIndex").getAsInt());
           user.addCandidate(cand);
         }
         break;
@@ -173,10 +174,11 @@ public class CallHandler extends TextWebSocketHandler {
         pipelines.put(callee.getSessionId(), pipeline);
 
         callee.setWebRtcEndpoint(pipeline.getCalleeWebRtcEp());
-        pipeline.getCalleeWebRtcEp()
-            .addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+        pipeline.getCalleeWebRtcEp().addIceCandidateFoundListener(
+            new EventListener<IceCandidateFoundEvent>() {
+
               @Override
-              public void onEvent(OnIceCandidateEvent event) {
+              public void onEvent(IceCandidateFoundEvent event) {
                 JsonObject response = new JsonObject();
                 response.addProperty("id", "iceCandidate");
                 response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -191,11 +193,11 @@ public class CallHandler extends TextWebSocketHandler {
             });
 
         calleer.setWebRtcEndpoint(pipeline.getCallerWebRtcEp());
-        pipeline.getCallerWebRtcEp()
-            .addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+        pipeline.getCallerWebRtcEp().addIceCandidateFoundListener(
+            new EventListener<IceCandidateFoundEvent>() {
 
               @Override
-              public void onEvent(OnIceCandidateEvent event) {
+              public void onEvent(IceCandidateFoundEvent event) {
                 JsonObject response = new JsonObject();
                 response.addProperty("id", "iceCandidate");
                 response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -273,18 +275,18 @@ public class CallHandler extends TextWebSocketHandler {
       // message will be sent to the other peer.
       UserSession stopperUser = registry.getBySession(session);
       if (stopperUser != null) {
-        UserSession stoppedUser = (stopperUser.getCallingFrom() != null)
-            ? registry.getByName(stopperUser.getCallingFrom())
-            : stopperUser.getCallingTo() != null ? registry.getByName(stopperUser.getCallingTo())
-                : null;
+        UserSession stoppedUser =
+            (stopperUser.getCallingFrom() != null) ? registry.getByName(stopperUser
+                .getCallingFrom()) : stopperUser.getCallingTo() != null ? registry
+                    .getByName(stopperUser.getCallingTo()) : null;
 
-        if (stoppedUser != null) {
-          JsonObject message = new JsonObject();
-          message.addProperty("id", "stopCommunication");
-          stoppedUser.sendMessage(message);
-          stoppedUser.clear();
-        }
-        stopperUser.clear();
+                    if (stoppedUser != null) {
+                      JsonObject message = new JsonObject();
+                      message.addProperty("id", "stopCommunication");
+                      stoppedUser.sendMessage(message);
+                      stoppedUser.clear();
+                    }
+                    stopperUser.clear();
       }
 
     }

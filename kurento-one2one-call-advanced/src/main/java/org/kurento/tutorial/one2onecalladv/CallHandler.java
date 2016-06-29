@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,8 +87,9 @@ public class CallHandler extends TextWebSocketHandler {
         JsonObject candidate = jsonMessage.get("candidate").getAsJsonObject();
 
         if (user != null) {
-          IceCandidate cand = new IceCandidate(candidate.get("candidate").getAsString(),
-              candidate.get("sdpMid").getAsString(), candidate.get("sdpMLineIndex").getAsInt());
+          IceCandidate cand =
+              new IceCandidate(candidate.get("candidate").getAsString(), candidate.get("sdpMid")
+                  .getAsString(), candidate.get("sdpMLineIndex").getAsInt());
           user.addCandidate(cand);
         }
         break;
@@ -163,11 +164,11 @@ public class CallHandler extends TextWebSocketHandler {
       pipelines.put(callee.getSessionId(), callMediaPipeline.getPipeline());
 
       callee.setWebRtcEndpoint(callMediaPipeline.getCalleeWebRtcEp());
-      callMediaPipeline.getCalleeWebRtcEp()
-          .addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      callMediaPipeline.getCalleeWebRtcEp().addIceCandidateFoundListener(
+          new EventListener<IceCandidateFoundEvent>() {
 
             @Override
-            public void onEvent(OnIceCandidateEvent event) {
+            public void onEvent(IceCandidateFoundEvent event) {
               JsonObject response = new JsonObject();
               response.addProperty("id", "iceCandidate");
               response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -196,11 +197,11 @@ public class CallHandler extends TextWebSocketHandler {
       String callerSdpOffer = registry.getByName(from).getSdpOffer();
 
       calleer.setWebRtcEndpoint(callMediaPipeline.getCallerWebRtcEp());
-      callMediaPipeline.getCallerWebRtcEp()
-          .addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      callMediaPipeline.getCallerWebRtcEp().addIceCandidateFoundListener(
+          new EventListener<IceCandidateFoundEvent>() {
 
             @Override
-            public void onEvent(OnIceCandidateEvent event) {
+            public void onEvent(IceCandidateFoundEvent event) {
               JsonObject response = new JsonObject();
               response.addProperty("id", "iceCandidate");
               response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -242,18 +243,18 @@ public class CallHandler extends TextWebSocketHandler {
     // message will be sent to the other peer.
     UserSession stopperUser = registry.getBySession(session);
     if (stopperUser != null) {
-      UserSession stoppedUser = (stopperUser.getCallingFrom() != null)
-          ? registry.getByName(stopperUser.getCallingFrom())
-          : stopperUser.getCallingTo() != null ? registry.getByName(stopperUser.getCallingTo())
-              : null;
+      UserSession stoppedUser =
+          (stopperUser.getCallingFrom() != null) ? registry.getByName(stopperUser.getCallingFrom())
+              : stopperUser.getCallingTo() != null ? registry.getByName(stopperUser.getCallingTo())
+                  : null;
 
-      if (stoppedUser != null) {
-        JsonObject message = new JsonObject();
-        message.addProperty("id", "stopCommunication");
-        stoppedUser.sendMessage(message);
-        stoppedUser.clear();
-      }
-      stopperUser.clear();
+              if (stoppedUser != null) {
+                JsonObject message = new JsonObject();
+                message.addProperty("id", "stopCommunication");
+                stoppedUser.sendMessage(message);
+                stoppedUser.clear();
+              }
+              stopperUser.clear();
     }
   }
 
@@ -268,10 +269,11 @@ public class CallHandler extends TextWebSocketHandler {
     session.setWebRtcEndpoint(null);
     session.setPlayingWebRtcEndpoint(null);
 
-    UserSession stoppedUser = (session.getCallingFrom() != null)
-        ? registry.getByName(session.getCallingFrom()) : registry.getByName(session.getCallingTo());
-    stoppedUser.setWebRtcEndpoint(null);
-    stoppedUser.setPlayingWebRtcEndpoint(null);
+    UserSession stoppedUser =
+        (session.getCallingFrom() != null) ? registry.getByName(session.getCallingFrom())
+            : registry.getByName(session.getCallingTo());
+        stoppedUser.setWebRtcEndpoint(null);
+        stoppedUser.setPlayingWebRtcEndpoint(null);
   }
 
   private void play(final UserSession session, JsonObject jsonMessage) throws IOException {
@@ -282,8 +284,8 @@ public class CallHandler extends TextWebSocketHandler {
     response.addProperty("id", "playResponse");
 
     if (registry.getByName(user) != null && registry.getBySession(session.getSession()) != null) {
-      final PlayMediaPipeline playMediaPipeline = new PlayMediaPipeline(kurento, user,
-          session.getSession());
+      final PlayMediaPipeline playMediaPipeline =
+          new PlayMediaPipeline(kurento, user, session.getSession());
 
       session.setPlayingWebRtcEndpoint(playMediaPipeline.getWebRtc());
 
@@ -296,11 +298,11 @@ public class CallHandler extends TextWebSocketHandler {
         }
       });
 
-      playMediaPipeline.getWebRtc()
-          .addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      playMediaPipeline.getWebRtc().addIceCandidateFoundListener(
+          new EventListener<IceCandidateFoundEvent>() {
 
             @Override
-            public void onEvent(OnIceCandidateEvent event) {
+            public void onEvent(IceCandidateFoundEvent event) {
               JsonObject response = new JsonObject();
               response.addProperty("id", "iceCandidate");
               response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -331,8 +333,8 @@ public class CallHandler extends TextWebSocketHandler {
 
     } else {
       response.addProperty("response", "rejected");
-      response.addProperty("error",
-          "No recording for user '" + user + "'. Please type a correct user in the 'Peer' field.");
+      response.addProperty("error", "No recording for user '" + user
+          + "'. Please type a correct user in the 'Peer' field.");
       session.getSession().sendMessage(new TextMessage(response.toString()));
     }
   }

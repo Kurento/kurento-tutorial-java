@@ -21,8 +21,8 @@ import java.io.IOException;
 
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -123,10 +123,10 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
 
     WebRtcEndpoint webRtcEndpoint = new WebRtcEndpoint.Builder(mediaPipeline).build();
 
-    webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+    webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
       @Override
-      public void onEvent(OnIceCandidateEvent event) {
+      public void onEvent(IceCandidateFoundEvent event) {
         JsonObject response = new JsonObject();
         response.addProperty("id", "iceCandidate");
         response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));

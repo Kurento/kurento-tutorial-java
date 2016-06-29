@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.kurento.client.EventListener;
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -101,9 +101,10 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
       users.put(session.getId(), user);
 
       // ICE candidates
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));

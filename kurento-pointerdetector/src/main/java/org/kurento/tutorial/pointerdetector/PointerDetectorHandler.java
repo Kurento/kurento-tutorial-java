@@ -22,9 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.kurento.module.pointerdetector.PointerDetectorFilter;
@@ -45,7 +45,7 @@ import com.google.gson.JsonObject;
 
 /**
  * Pointer Detector handler (application and media logic).
- * 
+ *
  * @author Boni Garcia (bgarcia@gsyc.es)
  * @author David Fernandez (d.fernandezlop@gmail.com)
  * @since 5.0.0
@@ -119,10 +119,10 @@ public class PointerDetectorHandler extends TextWebSocketHandler {
       user.setWebRtcEndpoint(webRtcEndpoint);
       users.put(session.getId(), user);
 
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -140,10 +140,10 @@ public class PointerDetectorHandler extends TextWebSocketHandler {
           new WindowParam(5, 5, 30, 30)).build();
 
       pointerDetectorFilter
-          .addWindow(new PointerDetectorWindowMediaParam("window0", 50, 50, 500, 150));
+      .addWindow(new PointerDetectorWindowMediaParam("window0", 50, 50, 500, 150));
 
       pointerDetectorFilter
-          .addWindow(new PointerDetectorWindowMediaParam("window1", 50, 50, 500, 250));
+      .addWindow(new PointerDetectorWindowMediaParam("window1", 50, 50, 500, 250));
 
       webRtcEndpoint.connect(pointerDetectorFilter);
       pointerDetectorFilter.connect(webRtcEndpoint);

@@ -22,9 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -90,8 +90,9 @@ public class CallHandler extends TextWebSocketHandler {
           }
         }
         if (user != null) {
-          IceCandidate cand = new IceCandidate(candidate.get("candidate").getAsString(),
-              candidate.get("sdpMid").getAsString(), candidate.get("sdpMLineIndex").getAsInt());
+          IceCandidate cand =
+              new IceCandidate(candidate.get("candidate").getAsString(), candidate.get("sdpMid")
+                  .getAsString(), candidate.get("sdpMLineIndex").getAsInt());
           user.addCandidate(cand);
         }
         break;
@@ -125,10 +126,10 @@ public class CallHandler extends TextWebSocketHandler {
 
       WebRtcEndpoint presenterWebRtc = presenterUserSession.getWebRtcEndpoint();
 
-      presenterWebRtc.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      presenterWebRtc.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -189,10 +190,10 @@ public class CallHandler extends TextWebSocketHandler {
 
       WebRtcEndpoint nextWebRtc = new WebRtcEndpoint.Builder(pipeline).build();
 
-      nextWebRtc.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      nextWebRtc.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -225,8 +226,7 @@ public class CallHandler extends TextWebSocketHandler {
 
   private synchronized void stop(WebSocketSession session) throws IOException {
     String sessionId = session.getId();
-    if (presenterUserSession != null
-        && presenterUserSession.getSession().getId().equals(sessionId)) {
+    if (presenterUserSession != null && presenterUserSession.getSession().getId().equals(sessionId)) {
       for (UserSession viewer : viewers.values()) {
         JsonObject response = new JsonObject();
         response.addProperty("id", "stopCommunication");

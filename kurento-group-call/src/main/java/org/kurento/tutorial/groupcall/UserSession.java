@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentMap;
 import org.kurento.client.Continuation;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -63,10 +63,10 @@ public class UserSession implements Closeable {
     this.roomName = roomName;
     this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
 
-    this.outgoingMedia.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+    this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
       @Override
-      public void onEvent(OnIceCandidateEvent event) {
+      public void onEvent(IceCandidateFoundEvent event) {
         JsonObject response = new JsonObject();
         response.addProperty("id", "iceCandidate");
         response.addProperty("name", name);
@@ -133,10 +133,10 @@ public class UserSession implements Closeable {
       log.debug("PARTICIPANT {}: creating new endpoint for {}", this.name, sender.getName());
       incoming = new WebRtcEndpoint.Builder(pipeline).build();
 
-      incoming.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      incoming.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.addProperty("name", sender.getName());
@@ -172,8 +172,8 @@ public class UserSession implements Closeable {
     incoming.release(new Continuation<Void>() {
       @Override
       public void onSuccess(Void result) throws Exception {
-        log.trace("PARTICIPANT {}: Released successfully incoming EP for {}", UserSession.this.name,
-            senderName);
+        log.trace("PARTICIPANT {}: Released successfully incoming EP for {}",
+            UserSession.this.name, senderName);
       }
 
       @Override

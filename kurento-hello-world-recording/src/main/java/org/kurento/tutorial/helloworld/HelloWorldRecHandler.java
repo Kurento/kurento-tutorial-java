@@ -21,11 +21,11 @@ import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.MediaType;
-import org.kurento.client.OnIceCandidateEvent;
 import org.kurento.client.PausedEvent;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
@@ -81,35 +81,35 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
     }
 
     switch (jsonMessage.get("id").getAsString()) {
-    case "start":
-      start(session, jsonMessage);
-      break;
-    case "stop":
-      if (user != null) {
-        user.stop();
-      }
-    case "stopPlay":
-      if (user != null) {
-        user.release();
-      }
-      break;
-    case "play":
-      play(user, session, jsonMessage);
-      break;
-    case "onIceCandidate": {
-      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
+      case "start":
+        start(session, jsonMessage);
+        break;
+      case "stop":
+        if (user != null) {
+          user.stop();
+        }
+      case "stopPlay":
+        if (user != null) {
+          user.release();
+        }
+        break;
+      case "play":
+        play(user, session, jsonMessage);
+        break;
+      case "onIceCandidate": {
+        JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
 
-      if (user != null) {
-        IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-            jsonCandidate.get("sdpMid").getAsString(),
-            jsonCandidate.get("sdpMLineIndex").getAsInt());
-        user.addCandidate(candidate);
+        if (user != null) {
+          IceCandidate candidate = new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+              jsonCandidate.get("sdpMid").getAsString(),
+              jsonCandidate.get("sdpMLineIndex").getAsInt());
+          user.addCandidate(candidate);
+        }
+        break;
       }
-      break;
-    }
-    default:
-      sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
-      break;
+      default:
+        sendError(session, "Invalid message with id " + jsonMessage.get("id").getAsString());
+        break;
     }
   }
 
@@ -130,7 +130,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       MediaProfileSpecType profile = getMediaProfileFromMessage(jsonMessage);
 
       RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, RECORDER_FILE_PATH)
-          .withMediaProfile(profile).build();
+      .withMediaProfile(profile).build();
 
       recorder.addRecordingListener(new EventListener<RecordingEvent>() {
 
@@ -197,9 +197,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
 
       // 4. Gather ICE candidates
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -234,14 +235,14 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
 
     MediaProfileSpecType profile;
     switch (jsonMessage.get("mode").getAsString()) {
-    case "audio-only":
-      profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
-      break;
-    case "video-only":
-      profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
-      break;
-    default:
-      profile = MediaProfileSpecType.WEBM;
+      case "audio-only":
+        profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
+        break;
+      case "video-only":
+        profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
+        break;
+      default:
+        profile = MediaProfileSpecType.WEBM;
     }
 
     return profile;
@@ -250,18 +251,18 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
   private void connectAccordingToProfile(WebRtcEndpoint webRtcEndpoint, RecorderEndpoint recorder,
       MediaProfileSpecType profile) {
     switch (profile) {
-    case WEBM:
-      webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-      webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-      break;
-    case WEBM_AUDIO_ONLY:
-      webRtcEndpoint.connect(recorder, MediaType.AUDIO);
-      break;
-    case WEBM_VIDEO_ONLY:
-      webRtcEndpoint.connect(recorder, MediaType.VIDEO);
-      break;
-    default:
-      throw new UnsupportedOperationException("Unsupported profile for this tutorial: " + profile);
+      case WEBM:
+        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
+        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
+        break;
+      case WEBM_AUDIO_ONLY:
+        webRtcEndpoint.connect(recorder, MediaType.AUDIO);
+        break;
+      case WEBM_VIDEO_ONLY:
+        webRtcEndpoint.connect(recorder, MediaType.VIDEO);
+        break;
+      default:
+        throw new UnsupportedOperationException("Unsupported profile for this tutorial: " + profile);
     }
   }
 
@@ -303,9 +304,10 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       response.addProperty("sdpAnswer", sdpAnswer);
 
       // 4. Gather ICE candidates
-      webRtcEndpoint.addOnIceCandidateListener(new EventListener<OnIceCandidateEvent>() {
+      webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
         @Override
-        public void onEvent(OnIceCandidateEvent event) {
+        public void onEvent(IceCandidateFoundEvent event) {
           JsonObject response = new JsonObject();
           response.addProperty("id", "iceCandidate");
           response.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
