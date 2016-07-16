@@ -10,7 +10,6 @@
 
 	<groupId>org.kurento.tutorial</groupId>
 	<artifactId>kurento-tutorial</artifactId>
-	<version>6.5.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Kurento Java Client Tutorials</name>
@@ -49,6 +48,13 @@
 
 	<properties>
 		<version.kurento-datachannelexample>6.5.1-SNAPSHOT</version.kurento-datachannelexample>
+		<webjars-locator.version>0.32</webjars-locator.version>
+		<bootstrap.version>3.3.6</bootstrap.version>
+		<draggabilly.version>2.1.0</draggabilly.version>
+		<demo-console.version>1.5.1</demo-console.version>
+		<adapter.js.version>0.2.9</adapter.js.version>
+		<jquery.version>1.12.3</jquery.version>
+		<ekko-lightbox.version>4.0.2</ekko-lightbox.version>
 	</properties>
 
 	<dependencyManagement>
@@ -57,6 +63,41 @@
 				<groupId>org.kurento.module</groupId>
 				<artifactId>datachannelexample</artifactId>
 				<version>${version.kurento-datachannelexample}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>webjars-locator</artifactId>
+				<version>${webjars-locator.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>bootstrap</artifactId>
+				<version>${bootstrap.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>draggabilly</artifactId>
+				<version>${draggabilly.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>demo-console</artifactId>
+				<version>${demo-console.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>adapter.js</artifactId>
+				<version>${adapter.js.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>jquery</artifactId>
+				<version>${jquery.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bower</groupId>
+				<artifactId>ekko-lightbox</artifactId>
+				<version>${ekko-lightbox.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

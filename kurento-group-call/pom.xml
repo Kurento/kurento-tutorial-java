@@ -50,7 +50,6 @@
 
 		<!-- Main class -->
 		<start-class>org.kurento.tutorial.groupcall.GroupCallApp</start-class>
-
 	</properties>
 
 
@@ -72,6 +71,14 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-utils-js</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>adapter.js</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -95,35 +102,8 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>exec-bower-install</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>bower</executable>
-							<workingDirectory>${project.build.directory}/classes</workingDirectory>
-							<arguments>
-								<argument>install</argument>
-								<argument>--allow-root</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
 				<configuration>
 					<mainClass>${start-class}</mainClass>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/resources/static/bower_components</directory>
-						</fileset>
-					</filesets>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -138,13 +118,6 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>banner.txt</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>.</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>bower.json</include>
 				</includes>
 			</resource>
 		</resources>
