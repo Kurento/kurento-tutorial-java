@@ -17,11 +17,15 @@
 
 var ws = new WebSocket('wss://' + location.host + '/call');
 var video;
+var audio;
+var modeSelect;
 var webRtcPeer;
 
 window.onload = function() {
 	console = new Console();
 	video = document.getElementById('video');
+	audio = document.getElementById('audio');
+	modeSelect = document.getElementById('modeSelect');
 	disableStopButton();
 }
 
@@ -64,6 +68,10 @@ function presenterResponse(message) {
 			if (error)
 				return console.error(error);
 		});
+		
+		if(modeSelect.value == 'audio') {
+			hideSpinner();
+		}
 	}
 }
 
@@ -77,16 +85,30 @@ function viewerResponse(message) {
 			if (error)
 				return console.error(error);
 		});
+		if(modeSelect.value == 'audio') {
+			hideSpinner();
+		}
 	}
 }
 
 function presenter() {
 	if (!webRtcPeer) {
-		showSpinner(video);
-
-		var options = {
-			localVideo : video,
-			onicecandidate : onIceCandidate
+		var options;
+		
+		if(modeSelect.value == 'audio') {
+			options = {
+				localVideo : audio,
+				onicecandidate : onIceCandidate,
+				mediaConstraints: {
+					audio: true,
+					video: false
+				}
+			};
+		} else {
+			options = {
+				localVideo : video,
+				onicecandidate : onIceCandidate,
+			};
 		}
 		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options,
 				function(error) {
@@ -106,6 +128,7 @@ function onOfferPresenter(error, offerSdp) {
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
 		id : 'presenter',
+		modeSelect: modeSelect.value,
 		sdpOffer : offerSdp
 	}
 	sendMessage(message);
@@ -113,11 +136,22 @@ function onOfferPresenter(error, offerSdp) {
 
 function viewer() {
 	if (!webRtcPeer) {
-		showSpinner(video);
-
-		var options = {
-			remoteVideo : video,
-			onicecandidate : onIceCandidate
+		var options;
+		
+		if(modeSelect.value == 'audio') {
+			options = {
+				remoteVideo : audio,
+				onicecandidate : onIceCandidate,
+				mediaConstraints: {
+					audio: true,
+					video: false
+				}
+			};
+		} else {
+			options = {
+				remoteVideo : video,
+				onicecandidate : onIceCandidate,
+			};
 		}
 		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
 				function(error) {
@@ -194,7 +228,7 @@ function enableButton(id, functionName) {
 
 function sendMessage(message) {
 	var jsonMessage = JSON.stringify(message);
-	console.log('Senging message: ' + jsonMessage);
+	console.log('Sending message: ' + jsonMessage);
 	ws.send(jsonMessage);
 }
 

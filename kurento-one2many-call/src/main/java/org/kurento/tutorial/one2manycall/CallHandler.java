@@ -25,6 +25,7 @@ import org.kurento.client.IceCandidate;
 import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.MediaType;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ public class CallHandler extends TextWebSocketHandler {
 
   private MediaPipeline pipeline;
   private UserSession presenterUserSession;
+  private MediaType mediaType = MediaType.VIDEO;
 
   @Override
   public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -119,6 +121,7 @@ public class CallHandler extends TextWebSocketHandler {
   private synchronized void presenter(final WebSocketSession session, JsonObject jsonMessage)
       throws IOException {
     if (presenterUserSession == null) {
+      
       presenterUserSession = new UserSession(session);
 
       pipeline = kurento.createMediaPipeline();
@@ -143,7 +146,11 @@ public class CallHandler extends TextWebSocketHandler {
         }
       });
 
+      boolean audioOnly = jsonMessage.has("modeSelect") && "audio".equals(jsonMessage.get("modeSelect").getAsString());
+      mediaType = audioOnly ? MediaType.AUDIO : MediaType.VIDEO;
+      
       String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer").getAsString();
+      
       String sdpAnswer = presenterWebRtc.processOffer(sdpOffer);
 
       JsonObject response = new JsonObject();
@@ -208,7 +215,7 @@ public class CallHandler extends TextWebSocketHandler {
       });
 
       viewer.setWebRtcEndpoint(nextWebRtc);
-      presenterUserSession.getWebRtcEndpoint().connect(nextWebRtc);
+      presenterUserSession.getWebRtcEndpoint().connect(nextWebRtc, mediaType);
       String sdpOffer = jsonMessage.getAsJsonPrimitive("sdpOffer").getAsString();
       String sdpAnswer = nextWebRtc.processOffer(sdpOffer);
 
