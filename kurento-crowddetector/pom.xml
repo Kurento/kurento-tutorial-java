@@ -58,6 +58,7 @@
 				<configuration>
 					<mainClass>${start-class}</mainClass>
 					<layout>ZIP</layout>
+					<classifier>exec</classifier>
 				</configuration>
 				<executions>
 					<execution>
