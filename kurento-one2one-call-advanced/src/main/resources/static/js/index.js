@@ -110,8 +110,8 @@ ws.onmessage = function(message) {
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
-	case 'resgisterResponse':
-		resgisterResponse(parsedMessage);
+	case 'registerResponse':
+		registerResponse(parsedMessage);
 		break;
 	case 'callResponse':
 		callResponse(parsedMessage);
@@ -143,7 +143,7 @@ ws.onmessage = function(message) {
 	}
 }
 
-function resgisterResponse(message) {
+function registerResponse(message) {
 	if (message.response == 'accepted') {
 		setRegisterState(REGISTERED);
 		document.getElementById('peer').focus();

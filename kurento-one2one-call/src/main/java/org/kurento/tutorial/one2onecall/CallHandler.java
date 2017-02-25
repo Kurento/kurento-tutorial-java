@@ -73,7 +73,7 @@ public class CallHandler extends TextWebSocketHandler {
         try {
           register(session, jsonMessage);
         } catch (Throwable t) {
-          handleErrorResponse(t, session, "resgisterResponse");
+          handleErrorResponse(t, session, "registerResponse");
         }
         break;
       case "call":
@@ -129,7 +129,7 @@ public class CallHandler extends TextWebSocketHandler {
     }
 
     JsonObject response = new JsonObject();
-    response.addProperty("id", "resgisterResponse");
+    response.addProperty("id", "registerResponse");
     response.addProperty("response", responseMsg);
     caller.sendMessage(response);
   }
