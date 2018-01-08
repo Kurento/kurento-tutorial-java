@@ -25,31 +25,32 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 /**
- * Play an RTP stream (main).
- *
- * @author Boni Garcia (bgarcia@gsyc.es)
- * @since 6.1.1
+ * Kurento Java Tutorial - Main Application class.
  */
 @SpringBootApplication
 @EnableWebSocket
-public class Application implements WebSocketConfigurer {
-
+public class Application implements WebSocketConfigurer
+{
   @Bean
-  public PlayerHandler handler() {
+  public PlayerHandler handler()
+  {
     return new PlayerHandler();
   }
 
   @Bean
-  public KurentoClient kurentoClient() {
+  public KurentoClient kurentoClient()
+  {
     return KurentoClient.create();
   }
 
   @Override
-  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+  public void registerWebSocketHandlers(WebSocketHandlerRegistry registry)
+  {
     registry.addHandler(handler(), "/player");
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception
+  {
     SpringApplication.run(Application.class, args);
   }
 }
