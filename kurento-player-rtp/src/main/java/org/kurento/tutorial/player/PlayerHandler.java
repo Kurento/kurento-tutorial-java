@@ -41,6 +41,10 @@ import org.kurento.client.RtpEndpoint;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.jsonrpc.JsonUtils;
 
+// Kurento crypto
+import org.kurento.client.CryptoSuite;
+import org.kurento.client.SDES;
+
 // Kurento events
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.IceCandidateFoundEvent;
@@ -200,6 +204,33 @@ public class PlayerHandler extends TextWebSocketHandler
     webRtcEndpoint.gatherCandidates();
   }
 
+  private RtpEndpoint makeRtpEndpoint(MediaPipeline pipeline, Boolean useSrtp)
+  {
+    if (!useSrtp) {
+      return new RtpEndpoint.Builder(pipeline).build();
+    }
+
+    // ---- SRTP configuration BEGIN ----
+    // This is used by KMS to encrypt its SRTP/SRTCP packets.
+    // Encryption key used by receiver (ASCII): "4321ZYXWVUTSRQPONMLKJIHGFEDCBA"
+    // In Base64: "NDMyMVpZWFdWVVRTUlFQT05NTEtKSUhHRkVEQ0JB"
+    CryptoSuite srtpCrypto = CryptoSuite.AES_128_CM_HMAC_SHA1_80;
+    // CryptoSuite crypto = CryptoSuite.AES_256_CM_HMAC_SHA1_80;
+
+    // You can provide the SRTP Master Key in either plain text or Base64.
+    // The second form allows providing binary, non-ASCII keys.
+    String srtpMasterKeyAscii = "4321ZYXWVUTSRQPONMLKJIHGFEDCBA";
+    // String srtpMasterKeyBase64 = "NDMyMVpZWFdWVVRTUlFQT05NTEtKSUhHRkVEQ0JB";
+    // ---- SRTP configuration END ----
+
+    SDES sdes = new SDES();
+    sdes.setCrypto(srtpCrypto);
+    sdes.setKey(srtpMasterKeyAscii);
+    // sdes.setKeyBase64(srtpMasterKeyBase64);
+
+    return new RtpEndpoint.Builder(pipeline).withCrypto(sdes).build();
+  }
+
   /*
   RtpEndpoint configuration.
   Controls the SDP Offer/Answer negotiation between a 3rd-party RTP sender
@@ -208,9 +239,11 @@ public class PlayerHandler extends TextWebSocketHandler
   that KMS will use to listen for packets.
   */
   private void startRtpEndpoint(final WebSocketSession session,
-      RtpEndpoint rtpEndpoint)
+      RtpEndpoint rtpEndpoint, Boolean useComedia, Boolean useSrtp)
   {
-    log.info("[Handler::startRtpEndpoint] Configure RtpEndpoint");
+    log.info("[Handler::startRtpEndpoint]"
+        + " Configure RtpEndpoint, port discovery: {}, SRTP: {}",
+        useComedia, useSrtp);
 
     // Event: Some error happened
     rtpEndpoint.addErrorListener(new EventListener<ErrorEvent>() {
@@ -222,9 +255,8 @@ public class PlayerHandler extends TextWebSocketHandler
     });
 
 
-    // ---- CONFIGURATION BEGIN ----
+    // ---- RTP configuration BEGIN ----
     // Set the appropriate values for your setup
-    boolean useComedia = true;
     String senderIp = "127.0.0.1";
     int senderRtpPortA = 5006;
     int senderRtpPortV = 5004;
@@ -233,8 +265,7 @@ public class PlayerHandler extends TextWebSocketHandler
     String senderCname = "user@example.com";
     String senderCodecV = "H264";
     // String senderCodecV = "VP8";
-    // ---- CONFIGURATION END ----
-
+    // ---- RTP configuration END ----
 
     /*
     OPTIONAL: Set maximum bandwidth on reception.
@@ -244,16 +275,28 @@ public class PlayerHandler extends TextWebSocketHandler
     // log.info("[Handler::startRtpEndpoint] Limit output bandwidth: 1024 kbps");
     // rtpEndpoint.setMaxVideoRecvBandwidth(1024); // In kbps (1000 bps)
 
+    String sdpComediaAttr = "";
     if (useComedia) {
       // Use Discard port (9)
       senderRtpPortA = 9;
       senderRtpPortV = 9;
+
+      // Inspired by RFC 4145 Draft 05 ("COMEDIA")
+      sdpComediaAttr = "a=direction:active\r\n";
     }
 
-    String sdpComediaStr = "";
-    if (useComedia) {
-      // Inspired by RFC 4145 Draft 05 ("COMEDIA")
-      sdpComediaStr = "a=direction:active\r\n";
+    Boolean useAudio = true;
+    String senderProtocol = "RTP/AVPF";
+    String sdpCryptoAttr = "";
+    if (useSrtp) {
+      // Use SRTP protocol
+      useAudio = false;  // This demo uses audio only for non-SRTP streams
+      senderProtocol = "RTP/SAVPF";
+
+      // This is used by KMS to decrypt the sender's SRTP/SRTCP
+      // Encryption key used by sender (ASCII): "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234"
+      // In Base64: "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVoxMjM0"
+      sdpCryptoAttr = "a=crypto:2 AES_CM_128_HMAC_SHA1_80 inline:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVoxMjM0|2^31|1:1\r\n";
     }
 
 /*
@@ -280,48 +323,64 @@ Some default values are defined by different RFCs:
 */
 
     String rtpSdpOffer =
-      "v=0\r\n"
-      + "o=- 0 0 IN IP4 " + senderIp + "\r\n"
-      + "s=-\r\n"
-      + "c=IN IP4 " + senderIp + "\r\n"
-      + "t=0 0\r\n"
-      + "m=audio " + senderRtpPortA + " RTP/AVPF 96\r\n"
-      + "a=rtpmap:96 opus/48000/2\r\n"
-      + "a=sendonly\r\n"
-      + sdpComediaStr
-      + "a=ssrc:" + senderSsrcA + " cname:" + senderCname + "\r\n"
-      + "m=video " + senderRtpPortV + " RTP/AVPF 103\r\n"
-      + "a=rtpmap:103 " + senderCodecV + "/90000\r\n"
-      + "a=rtcp-fb:103 goog-remb\r\n"
-      + "a=sendonly\r\n"
-      + sdpComediaStr
-      + "a=ssrc:" + senderSsrcV + " cname:" + senderCname + "\r\n"
-      + "";
+        "v=0\r\n"
+        + "o=- 0 0 IN IP4 " + senderIp + "\r\n"
+        + "s=-\r\n"
+        + "c=IN IP4 " + senderIp + "\r\n"
+        + "t=0 0\r\n";
+
+    if (useAudio) {
+      rtpSdpOffer +=
+          "m=audio " + senderRtpPortA + " RTP/AVPF 96\r\n"
+          + "a=rtpmap:96 opus/48000/2\r\n"
+          + "a=sendonly\r\n"
+          + sdpComediaAttr
+          + "a=ssrc:" + senderSsrcA + " cname:" + senderCname + "\r\n";
+    }
+
+    rtpSdpOffer +=
+        "m=video " + senderRtpPortV + " " + senderProtocol + " 103\r\n"
+        + sdpCryptoAttr
+        + "a=rtpmap:103 " + senderCodecV + "/90000\r\n"
+        + "a=rtcp-fb:103 goog-remb\r\n"
+        + "a=sendonly\r\n"
+        + sdpComediaAttr
+        + "a=ssrc:" + senderSsrcV + " cname:" + senderCname + "\r\n"
+        + "";
 
     // Send the SDP Offer to KMS, and get its negotiated SDP Answer
     String rtpSdpAnswer = rtpEndpoint.processOffer(rtpSdpOffer);
 
-    log.info("[Handler::startRtpEndpoint] SDP Answer from KMS to App:\n{}",
-        rtpSdpAnswer);
     log.info("[Handler::startRtpEndpoint] Fake SDP Offer from App to KMS:\n{}",
         rtpSdpOffer);
+    log.info("[Handler::startRtpEndpoint] SDP Answer from KMS to App:\n{}",
+        rtpSdpAnswer);
 
     // Parse SDP Answer
     // NOTE: No error checking; this code assumes that the SDP Answer from KMS
     // is always well formed.
     Pattern p; Matcher m;
 
-    p = Pattern.compile("m=audio (\\d+) RTP");
-    m = p.matcher(rtpSdpAnswer);
-    m.find();
-    int kmsRtpPortA = Integer.parseInt(m.group(1));
-    int senderRtcpPortA = senderRtpPortA + 1;
+    int kmsRtpPortA = 0;
+    int senderRtcpPortA = 0;
+    if (useAudio) {
+      p = Pattern.compile("m=audio (\\d+) RTP");
+      m = p.matcher(rtpSdpAnswer);
+      m.find();
+      kmsRtpPortA = Integer.parseInt(m.group(1));
+      senderRtcpPortA = senderRtpPortA + 1;
+    }
 
     p = Pattern.compile("m=video (\\d+) RTP");
     m = p.matcher(rtpSdpAnswer);
     m.find();
     int kmsRtpPortV = Integer.parseInt(m.group(1));
     int senderRtcpPortV = senderRtpPortV + 1;
+
+    p = Pattern.compile("a=ssrc:(\\d+)");
+    m = p.matcher(rtpSdpAnswer);
+    m.find();
+    String kmsSsrcV = m.group(1);
 
     p = Pattern.compile("c=IN IP4 (([0-9]{1,3}\\.){3}[0-9]{1,3})");
     m = p.matcher(rtpSdpAnswer);
@@ -331,33 +390,42 @@ Some default values are defined by different RFCs:
     // Check if KMS accepted the use of "direction" attribute
     useComedia = rtpSdpAnswer.contains("a=direction:passive");
 
-    String msgRtcp;
+    String msgConnInfo = "SDP negotiation finished\n";
+    if (useAudio) {
+      msgConnInfo += String.format(
+          "* KMS listens for Audio RTP at port: %d\n", kmsRtpPortA);
+    }
+    msgConnInfo += String.format(
+        "* KMS listens for Video RTP at port: %d\n", kmsRtpPortV);
+    if (useAudio) {
+      msgConnInfo += String.format(
+          "* KMS expects Audio SSRC from sender: %d\n", senderSsrcA);
+    }
+    msgConnInfo += String.format(
+        "* KMS expects Video SSRC from sender: %d\n", senderSsrcV);
+    if (useSrtp) {
+      msgConnInfo += String.format(
+          "* Sender should expect Video SSRC from KMS: %s\n", kmsSsrcV);
+    }
+    msgConnInfo += String.format("* KMS local IP address: %s\n", kmsIp);
     if (useComedia) {
-      msgRtcp = "* KMS will discover remote IP and port to send RTCP";
+      msgConnInfo += "* KMS will discover remote IP and port to send RTCP\n";
     } else {
-      msgRtcp = String.format(
-        "* KMS sends Audio RTCP to: %s:%d\n"
-        + "* KMS sends Video RTCP to: %s:%d\n",
-        senderIp, senderRtcpPortA,
-        senderIp, senderRtcpPortV);
+      if (useAudio) {
+        msgConnInfo += String.format(
+            "* KMS sends Audio RTCP to: %s:%d\n", senderIp, senderRtcpPortA);
+      }
+      msgConnInfo += String.format(
+          "* KMS sends Video RTCP to: %s:%d\n", senderIp, senderRtcpPortV);
     }
 
-    String msgPortInfo = String.format(
-      "SDP negotiation finished\n"
-      + "* KMS listens for Audio RTP at port: %d\n"
-      + "* KMS listens for Video RTP at port: %d\n"
-      + "* KMS expects Audio SSRC from sender: %d\n"
-      + "* KMS expects Video SSRC from sender: %d\n"
-      + "* KMS local IP address: %s\n"
-      + msgRtcp, kmsRtpPortA, kmsRtpPortV, senderSsrcA, senderSsrcV, kmsIp);
-
-    log.info("[Handler::startRtpEndpoint] " + msgPortInfo);
+    log.info("[Handler::startRtpEndpoint] " + msgConnInfo);
 
     // Send info to UI
     {
       JsonObject message = new JsonObject();
-      message.addProperty("id", "msgPortInfo");
-      message.addProperty("text", msgPortInfo);
+      message.addProperty("id", "msgConnInfo");
+      message.addProperty("text", msgConnInfo);
       sendMessage(session, message.toString());
     }
     {
@@ -384,7 +452,8 @@ Some default values are defined by different RFCs:
         new WebRtcEndpoint.Builder(pipeline).build();
     user.setWebRtcEndpoint(webRtcEndpoint);
 
-    final RtpEndpoint rtpEndpoint = new RtpEndpoint.Builder(pipeline).build();
+    Boolean useSrtp = jsonMessage.get("useSrtp").getAsBoolean();
+    final RtpEndpoint rtpEndpoint = makeRtpEndpoint(pipeline, useSrtp);
     user.setRtpEndpoint(rtpEndpoint);
 
     rtpEndpoint.connect(webRtcEndpoint);
@@ -395,7 +464,8 @@ Some default values are defined by different RFCs:
     String webrtcSdpOffer = jsonMessage.get("sdpOffer").getAsString();
     startWebRtcEndpoint(session, webRtcEndpoint, webrtcSdpOffer);
 
-    startRtpEndpoint(session, rtpEndpoint);
+    Boolean useComedia = jsonMessage.get("useComedia").getAsBoolean();
+    startRtpEndpoint(session, rtpEndpoint, useComedia, useSrtp);
 
 
     // ---- Debug

@@ -38,35 +38,36 @@ ws.onmessage = function(message) {
   console.info('Received message: ' + message.data);
 
   switch (parsedMessage.id) {
-  case 'startResponse':
-    startResponse(parsedMessage);
-    break;
-  case 'error':
-    if (state == I_AM_STARTING) {
-      setState(I_CAN_START);
-    }
-    onError('Error message from server: ' + parsedMessage.message);
-    break;
-  case 'playEnd':
-    playEnd();
-    break;
-  case 'iceCandidate':
-    webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
-      if (error)
-        return console.error('Error adding candidate: ' + error);
-    });
-    break;
-  case 'msgPortInfo':
-    document.getElementById("msgPortInfo").value = parsedMessage.text;
-    break;
-  case 'msgSdpText':
-    document.getElementById("msgSdpText").value = parsedMessage.text;
-    break;
-  default:
-    if (state == I_AM_STARTING) {
-      setState(I_CAN_START);
-    }
-    onError('Unrecognized message', parsedMessage);
+    case 'startResponse':
+      startResponse(parsedMessage);
+      break;
+    case 'error':
+      if (state == I_AM_STARTING) {
+        setState(I_CAN_START);
+      }
+      onError('Error message from server: ' + parsedMessage.message);
+      break;
+    case 'playEnd':
+      playEnd();
+      break;
+    case 'iceCandidate':
+      webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
+        if (error)
+          return console.error('Error adding candidate: ' + error);
+      });
+      break;
+    case 'msgConnInfo':
+      document.getElementById("msgConnInfo").value = parsedMessage.text;
+      break;
+    case 'msgSdpText':
+      document.getElementById("msgSdpText").value = parsedMessage.text;
+      break;
+    default:
+      if (state == I_AM_STARTING) {
+        setState(I_CAN_START);
+      }
+      onError('Unrecognized message', parsedMessage);
+      break;
   }
 }
 
@@ -105,6 +106,8 @@ function onOffer(error, offer) {
   var message = {
     id: 'start',
     sdpOffer: offer,
+    useComedia: $('input[name="check-comedia"]').prop("checked"),
+    useSrtp: $('input[name="check-srtp"]').prop("checked"),
   }
   sendMessage(message);
 }

@@ -83,18 +83,28 @@
             </a>
           </div>
         </div>
-
-        <br> <label class="control-label">KMS port info</label>
         <br>
-        <textarea id="msgPortInfo" cols="6">
-          No info received yet...
-        </textarea>
-
-        <br> <label class="control-label">SDP response</label>
+        <div class="row">
+          <input type="checkbox" id="checkcomedia" name="check-comedia">
+          <label for="checkcomedia">
+            Automatic RTP/RTCP port discovery ("Connection-Oriented Media")
+          </label>
+        </div>
+        <div class="row">
+          <input type="checkbox" id="checksrtp" name="check-srtp">
+          <label for="checksrtp">Sender uses SRTP</label>
+        </div>
         <br>
-        <textarea id="msgSdpText" cols="6">
-          No info received yet...
-        </textarea>
+        <div class="row">
+          <label class="control-label">KMS connection info</label>
+          <br>
+          <textarea id="msgConnInfo">No info received yet...</textarea>
+        </div>
+        <div class="row">
+          <label class="control-label">SDP response</label>
+          <br>
+          <textarea id="msgSdpText">No info received yet...</textarea>
+        </div>
       </div>
 
       <div class="col-md-6">
@@ -114,26 +124,70 @@
         - Sends Audio and Video streams through RTP.<br>
         - Sends RTP and RTCP packets to KMS.<br>
         - Receives and prints Video RTCP packets from KMS.<br>
-        - Binds to specific output ports for symmetric RTP/RTCP.<br>
+        - Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
       </p>
       <pre id="gstCommand">
-KMS_A={KMS_AUDIO_PORT} KMS_V={KMS_VIDEO_PORT} KMS_IP={KMS_PUBLIC_IP} APP_A=5006 APP_V=5004 bash -c '\
-gst-launch-1.0 rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-  filesrc location={PATH_TO_VIDEO} ! decodebin name=d \
-  d. ! queue ! audioconvert ! opusenc ! rtpopuspay \
-    ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)445566" \
+DST_A={KMS_AUDIO_PORT} DST_V={KMS_VIDEO_PORT} DST_IP={KMS_PUBLIC_IP} \
+SRC_PATH="{PATH_TO_VIDEO_FILE}" \
+SRC_A=5006 SRC_V=5004 \
+bash -c 'gst-launch-1.0 -e \
+  rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+  filesrc location="$SRC_PATH" ! decodebin name=d \
+  d. ! queue ! audioconvert ! opusenc \
+    ! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)445566" \
     ! r.send_rtp_sink_0 \
-    r.send_rtp_src_0 ! udpsink host=$KMS_IP port=$KMS_A bind-port=$APP_A \
-    r.send_rtcp_src_0 ! udpsink host=$KMS_IP port=$((KMS_A+1)) bind-port=$((APP_A+1)) sync=false async=false \
-    udpsrc port=$((APP_A+1)) ! r.recv_rtcp_sink_0 \
-  d. ! queue ! videoconvert ! x264enc tune=zerolatency ! rtph264pay \
-    ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)112233" \
+  d. ! queue ! videoconvert ! x264enc tune=zerolatency \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)112233" \
     ! r.send_rtp_sink_1 \
-    r.send_rtp_src_1 ! udpsink host=$KMS_IP port=$KMS_V bind-port=$APP_V \
-    r.send_rtcp_src_1 ! udpsink host=$KMS_IP port=$((KMS_V+1)) bind-port=$((APP_V+1)) sync=false async=false \
-  udpsrc port=$((APP_V+1)) ! tee name=t \
-    t. ! queue ! fakesink dump=true async=false \
-    t. ! queue ! r.recv_rtcp_sink_1'
+  r.send_rtp_src_0 ! udpsink host=$DST_IP port=$DST_A bind-port=$SRC_A \
+  r.send_rtcp_src_0 ! udpsink host=$DST_IP port=$((DST_A+1)) bind-port=$((SRC_A+1)) sync=false async=false \
+  udpsrc port=$((SRC_A+1)) ! r.recv_rtcp_sink_0 \
+  r.send_rtp_src_1 ! udpsink host=$DST_IP port=$DST_V bind-port=$SRC_V \
+  r.send_rtcp_src_1 ! udpsink host=$DST_IP port=$((DST_V+1)) bind-port=$((SRC_V+1)) sync=false async=false \
+  udpsrc port=$((SRC_V+1)) ! tee name=t \
+    t. ! queue ! r.recv_rtcp_sink_1 \
+    t. ! queue ! fakesink dump=true async=false'
+      </pre>
+    </div>
+
+    <div class="row">
+      <br>
+      <label class="control-label">Sample SRTP sender</label>
+      <br>
+      <p>
+        This is a sample GStreamer pipeline command that you can copy and
+        paste into a shell. It includes the following features:<br>
+        - Sends a Video stream through SRTP.<br>
+        - Sends SRTP and SRTCP packets to KMS.<br>
+        - Receives and prints Video SRTCP packets from KMS.<br>
+        - Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
+      </p>
+      <pre id="gstCommand">
+DST_V={KMS_VIDEO_PORT} DST_SSRC={KMS_VIDEO_SSRC} DST_IP={KMS_PUBLIC_IP} \
+SRC_PATH="{PATH_TO_VIDEO_FILE}" \
+SRC=5004 SRC_SSRC=112233 \
+SRTP_CAPS="payload=(int)103,ssrc=(uint)$DST_SSRC,roc=(uint)0, \
+    srtp-key=(buffer)343332315A595857565554535251504F4E4D4C4B4A494847464544434241, \
+    srtp-cipher=(string)aes-128-icm,srtp-auth=(string)hmac-sha1-80, \
+    srtcp-cipher=(string)aes-128-icm,srtcp-auth=(string)hmac-sha1-80" \
+bash -c 'gst-launch-1.5 -e \
+  rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+  srtpenc name=e key="4142434445464748494A4B4C4D4E4F505152535455565758595A31323334" \
+    rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
+    rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
+  srtpdec name=d \
+  filesrc location="$SRC_PATH" ! decodebin \
+    ! x264enc tune=zerolatency \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SRC_SSRC" \
+    ! r.send_rtp_sink \
+  r.send_rtp_src ! e.rtp_sink_0 \
+    e.rtp_src_0 ! udpsink host=$DST_IP port=$DST_V \
+  r.send_rtcp_src ! e.rtcp_sink_0 \
+    e.rtcp_src_0 ! udpsink host=$DST_IP port=$((DST_V+1)) sync=false async=false \
+  udpsrc port=$((SRC+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
+    d.rtcp_src ! tee name=t \
+    t. ! queue ! r.recv_rtcp_sink \
+    t. ! queue ! fakesink dump=true async=false'
       </pre>
     </div>
 
