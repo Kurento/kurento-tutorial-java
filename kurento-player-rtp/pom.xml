@@ -5,14 +5,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.kurento</groupId>
-    <artifactId>kurento-parent-pom</artifactId>
-    <version>6.6.2</version>
+    <!-- <groupId>org.kurento</groupId> -->
+    <!-- <artifactId>kurento-parent-pom</artifactId> -->
+    <groupId>org.kurento.tutorial</groupId>
+    <artifactId>kurento-tutorial</artifactId>
+    <version>6.7.0</version>
   </parent>
 
   <groupId>org.kurento.tutorial</groupId>
   <artifactId>kurento-player-rtp</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Kurento Java Tutorial - RTP Player</name>
@@ -33,7 +34,6 @@
   <version> fields come inherited from <dependencyManagement>
   in parent (kurento-parent-pom). -->
   <dependencies>
-
     <!-- Spring Boot -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -44,7 +44,7 @@
       <artifactId>spring-websocket</artifactId>
     </dependency>
 
-    <!-- JavaScript -->
+    <!-- WebJars -->
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>webjars-locator</artifactId>
@@ -52,6 +52,11 @@
     <dependency>
       <groupId>org.webjars.bower</groupId>
       <artifactId>jquery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars.bower</groupId>
+      <artifactId>webrtc-adapter</artifactId>
+      <version>6.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.webjars.bower</groupId>
@@ -64,17 +69,6 @@
     <dependency>
       <groupId>org.webjars.bower</groupId>
       <artifactId>ekko-lightbox</artifactId>
-    </dependency>
-
-    <!-- <dependency>
-        <groupId>org.webjars.bower</groupId>
-        <artifactId>adapter.js</artifactId>
-        <version>4.0.1</version>
-    </dependency> -->
-    <dependency>
-      <groupId>org.webjars.bower</groupId>
-      <artifactId>webrtc-adapter</artifactId>
-      <version>6.0.0</version>
     </dependency>
 
     <!-- Kurento -->
