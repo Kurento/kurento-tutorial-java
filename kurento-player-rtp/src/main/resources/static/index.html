@@ -9,19 +9,18 @@
 
 <link rel="shortcut icon" href="/img/kurento.png" type="image/png">
 
+<!-- WebJars -->
 <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/webjars/ekko-lightbox/dist/ekko-lightbox.min.css">
 <link rel="stylesheet" href="/webjars/demo-console/index.css">
-<link rel="stylesheet" href="/css/kurento.css">
-
+<link rel="stylesheet" href="/webjars/ekko-lightbox/dist/ekko-lightbox.min.css">
 <script src="/webjars/jquery/dist/jquery.min.js"></script>
 <script src="/webjars/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="/webjars/demo-console/index.js"></script>
 <script src="/webjars/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
-
-<!-- <script src="/webjars/adapter.js/adapter.js"></script> -->
 <script src="/webjars/webrtc-adapter/release/adapter.js"></script>
 
+<!-- Kurento -->
+<link rel="stylesheet" href="/css/kurento.css">
 <script src="/js/kurento-utils.js"></script>
 <script src="/js/index.js"></script>
 
@@ -33,11 +32,11 @@
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse"
-            data-target=".navbar-collapse"></button>
+              data-target=".navbar-collapse"></button>
           <a class="navbar-brand" href=".">Kurento Tutorial</a>
         </div>
         <div class="collapse navbar-collapse"
-          id="bs-example-navbar-collapse-1">
+            id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="https://github.com/Kurento/kurento-tutorial-java/tree/master/kurento-player-rtp">
@@ -85,7 +84,7 @@
         </div>
         <br>
         <div class="row">
-          <input type="checkbox" id="checkcomedia" name="check-comedia">
+          <input type="checkbox" id="checkcomedia" name="check-comedia" checked>
           <label for="checkcomedia">
             Automatic RTP/RTCP port discovery ("Connection-Oriented Media")
           </label>
@@ -109,7 +108,8 @@
 
       <div class="col-md-6">
         <div id="videoBig">
-          <video id="video" autoplay width="640px" height="480px" poster="img/webrtc.png"></video>
+          <video id="video" autoplay width="640px" height="480px"
+              poster="img/webrtc.png"></video>
         </div>
       </div>
     </div>
@@ -127,24 +127,25 @@
         - Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
       </p>
       <pre id="gstCommand">
-DST_A={KMS_AUDIO_PORT} DST_V={KMS_VIDEO_PORT} DST_IP={KMS_PUBLIC_IP} \
-SRC_PATH="{PATH_TO_VIDEO_FILE}" \
-SRC_A=5006 SRC_V=5004 \
+PEER_A={KMS_AUDIO_PORT} PEER_V={KMS_VIDEO_PORT} PEER_IP={KMS_PUBLIC_IP} \
+SELF_PATH="{PATH_TO_VIDEO_FILE}" \
+SELF_A=5006 SELF_ASSRC=445566 \
+SELF_V=5004 SELF_VSSRC=112233 \
 bash -c 'gst-launch-1.0 -e \
   rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-  filesrc location="$SRC_PATH" ! decodebin name=d \
+  filesrc location="$SELF_PATH" ! decodebin name=d \
   d. ! queue ! audioconvert ! opusenc \
-    ! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)445566" \
+    ! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)$SELF_ASSRC" \
     ! r.send_rtp_sink_0 \
   d. ! queue ! videoconvert ! x264enc tune=zerolatency \
-    ! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)112233" \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)$SELF_VSSRC" \
     ! r.send_rtp_sink_1 \
-  r.send_rtp_src_0 ! udpsink host=$DST_IP port=$DST_A bind-port=$SRC_A \
-  r.send_rtcp_src_0 ! udpsink host=$DST_IP port=$((DST_A+1)) bind-port=$((SRC_A+1)) sync=false async=false \
-  udpsrc port=$((SRC_A+1)) ! r.recv_rtcp_sink_0 \
-  r.send_rtp_src_1 ! udpsink host=$DST_IP port=$DST_V bind-port=$SRC_V \
-  r.send_rtcp_src_1 ! udpsink host=$DST_IP port=$((DST_V+1)) bind-port=$((SRC_V+1)) sync=false async=false \
-  udpsrc port=$((SRC_V+1)) ! tee name=t \
+  r.send_rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_A bind-port=$SELF_A \
+  r.send_rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_A+1)) bind-port=$((SELF_A+1)) sync=false async=false \
+  udpsrc port=$((SELF_A+1)) ! r.recv_rtcp_sink_0 \
+  r.send_rtp_src_1 ! udpsink host=$PEER_IP port=$PEER_V bind-port=$SELF_V \
+  r.send_rtcp_src_1 ! udpsink host=$PEER_IP port=$((PEER_V+1)) bind-port=$((SELF_V+1)) sync=false async=false \
+  udpsrc port=$((SELF_V+1)) ! tee name=t \
     t. ! queue ! r.recv_rtcp_sink_1 \
     t. ! queue ! fakesink dump=true async=false'
       </pre>
@@ -163,28 +164,30 @@ bash -c 'gst-launch-1.0 -e \
         - Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
       </p>
       <pre id="gstCommand">
-DST_V={KMS_VIDEO_PORT} DST_SSRC={KMS_VIDEO_SSRC} DST_IP={KMS_PUBLIC_IP} \
-SRC_PATH="{PATH_TO_VIDEO_FILE}" \
-SRC=5004 SRC_SSRC=112233 \
-SRTP_CAPS="payload=(int)103,ssrc=(uint)$DST_SSRC,roc=(uint)0, \
-    srtp-key=(buffer)343332315A595857565554535251504F4E4D4C4B4A494847464544434241, \
+PEER_V={KMS_VIDEO_PORT} PEER_VSSRC={KMS_VIDEO_SSRC} PEER_IP={KMS_PUBLIC_IP} \
+PEER_KEY="343332315A595857565554535251504F4E4D4C4B4A494847464544434241" \
+SELF_PATH="{PATH_TO_VIDEO_FILE}" \
+SELF_V=5004 SELF_VSSRC=112233 \
+SELF_KEY="4142434445464748494A4B4C4D4E4F505152535455565758595A31323334" \
+SRTP_CAPS="payload=(int)103,ssrc=(uint)$PEER_VSSRC,roc=(uint)0, \
+    srtp-key=(buffer)$PEER_KEY, \
     srtp-cipher=(string)aes-128-icm,srtp-auth=(string)hmac-sha1-80, \
     srtcp-cipher=(string)aes-128-icm,srtcp-auth=(string)hmac-sha1-80" \
 bash -c 'gst-launch-1.5 -e \
   rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-  srtpenc name=e key="4142434445464748494A4B4C4D4E4F505152535455565758595A31323334" \
+  srtpenc name=e key="$SELF_KEY" \
     rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
     rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
   srtpdec name=d \
-  filesrc location="$SRC_PATH" ! decodebin \
+  filesrc location="$SELF_PATH" ! decodebin \
     ! x264enc tune=zerolatency \
-    ! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SRC_SSRC" \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SELF_VSSRC" \
     ! r.send_rtp_sink \
   r.send_rtp_src ! e.rtp_sink_0 \
-    e.rtp_src_0 ! udpsink host=$DST_IP port=$DST_V \
+    e.rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_V \
   r.send_rtcp_src ! e.rtcp_sink_0 \
-    e.rtcp_src_0 ! udpsink host=$DST_IP port=$((DST_V+1)) sync=false async=false \
-  udpsrc port=$((SRC+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
+    e.rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_V+1)) sync=false async=false \
+  udpsrc port=$((SELF_V+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
     d.rtcp_src ! tee name=t \
     t. ! queue ! r.recv_rtcp_sink \
     t. ! queue ! fakesink dump=true async=false'
@@ -206,19 +209,19 @@ bash -c 'gst-launch-1.5 -e \
     <div class="foot-fixed-bottom">
       <div class="container text-center">
         <hr>
-        <div class="row">&copy; 2016-2017 Kurento</div>
+        <div class="row">&copy; 2018 Kurento</div>
         <div class="row">
           <div class="col-md-4">
             <a href="http://www.urjc.es"><img src="/img/urjc.gif"
-              alt="Universidad Rey Juan Carlos" height="50px"></a>
+                alt="Universidad Rey Juan Carlos" height="50px"></a>
           </div>
           <div class="col-md-4">
             <a href="http://www.kurento.org"><img src="/img/kurento.png"
-              alt="Kurento" height="50px"></a>
+                alt="Kurento" height="50px"></a>
           </div>
           <div class="col-md-4">
             <a href="http://www.naevatec.com"><img src="/img/naevatec.png"
-              alt="Naevatec" height="50px"></a>
+                alt="Naevatec" height="50px"></a>
           </div>
         </div>
       </div>

@@ -325,7 +325,7 @@ Some default values are defined by different RFCs:
     String rtpSdpOffer =
         "v=0\r\n"
         + "o=- 0 0 IN IP4 " + senderIp + "\r\n"
-        + "s=-\r\n"
+        + "s=Kurento Tutorial - RTP Player\r\n"
         + "c=IN IP4 " + senderIp + "\r\n"
         + "t=0 0\r\n";
 
