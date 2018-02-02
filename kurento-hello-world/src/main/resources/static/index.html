@@ -69,7 +69,8 @@
 		</div>
 		<div class="row">
 			<div class="col-md-5">
-				<h3>Local stream</h3>
+				<h3>Local stream</h3>				
+				<audio id="audioInput" autoplay style='display:none'></audio>
 				<video id="videoInput" autoplay width="480px" height="360px"
 					poster="img/webrtc.png"></video>
 			</div>
@@ -78,9 +79,15 @@
 					class="glyphicon glyphicon-play"></span> Start</a><br /> <br /> <a
 					id="stop" href="#" class="btn btn-danger"><span
 					class="glyphicon glyphicon-stop"></span> Stop</a>
+				<br /> <br />
+				<select id='modeSelect'>
+					<option value="video">Video And Audio</option>
+					<option value="audio">Audio Only</option>
+				</select>
 			</div>
 			<div class="col-md-5">
 				<h3>Remote stream</h3>
+				<audio id="audioOutput" autoplay style='display:none'></audio>
 				<video id="videoOutput" autoplay width="480px" height="360px"
 					poster="img/webrtc.png"></video>
 			</div>

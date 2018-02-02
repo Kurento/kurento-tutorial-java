@@ -92,6 +92,10 @@
 							class="glyphicon glyphicon-user"></span> Viewer</a> <a id="stop"
 							href="#" class="btn btn-danger"><span
 							class="glyphicon glyphicon-stop"></span> Stop</a>
+						<select id='modeSelect'>
+							<option value="video">Video And Audio</option>
+							<option value="audio">Audio Only</option>
+						</select>
 					</div>
 				</div>
 				<br /> <label class="control-label" for="console">Console</label><br>
@@ -104,6 +108,7 @@
 				<div id="videoBig">
 					<video id="video" autoplay width="640px" height="480px"
 						poster="img/webrtc.png"></video>
+					<audio id='audio' autoplay style='display:none'></audio>
 				</div>
 			</div>
 		</div>

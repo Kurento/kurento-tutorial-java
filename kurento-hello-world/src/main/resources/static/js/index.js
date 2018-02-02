@@ -18,6 +18,9 @@
 var ws = new WebSocket('wss://' + location.host + '/helloworld');
 var videoInput;
 var videoOutput;
+var audioInput;
+var audioOutput;
+var modeSelect;
 var webRtcPeer;
 var state = null;
 
@@ -30,6 +33,9 @@ window.onload = function() {
 	console.log('Page loaded ...');
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
+	audioInput = document.getElementById('audioInput');
+	audioOutput = document.getElementById('audioOutput');
+	modeSelect = document.getElementById('modeSelect');
 	setState(I_CAN_START);
 }
 
@@ -73,11 +79,26 @@ function start() {
 	showSpinner(videoInput, videoOutput);
 
 	console.log('Creating WebRtcPeer and generating local sdp offer ...');
-
-	var options = {
-		localVideo : videoInput,
-		remoteVideo : videoOutput,
-		onicecandidate : onIceCandidate
+	var audioOnly = modeSelect.value == 'audio';
+	
+	var options;
+	
+	if(audioOnly) {
+		options = {
+			localVideo : audioInput,
+			remoteVideo : audioOutput,
+			mediaConstraints: {
+				audio: true,
+				video: false,
+			},
+			onicecandidate : onIceCandidate
+		}
+	} else {
+		options = {
+			localVideo : videoInput,
+			remoteVideo : videoOutput,
+			onicecandidate : onIceCandidate
+		}
 	}
 	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options,
 			function(error) {
@@ -116,6 +137,10 @@ function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log('SDP answer received from server. Processing ...');
 
+	var audioOnly = modeSelect.value == 'audio';
+	if(audioOnly) {
+		hideSpinner(videoInput, videoOutput);
+	}
 	webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
 		if (error)
 			return console.error(error);
