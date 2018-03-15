@@ -64,8 +64,8 @@
 	<repositories>
 		<repository>
 			<id>kurento-snapshots</id>
-			<name>Kurento Snapshot Repository</name>
-			<url>http://maven.kurento.org/snapshots/</url>
+			<name>Kurento Snapshots</name>
+			<url>https://maven.openvidu.io/archiva/repository/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
@@ -74,4 +74,18 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>kurento-snapshots</id>
+			<name>Kurento Snapshots</name>
+			<url>https://maven.openvidu.io/archiva/repository/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
 </project>
