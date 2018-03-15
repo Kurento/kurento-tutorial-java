@@ -55,6 +55,6 @@ public class HelloWorldRecApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(HelloWorldRecApp.class).run(args);
+    SpringApplication.run(HelloWorldRecApp.class, args);
   }
 }

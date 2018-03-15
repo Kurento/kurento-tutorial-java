@@ -50,7 +50,8 @@ public class HelloWorldApp implements WebSocketConfigurer {
     registry.addHandler(handler(), "/helloworld");
   }
 
-  public static void main(String[] args) throws Exception {
-    new SpringApplication(HelloWorldApp.class).run(args);
+  public static void main(String[] args) throws Exception
+  {
+    SpringApplication.run(HelloWorldApp.class, args);
   }
 }

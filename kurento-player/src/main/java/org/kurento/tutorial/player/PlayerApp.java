@@ -51,6 +51,6 @@ public class PlayerApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(PlayerApp.class).run(args);
+    SpringApplication.run(PlayerApp.class, args);
   }
 }

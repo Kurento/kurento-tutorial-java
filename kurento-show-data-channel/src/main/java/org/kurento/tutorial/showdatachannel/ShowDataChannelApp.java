@@ -54,6 +54,6 @@ public class ShowDataChannelApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(ShowDataChannelApp.class).run(args);
+    SpringApplication.run(ShowDataChannelApp.class, args);
   }
 }

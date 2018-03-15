@@ -54,6 +54,6 @@ public class ChromaApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(ChromaApp.class).run(args);
+    SpringApplication.run(ChromaApp.class, args);
   }
 }

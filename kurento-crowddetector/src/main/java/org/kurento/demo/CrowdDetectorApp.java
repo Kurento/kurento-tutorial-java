@@ -83,6 +83,6 @@ public class CrowdDetectorApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(CrowdDetectorApp.class).run(args);
+    SpringApplication.run(CrowdDetectorApp.class, args);
   }
 }

@@ -52,6 +52,6 @@ public class PointerDetectorApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(PointerDetectorApp.class).run(args);
+    SpringApplication.run(PointerDetectorApp.class, args);
   }
 }

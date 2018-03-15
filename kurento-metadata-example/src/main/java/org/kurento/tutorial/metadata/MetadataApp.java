@@ -54,6 +54,6 @@ public class MetadataApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(MetadataApp.class).run(args);
+    SpringApplication.run(MetadataApp.class, args);
   }
 }

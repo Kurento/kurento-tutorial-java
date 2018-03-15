@@ -53,6 +53,6 @@ public class MagicMirrorApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(MagicMirrorApp.class).run(args);
+    SpringApplication.run(MagicMirrorApp.class, args);
   }
 }

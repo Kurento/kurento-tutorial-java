@@ -52,6 +52,6 @@ public class PlateDetectorApp implements WebSocketConfigurer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(PlateDetectorApp.class).run(args);
+    SpringApplication.run(PlateDetectorApp.class, args);
   }
 }
