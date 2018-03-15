@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Kurento (https://www.kurento.org)
+ * Copyright 2018 Kurento (https://www.kurento.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,7 @@ import org.kurento.client.OnKeySoftLimitEvent;
 
 
 /**
- * RTP Video player through WebRTC.
- *
- * @author Juan Navarro (juan.navarro@gmx.es)
- * @since 6.7.0
+ * Kurento Java Tutorial - Handler class.
  */
 public class PlayerHandler extends TextWebSocketHandler
 {
@@ -93,10 +90,10 @@ public class PlayerHandler extends TextWebSocketHandler
           start(session, jsonMessage);
           break;
         case "stop":
-          stop(sessionId);
+          stop(session);
           break;
         case "onIceCandidate":
-          onRemoteIceCandidate(sessionId, jsonMessage);
+          onRemoteIceCandidate(session, jsonMessage);
           break;
         default:
           sendError(session, "Invalid message, ID: " + messageId);
@@ -119,7 +116,7 @@ public class PlayerHandler extends TextWebSocketHandler
         log.error("[{}::{}] source: {}, timestamp: {}, tags: {}, description: {}, errorCode: {}",
             name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
             ev.getDescription(), ev.getErrorCode());
-        sendPlayEnd(session);
+        stop(session);
       }
     });
 
@@ -433,7 +430,7 @@ Some default values are defined by different RFCs:
             ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
             JsonUtils.toJsonObject(ev.getCandidate()));
 
-        // Send info to UI
+        // Update the UI
         {
           JsonObject message = new JsonObject();
           message.addProperty("id", "iceCandidate");
@@ -497,7 +494,7 @@ Some default values are defined by different RFCs:
     log.info("[Handler::startWebRtcEndpoint] SDP Answer from KMS to browser:\n{}",
         webrtcSdpAnswer);
 
-    // Send info to UI
+    // Update the UI
     {
       JsonObject message = new JsonObject();
       message.addProperty("id", "startResponse");
@@ -550,25 +547,35 @@ Some default values are defined by different RFCs:
     }
   }
 
-  private void stop(String sessionId)
+  private void stop(final WebSocketSession session)
   {
-    UserSession user = users.remove(sessionId);
+    // Update the UI
+    sendPlayEnd(session);
 
+    // Remove the user session and release all resources
+    String sessionId = session.getId();
+    UserSession user = users.remove(sessionId);
     if (user != null) {
-      user.release();
+      MediaPipeline mediaPipeline = user.getMediaPipeline();
+      if (mediaPipeline != null) {
+        log.info("[Handler::stop] Release the Media Pipeline");
+        mediaPipeline.release();
+      }
     }
   }
 
-  private void onRemoteIceCandidate(String sessionId, JsonObject jsonMessage)
+  private void onRemoteIceCandidate(final WebSocketSession session,
+      JsonObject jsonMessage)
   {
+    String sessionId = session.getId();
     UserSession user = users.get(sessionId);
 
     if (user != null) {
       JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
       IceCandidate candidate =
         new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-        jsonCandidate.get("sdpMid").getAsString(),
-        jsonCandidate.get("sdpMLineIndex").getAsInt());
+            jsonCandidate.get("sdpMid").getAsString(),
+            jsonCandidate.get("sdpMLineIndex").getAsInt());
       user.getWebRtcEndpoint().addIceCandidate(candidate);
     }
   }
@@ -592,7 +599,8 @@ Some default values are defined by different RFCs:
     }
   }
 
-  private synchronized void sendMessage(final WebSocketSession session, String message)
+  private synchronized void sendMessage(final WebSocketSession session,
+      String message)
   {
     try {
       session.sendMessage(new TextMessage(message));
@@ -602,9 +610,9 @@ Some default values are defined by different RFCs:
   }
 
   @Override
-  public void afterConnectionClosed(final WebSocketSession session, CloseStatus status)
-      throws Exception
+  public void afterConnectionClosed(final WebSocketSession session,
+      CloseStatus status) throws Exception
   {
-    stop(session.getId());
+    stop(session);
   }
 }
