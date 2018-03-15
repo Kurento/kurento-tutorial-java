@@ -16,28 +16,22 @@
 
 package org.kurento.tutorial.player;
 
-import org.kurento.client.IceCandidate;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.RtpEndpoint;
 import org.kurento.client.WebRtcEndpoint;
 
 public class UserSession
 {
-  private WebRtcEndpoint webRtcEndpoint;
   private MediaPipeline mediaPipeline;
-  private RtpEndpoint rtpEndpoint;
+  private RtpEndpoint rtpEp;
+  private WebRtcEndpoint webRtcEp;
 
   public UserSession()
   {}
 
-  public WebRtcEndpoint getWebRtcEndpoint()
+  public void release()
   {
-    return webRtcEndpoint;
-  }
-
-  public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint)
-  {
-    this.webRtcEndpoint = webRtcEndpoint;
+    this.mediaPipeline.release();
   }
 
   public MediaPipeline getMediaPipeline()
@@ -52,16 +46,21 @@ public class UserSession
 
   public RtpEndpoint getRtpEndpoint()
   {
-    return rtpEndpoint;
+    return rtpEp;
   }
 
-  public void setRtpEndpoint(RtpEndpoint rtpEndpoint)
+  public void setRtpEndpoint(RtpEndpoint rtpEp)
   {
-    this.rtpEndpoint = rtpEndpoint;
+    this.rtpEp = rtpEp;
   }
 
-  public void release()
+  public WebRtcEndpoint getWebRtcEndpoint()
   {
-    this.mediaPipeline.release();
+    return webRtcEp;
+  }
+
+  public void setWebRtcEndpoint(WebRtcEndpoint webRtcEp)
+  {
+    this.webRtcEp = webRtcEp;
   }
 }

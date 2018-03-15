@@ -33,6 +33,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 // Kurento client
+import org.kurento.client.BaseRtpEndpoint;
 import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
@@ -46,11 +47,17 @@ import org.kurento.client.CryptoSuite;
 import org.kurento.client.SDES;
 
 // Kurento events
+import org.kurento.client.ConnectionStateChangedEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.IceComponentStateChangeEvent;
 import org.kurento.client.IceGatheringDoneEvent;
+import org.kurento.client.MediaFlowInStateChangeEvent;
+import org.kurento.client.MediaFlowOutStateChangeEvent;
+import org.kurento.client.MediaStateChangedEvent;
+import org.kurento.client.MediaTranscodingStateChangeEvent;
 import org.kurento.client.NewCandidatePairSelectedEvent;
+import org.kurento.client.OnKeySoftLimitEvent;
 
 
 /**
@@ -70,7 +77,7 @@ public class PlayerHandler extends TextWebSocketHandler
       new ConcurrentHashMap<>();
 
   @Override
-  public void handleTextMessage(WebSocketSession session, TextMessage message)
+  public void handleTextMessage(final WebSocketSession session, TextMessage message)
       throws Exception
   {
     JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);
@@ -95,113 +102,81 @@ public class PlayerHandler extends TextWebSocketHandler
           sendError(session, "Invalid message, ID: " + messageId);
           break;
       }
-    } catch (Throwable t) {
-      log.error("[Handler::handleTextMessage]"
-          + " Exception: {}, message: {}, sessionId: {}",
-          t, jsonMessage, sessionId);
-      sendError(session, "Exception: " + t.getMessage());
+    } catch (Throwable ex) {
+      log.error("[Handler::handleTextMessage] Exception: {}, sessionId: {}",
+          ex, sessionId);
+      sendError(session, "Exception: " + ex.getMessage());
     }
   }
 
-  /*
-  WebRtcEndpoint configuration.
-  Controls the connection between the browser and KMS.
-  */
-  private void startWebRtcEndpoint(final WebSocketSession session,
-      WebRtcEndpoint webRtcEndpoint, String webrtcSdpOffer)
+  private void addCommonEventListeners(final WebSocketSession session,
+      BaseRtpEndpoint ep, final String name)
   {
-    log.info("[Handler::startWebRtcEndpoint] Configure now");
-
     // Event: Some error happened
-    webRtcEndpoint.addErrorListener(new EventListener<ErrorEvent>() {
+    ep.addErrorListener(new EventListener<ErrorEvent>() {
       @Override
-      public void onEvent(ErrorEvent event) {
-        log.error("[WebRtcEndpoint::Error] Error: {}", event.getDescription());
+      public void onEvent(ErrorEvent ev) {
+        log.error("[{}::{}] source: {}, timestamp: {}, tags: {}, description: {}, errorCode: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getDescription(), ev.getErrorCode());
         sendPlayEnd(session);
       }
     });
 
-    // Event: The ICE backend found a local candidate during Trickle ICE
-    webRtcEndpoint.addIceCandidateFoundListener(
-        new EventListener<IceCandidateFoundEvent>() {
+    // Event: Media is flowing into this sink
+    ep.addMediaFlowInStateChangeListener(
+        new EventListener<MediaFlowInStateChangeEvent>() {
       @Override
-      public void onEvent(IceCandidateFoundEvent event) {
-        log.debug("[WebRtcEndpoint::IceCandidateFound] {}",
-            JsonUtils.toJsonObject(event.getCandidate()));
-
-        // Send info to UI
-        {
-          JsonObject message = new JsonObject();
-          message.addProperty("id", "iceCandidate");
-          message.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
-          sendMessage(session, message.toString());
-        }
+      public void onEvent(MediaFlowInStateChangeEvent ev) {
+        log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, padName: {}, mediaType: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getState(), ev.getPadName(), ev.getMediaType());
       }
     });
 
-    // Event: The ICE backend changed state
-    webRtcEndpoint.addIceComponentStateChangeListener(
-        new EventListener<IceComponentStateChangeEvent>() {
+    // Event: Media is flowing out of this source
+    ep.addMediaFlowOutStateChangeListener(
+        new EventListener<MediaFlowOutStateChangeEvent>() {
       @Override
-      public void onEvent(IceComponentStateChangeEvent event) {
-        log.debug("[WebRtcEndpoint::IceComponentStateChange]"
-            + " Source: {}, Type: {}, StreamId: {}, Component: {}, State: {}",
-            event.getSource(), event.getType(), event.getStreamId(),
-            event.getComponentId(), event.getState());
+      public void onEvent(MediaFlowOutStateChangeEvent ev) {
+        log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, padName: {}, mediaType: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getState(), ev.getPadName(), ev.getMediaType());
       }
     });
 
-    // Event: The ICE backend finished gathering ICE candidates
-    webRtcEndpoint.addIceGatheringDoneListener(
-        new EventListener<IceGatheringDoneEvent>() {
+    // Event: [TODO write meaning of this event]
+    ep.addConnectionStateChangedListener(
+        new EventListener<ConnectionStateChangedEvent>() {
       @Override
-      public void onEvent(IceGatheringDoneEvent event) {
-        log.debug("[WebRtcEndpoint::IceGatheringDone]");
+      public void onEvent(ConnectionStateChangedEvent ev) {
+        log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, oldState: {}, newState: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getOldState(), ev.getNewState());
       }
     });
 
-    // Event: The ICE backend selected a new pair of ICE candidates for use
-    webRtcEndpoint.addNewCandidatePairSelectedListener(
-        new EventListener<NewCandidatePairSelectedEvent>() {
+    // Event: [TODO write meaning of this event]
+    ep.addMediaStateChangedListener(
+        new EventListener<MediaStateChangedEvent>() {
       @Override
-      public void onEvent(NewCandidatePairSelectedEvent event) {
-        log.debug("[WebRtcEndpoint::NewCandidatePairSelected]"
-            + " Local: {}, Remote: {}, StreamId: {}",
-            event.getCandidatePair().getLocalCandidate(),
-            event.getCandidatePair().getRemoteCandidate(),
-            event.getCandidatePair().getStreamID());
+      public void onEvent(MediaStateChangedEvent ev) {
+        log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, oldState: {}, newState: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getOldState(), ev.getNewState());
       }
     });
 
-    /*
-    OPTIONAL: Force usage of an Application-specific STUN server.
-    Usually this is configured globally in KMS WebRTC settings file:
-    /etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini
-
-    But it can be configured also per-application, as shown:
-    */
-    // log.info("[Handler::startWebRtcEndpoint]"
-    //     + " Using STUN server: 193.147.51.12:3478");
-    // webRtcEndpoint.setStunServerAddress("193.147.51.12");
-    // webRtcEndpoint.setStunServerPort(3478);
-
-    // Send the SDP Offer to KMS, and get its negotiated SDP Answer
-    String webrtcSdpAnswer = webRtcEndpoint.processOffer(webrtcSdpOffer);
-
-    log.info("[Handler::startWebRtcEndpoint]"
-        + " SDP Offer from browser to KMS:\n{}", webrtcSdpOffer);
-    log.info("[Handler::startWebRtcEndpoint]"
-        + " SDP Answer from KMS to browser:\n{}", webrtcSdpAnswer);
-
-    // Send info to UI
-    {
-      JsonObject message = new JsonObject();
-      message.addProperty("id", "startResponse");
-      message.addProperty("sdpAnswer", webrtcSdpAnswer);
-      sendMessage(session, message.toString());
-    }
-
-    webRtcEndpoint.gatherCandidates();
+    // Event: This element will (or will not) perform media transcoding
+    ep.addMediaTranscodingStateChangeListener(
+        new EventListener<MediaTranscodingStateChangeEvent>() {
+      @Override
+      public void onEvent(MediaTranscodingStateChangeEvent ev) {
+        log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, binName: {}, mediaType: {}",
+            name, ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getState(), ev.getBinName(), ev.getMediaType());
+      }
+    });
   }
 
   private RtpEndpoint makeRtpEndpoint(MediaPipeline pipeline, Boolean useSrtp)
@@ -239,21 +214,23 @@ public class PlayerHandler extends TextWebSocketHandler
   that KMS will use to listen for packets.
   */
   private void startRtpEndpoint(final WebSocketSession session,
-      RtpEndpoint rtpEndpoint, Boolean useComedia, Boolean useSrtp)
+      RtpEndpoint rtpEp, Boolean useComedia, Boolean useSrtp)
   {
-    log.info("[Handler::startRtpEndpoint]"
-        + " Configure RtpEndpoint, port discovery: {}, SRTP: {}",
+    log.info("[Handler::startRtpEndpoint] Configure RtpEndpoint, port discovery: {}, SRTP: {}",
         useComedia, useSrtp);
 
-    // Event: Some error happened
-    rtpEndpoint.addErrorListener(new EventListener<ErrorEvent>() {
+    addCommonEventListeners(session, rtpEp, "RtpEndpoint");
+
+    // Event: The SRTP key is about to expire
+    rtpEp.addOnKeySoftLimitListener(
+        new EventListener<OnKeySoftLimitEvent>() {
       @Override
-      public void onEvent(ErrorEvent event) {
-        log.error("[RtpEndpoint::Error] Error: {}", event.getDescription());
-        sendPlayEnd(session);
+      public void onEvent(OnKeySoftLimitEvent ev) {
+        log.info("[RtpEndpoint::{}] source: {}, timestamp: {}, tags: {}, mediaType: {}",
+            ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getMediaType());
       }
     });
-
 
     // ---- RTP configuration BEGIN ----
     // Set the appropriate values for your setup
@@ -273,7 +250,7 @@ public class PlayerHandler extends TextWebSocketHandler
     that the receiver is able to process.
     */
     // log.info("[Handler::startRtpEndpoint] Limit output bandwidth: 1024 kbps");
-    // rtpEndpoint.setMaxVideoRecvBandwidth(1024); // In kbps (1000 bps)
+    // rtpEp.setMaxVideoRecvBandwidth(1024); // In kbps (1000 bps)
 
     String sdpComediaAttr = "";
     if (useComedia) {
@@ -349,7 +326,7 @@ Some default values are defined by different RFCs:
         + "";
 
     // Send the SDP Offer to KMS, and get its negotiated SDP Answer
-    String rtpSdpAnswer = rtpEndpoint.processOffer(rtpSdpOffer);
+    String rtpSdpAnswer = rtpEp.processOffer(rtpSdpOffer);
 
     log.info("[Handler::startRtpEndpoint] Fake SDP Offer from App to KMS:\n{}",
         rtpSdpOffer);
@@ -436,6 +413,101 @@ Some default values are defined by different RFCs:
     }
   }
 
+  /*
+  WebRtcEndpoint configuration.
+  Controls the connection between the browser and KMS.
+  */
+  private void startWebRtcEndpoint(final WebSocketSession session,
+      WebRtcEndpoint webRtcEp, String webrtcSdpOffer)
+  {
+    log.info("[Handler::startWebRtcEndpoint] Configure now");
+
+    addCommonEventListeners(session, webRtcEp, "WebRtcEndpoint");
+
+    // Event: The ICE backend found a local candidate during Trickle ICE
+    webRtcEp.addIceCandidateFoundListener(
+        new EventListener<IceCandidateFoundEvent>() {
+      @Override
+      public void onEvent(IceCandidateFoundEvent ev) {
+        log.debug("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, candidate: {}",
+            ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            JsonUtils.toJsonObject(ev.getCandidate()));
+
+        // Send info to UI
+        {
+          JsonObject message = new JsonObject();
+          message.addProperty("id", "iceCandidate");
+          message.add("candidate", JsonUtils.toJsonObject(ev.getCandidate()));
+          sendMessage(session, message.toString());
+        }
+      }
+    });
+
+    // Event: The ICE backend changed state
+    webRtcEp.addIceComponentStateChangeListener(
+        new EventListener<IceComponentStateChangeEvent>() {
+      @Override
+      public void onEvent(IceComponentStateChangeEvent ev) {
+        log.info("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, streamId: {}, componentId: {}, state: {}",
+            ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getStreamId(), ev.getComponentId(), ev.getState());
+      }
+    });
+
+    // Event: The ICE backend finished gathering ICE candidates
+    webRtcEp.addIceGatheringDoneListener(
+        new EventListener<IceGatheringDoneEvent>() {
+      @Override
+      public void onEvent(IceGatheringDoneEvent ev) {
+        log.info("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}",
+            ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags());
+      }
+    });
+
+    // Event: The ICE backend selected a new pair of ICE candidates for use
+    webRtcEp.addNewCandidatePairSelectedListener(
+        new EventListener<NewCandidatePairSelectedEvent>() {
+      @Override
+      public void onEvent(NewCandidatePairSelectedEvent ev) {
+        log.info("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, streamId: {}, local: {}, remote: {}",
+            ev.getType(), ev.getSource(), ev.getTimestamp(), ev.getTags(),
+            ev.getCandidatePair().getStreamID(),
+            ev.getCandidatePair().getLocalCandidate(),
+            ev.getCandidatePair().getRemoteCandidate());
+      }
+    });
+
+    /*
+    OPTIONAL: Force usage of an Application-specific STUN server.
+    Usually this is configured globally in KMS WebRTC settings file:
+    /etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini
+
+    But it can also be configured per-application, as shown:
+
+    log.info("[Handler::startWebRtcEndpoint] Using STUN server: 193.147.51.12:3478");
+    webRtcEp.setStunServerAddress("193.147.51.12");
+    webRtcEp.setStunServerPort(3478);
+    */
+
+    // Send the SDP Offer to KMS, and get its negotiated SDP Answer
+    String webrtcSdpAnswer = webRtcEp.processOffer(webrtcSdpOffer);
+
+    log.info("[Handler::startWebRtcEndpoint] SDP Offer from browser to KMS:\n{}",
+        webrtcSdpOffer);
+    log.info("[Handler::startWebRtcEndpoint] SDP Answer from KMS to browser:\n{}",
+        webrtcSdpAnswer);
+
+    // Send info to UI
+    {
+      JsonObject message = new JsonObject();
+      message.addProperty("id", "startResponse");
+      message.addProperty("sdpAnswer", webrtcSdpAnswer);
+      sendMessage(session, message.toString());
+    }
+
+    webRtcEp.gatherCandidates();
+  }
+
   private void start(final WebSocketSession session, JsonObject jsonMessage)
   {
     // ---- Media pipeline
@@ -448,24 +520,24 @@ Some default values are defined by different RFCs:
     final MediaPipeline pipeline = kurento.createMediaPipeline();
     user.setMediaPipeline(pipeline);
 
-    final WebRtcEndpoint webRtcEndpoint =
-        new WebRtcEndpoint.Builder(pipeline).build();
-    user.setWebRtcEndpoint(webRtcEndpoint);
-
     Boolean useSrtp = jsonMessage.get("useSrtp").getAsBoolean();
-    final RtpEndpoint rtpEndpoint = makeRtpEndpoint(pipeline, useSrtp);
-    user.setRtpEndpoint(rtpEndpoint);
+    final RtpEndpoint rtpEp = makeRtpEndpoint(pipeline, useSrtp);
+    user.setRtpEndpoint(rtpEp);
 
-    rtpEndpoint.connect(webRtcEndpoint);
+    final WebRtcEndpoint webRtcEp =
+        new WebRtcEndpoint.Builder(pipeline).build();
+    user.setWebRtcEndpoint(webRtcEp);
+
+    rtpEp.connect(webRtcEp);
 
 
     // ---- Endpoint configuration
 
     String webrtcSdpOffer = jsonMessage.get("sdpOffer").getAsString();
-    startWebRtcEndpoint(session, webRtcEndpoint, webrtcSdpOffer);
+    startWebRtcEndpoint(session, webRtcEp, webrtcSdpOffer);
 
     Boolean useComedia = jsonMessage.get("useComedia").getAsBoolean();
-    startRtpEndpoint(session, rtpEndpoint, useComedia, useSrtp);
+    startRtpEndpoint(session, rtpEp, useComedia, useSrtp);
 
 
     // ---- Debug
@@ -473,8 +545,8 @@ Some default values are defined by different RFCs:
     String pipelineDot = pipeline.getGstreamerDot();
     try (PrintWriter out = new PrintWriter("pipeline.dot")) {
       out.println(pipelineDot);
-    } catch (IOException e) {
-      log.error("[Handler::start] Exception: {}", e.getMessage());
+    } catch (IOException ex) {
+      log.error("[Handler::start] Exception: {}", ex.getMessage());
     }
   }
 
@@ -501,7 +573,7 @@ Some default values are defined by different RFCs:
     }
   }
 
-  public void sendPlayEnd(WebSocketSession session)
+  public void sendPlayEnd(final WebSocketSession session)
   {
     if (users.containsKey(session.getId())) {
       JsonObject message = new JsonObject();
@@ -510,7 +582,7 @@ Some default values are defined by different RFCs:
     }
   }
 
-  private void sendError(WebSocketSession session, String errorMsg)
+  private void sendError(final WebSocketSession session, String errorMsg)
   {
     if (users.containsKey(session.getId())) {
       JsonObject message = new JsonObject();
@@ -520,17 +592,17 @@ Some default values are defined by different RFCs:
     }
   }
 
-  private synchronized void sendMessage(WebSocketSession session, String message)
+  private synchronized void sendMessage(final WebSocketSession session, String message)
   {
     try {
       session.sendMessage(new TextMessage(message));
-    } catch (IOException e) {
-      log.error("[Handler::sendMessage] Exception: {}", e.getMessage());
+    } catch (IOException ex) {
+      log.error("[Handler::sendMessage] Exception: {}", ex.getMessage());
     }
   }
 
   @Override
-  public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
+  public void afterConnectionClosed(final WebSocketSession session, CloseStatus status)
       throws Exception
   {
     stop(session.getId());
