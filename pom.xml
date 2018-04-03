@@ -88,4 +88,40 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- spring-boot-maven-plugin
+				Generates an executable JAR during the 'package' phase.
+				The original package is still generated as "<Name>.jar", and
+				the executable one is generated as "<Name>-exec.jar".
+
+				It also supports the service actions start/stop/status, so it
+				can be linked into "/etc/init.d/" to be used as system service.
+
+				Ref:
+				- https://docs.spring.io/spring-boot/docs/current/maven-plugin/index.html
+				- https://docs.spring.io/spring-boot/docs/1.4.1.RELEASE/reference/htmlsingle/#deployment-service
+				-->
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<configuration>
+						<classifier>exec</classifier>
+						<executable>true</executable>
+						<layout>ZIP</layout>
+						<mainClass>${start-class}</mainClass>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 </project>
