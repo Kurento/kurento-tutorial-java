@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-var ws = new WebSocket('wss://' + location.host + '/player');
-var video;
-var webRtcPeer;
-var state = null;
+const ws = new WebSocket('wss://' + location.host + '/player');
+let video;
+let webRtcPeer;
+let state = null;
 
-var I_CAN_START = 0;
-var I_CAN_STOP = 1;
-var I_AM_STARTING = 2;
+const I_CAN_START = 0;
+const I_CAN_STOP = 1;
+const I_AM_STARTING = 2;
 
 window.onload = function()
 {
   console = new Console();
-  console.log('Page loaded ...');
+  console.log('Page loaded');
   video = document.getElementById('video');
   setState(I_CAN_START);
 }
@@ -38,8 +38,8 @@ window.onbeforeunload = function()
 
 ws.onmessage = function(message)
 {
-  var parsedMessage = JSON.parse(message.data);
-  console.info('Received message: ' + message.data);
+  const parsedMessage = JSON.parse(message.data);
+  console.log('[onmessage] Received message: ' + message.data);
 
   switch (parsedMessage.id) {
     case 'startResponse':
@@ -49,7 +49,7 @@ ws.onmessage = function(message)
       if (state == I_AM_STARTING) {
         setState(I_CAN_START);
       }
-      onError('Error message from server: ' + parsedMessage.message);
+      console.error('[onmessage] Error message from server: ' + parsedMessage.message);
       break;
     case 'playEnd':
       playEnd();
@@ -57,7 +57,8 @@ ws.onmessage = function(message)
     case 'iceCandidate':
       webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
         if (error) {
-          return console.error('Error adding candidate: ' + error);
+          console.error('[onmessage] Error adding candidate: ' + error);
+          return;
         }
       });
       break;
@@ -71,67 +72,91 @@ ws.onmessage = function(message)
       if (state == I_AM_STARTING) {
         setState(I_CAN_START);
       }
-      onError('Unrecognized message', parsedMessage);
+      console.error('[onmessage] Unrecognized message: ', parsedMessage);
       break;
+  }
+}
+
+function explainUserMediaError(error)
+{
+  const n = error.name;
+  if (n == 'NotFoundError' || n == 'DevicesNotFoundError') {
+    return "Missing webcam for required tracks";
+  }
+  else if (n == 'NotReadableError' || n == 'TrackStartError') {
+    return "Webcam is already in use";
+  }
+  else if (n == 'OverconstrainedError' || n == 'ConstraintNotSatisfiedError') {
+    return "Webcam doesn't provide required tracks";
+  }
+  else if (n == 'NotAllowedError' || n == 'PermissionDeniedError') {
+    return "Webcam permission has been denied by the user";
+  }
+  else if (n == 'TypeError') {
+    return "No media tracks have been requested";
+  }
+  else {
+    return "Unknown error";
   }
 }
 
 function start()
 {
+  console.log('[start] Update UI');
+
   // Disable start button
   setState(I_AM_STARTING);
   showSpinner(video);
 
-  console.info('[start] Create WebRtcPeer');
+  console.log('[start] Create WebRtcPeer');
 
-  var options = {
+  const options = {
     remoteVideo: video,
     mediaConstraints: { audio: true, video: true },
     onicecandidate: onIceCandidate
-  }
+  };
   webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
-    function(error) {
-      if (error) {
-        return console.error(error);
-      }
+      function(error) {
+        if (error) {
+          console.error('[WebRtcPeer] Error in constructor: ' + explainUserMediaError(error));
+          return;
+        }
 
-      console.info('[WebRtcPeer] Generate SDP Offer');
-      webRtcPeer.generateOffer(onOffer);
-    });
+        console.log('[WebRtcPeer] Generate SDP Offer');
+        webRtcPeer.generateOffer(onOffer);
+      });
 }
 
 function onOffer(error, offerSdp)
 {
   if (error) {
-    return console.error('Error generating the SDP Offer');
+    console.error('[onOffer] Error generating SDP Offer: ' + error);
+    return;
   }
 
-  var message = {
+  console.log('[onOffer] Received SDP Offer; send message to Kurento Client at ' + location.host);
+
+  const message = {
     id: 'start',
     sdpOffer: offerSdp,
     useComedia: document.getElementById('useComedia').checked,
     useSrtp: document.getElementById('useSrtp').checked,
-  }
+  };
 
-  console.info('[onOffer] Received SDP Offer; send message to Kurento Client at ' + location.host);
   console.info('[onOffer] COMEDIA checkbox is: ' + message.useComedia);
   console.info('[onOffer] SRTP checkbox is: ' + message.useSrtp);
-  sendMessage(message);
-}
 
-function onError(error)
-{
-  console.error(error);
+  sendMessage(message);
 }
 
 function onIceCandidate(candidate)
 {
   console.log('[onIceCandidate] Local candidate: ' + JSON.stringify(candidate));
 
-  var message = {
+  const message = {
     id: 'onIceCandidate',
     candidate: candidate
-  }
+  };
   sendMessage(message);
 }
 
@@ -139,27 +164,28 @@ function startResponse(message)
 {
   setState(I_CAN_STOP);
 
-  console.info('[startResponse] SDP Answer received from Kurento Client; process in WebRtcPeer');
+  console.log('[startResponse] SDP Answer received from Kurento Client; process in WebRtcPeer');
 
   webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
     if (error) {
-      return console.error(error);
+      console.error('[startResponse] Error processing SDP Answer: ' + error);
+      return;
     }
   });
 }
 
 function stop()
 {
-  console.info('[stop] Stop video playback');
+  console.log('[stop] Stop video playback');
 
   setState(I_CAN_START);
   if (webRtcPeer) {
     webRtcPeer.dispose();
     webRtcPeer = null;
 
-    var message = {
+    const message = {
       id: 'stop'
-    }
+    };
     sendMessage(message);
   }
   hideSpinner(video);
@@ -187,7 +213,7 @@ function setState(nextState)
       disableButton('#stop');
       break;
     default:
-      onError('Unknown state ' + nextState);
+      console.error('[setState] Unknown state: ' + nextState);
       return;
   }
   state = nextState;
@@ -195,9 +221,8 @@ function setState(nextState)
 
 function sendMessage(message)
 {
-  console.info('[sendMessage] message: ' + message);
-
-  var jsonMessage = JSON.stringify(message);
+  const jsonMessage = JSON.stringify(message);
+  console.log('[sendMessage] message: ' + jsonMessage);
   ws.send(jsonMessage);
 }
 
@@ -217,7 +242,7 @@ function enableButton(id, functionName)
 
 function showSpinner()
 {
-  for (var i = 0; i < arguments.length; i++) {
+  for (let i = 0; i < arguments.length; i++) {
     arguments[i].poster = './img/transparent-1px.png';
     arguments[i].style.background = "center transparent url('./img/spinner.gif') no-repeat";
   }
@@ -225,7 +250,7 @@ function showSpinner()
 
 function hideSpinner()
 {
-  for (var i = 0; i < arguments.length; i++) {
+  for (let i = 0; i < arguments.length; i++) {
     arguments[i].src = '';
     arguments[i].poster = './img/webrtc.png';
     arguments[i].style.background = '';
