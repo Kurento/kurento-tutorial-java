@@ -22,7 +22,7 @@ using Maven's `exec` plugin (`[...]` is optional):
 ```
 $ git clone git@github.com:Kurento/kurento-tutorial-java.git
 $ cd kurento-tutorial-java/kurento-hello-world-recording
-$ mvn compile exec:java [-Dkms.url=ws://localhost:8888/kurento]
+$ mvn -U clean spring-boot:run [-Dkms.url=ws://localhost:8888/kurento]
 ```
 
 ### Dependencies ###
