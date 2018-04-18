@@ -371,16 +371,16 @@ Some default values are defined by different RFCs:
     }
     msgConnInfo += String.format(
         "* KMS listens for Video RTP at port: %d\n", kmsRtpPortV);
+    if (useSrtp) {
+      msgConnInfo += String.format(
+          "* KMS uses Video SSRC: %s\n", kmsSsrcV);
+    }
     if (useAudio) {
       msgConnInfo += String.format(
           "* KMS expects Audio SSRC from sender: %d\n", senderSsrcA);
     }
     msgConnInfo += String.format(
         "* KMS expects Video SSRC from sender: %d\n", senderSsrcV);
-    if (useSrtp) {
-      msgConnInfo += String.format(
-          "* Sender should expect Video SSRC from KMS: %s\n", kmsSsrcV);
-    }
     msgConnInfo += String.format("* KMS local IP address: %s\n", kmsIp);
     if (useComedia) {
       msgConnInfo += "* KMS will discover remote IP and port to send RTCP\n";

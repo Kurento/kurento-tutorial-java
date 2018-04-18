@@ -67,13 +67,13 @@
 			</p>
 			<p>
 				To run this demo follow these steps:
+				<ol>
+					<li>Open this page with a WebRTC-compliant browser (Chrome, Firefox).</li>
+					<li>Click on <i>Start</i> to begin the stream negotiation.</li>
+					<li>Copy the KMS IP and Port information to the external streaming program.</li>
+					<li>Click on <i>Stop</i> to finish the test.</li>
+				</ol>
 			</p>
-			<ol>
-				<li>Open this page with a WebRTC-compliant browser (Chrome, Firefox).</li>
-				<li>Click on <i>Start</i> to begin the stream negotiation.</li>
-				<li>Copy the KMS IP and Port information to the external streaming program.</li>
-				<li>Click on <i>Stop</i> to finish the test.</li>
-			</ol>
 		</div>
 		<div class="row">
 			<div class="col-md-6">
@@ -106,8 +106,9 @@
 					<br>
 					<textarea id="msgConnInfo">No info received yet...</textarea>
 				</div>
+				<br>
 				<div class="row">
-					<label class="control-label">SDP response</label>
+					<label class="control-label">SDP response from KMS</label>
 					<br>
 					<textarea id="msgSdpText">No info received yet...</textarea>
 				</div>
@@ -129,22 +130,20 @@
 				You should be able to send an RTP stream to Kurento with any external
 				application or device that supports this kind of streams. For example,
 				VLC should be able to output an RTP stream, and also there are some
-				devices in the market -such as video surveillance cameras- which also
+				devices in the market (such as video surveillance cameras) which also
 				output an RTP stream.
-
-				For this tutorial, we provide a sample GStreamer launch command which
-				<em>simulates</em> an RTP streaming application. You just need to copy
-				the provided commands, substitute any placeholder with the actual
-				required values, and run them.
-				<br>
-				First step is to install the required dependencies for these sample
-				GStreamer commands:
 			</p>
-			<pre id="gstCommand">
-sudo apt-get install \
-		gstreamer1.0-{tools,libav} gstreamer1.0-plugins-{base,good,bad,ugly} \
-		gstreamer1.5-{tools,libav} gstreamer1.5-plugins-{base,good,bad,ugly}
-			</pre>
+			<p>
+				For this tutorial, we provide a sample GStreamer launch command which
+				<em>simulates</em> an RTP streaming application. You just need to run
+				the provided commands.
+			</p>
+			<p>
+				First step is to install the required packages:
+				<pre id="gstCommand">sudo apt-get install \
+    gstreamer1.0-{tools,libav} gstreamer1.0-plugins-{base,good,bad,ugly} \
+    gstreamer1.5-{tools,libav} gstreamer1.5-plugins-{base,good,bad,ugly}</pre>
+			</p>
 		</div>
 
 		<div class="row">
@@ -152,34 +151,45 @@ sudo apt-get install \
 			<label class="control-label">Sample RTP sender</label>
 			<br>
 			<p>
-				This sample GStreamer pipeline command includes the following features:<br>
-				- Sends RTP and RTCP packets to KMS (for both Audio and Video streams).<br>
-				- Receives and prints Video RTCP packets received from KMS.<br>
-				- Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
+				This sample GStreamer pipeline command includes the following features:
+				<ul>
+					<li>Sends RTP and RTCP packets to KMS (for both Audio and Video streams).</li>
+					<li>Receives and prints Video RTCP packets received from KMS.</li>
+					<li>Binds to specific output ports for automatic RTP/RTCP port discovery.</li>
+				</ul>
 			</p>
-			<pre id="gstCommand">
+			<p>
+				To run this command, first copy it into a terminal and substitute all placeholders with the actual required values:
+				<ul>
+					<li><em>{KMS_AUDIO_PORT}</em>: Port where KMS listens for Audio RTP packets.</li>
+					<li><em>{KMS_VIDEO_PORT}</em>: Port where KMS listens for Video RTP packets.</li>
+					<li><em>{KMS_PUBLIC_IP}</em>: IP Address where KMS is running. It can be <em>127.0.0.1</em> if KMS is running in the same machine as the GStreamer command.</li>
+					<li><em>{PATH_TO_VIDEO_FILE}</em>: Path to the video file that will be streamed over RTP by GStreamer.</li>
+				</ul>
+				<pre id="gstCommand">
 PEER_A={KMS_AUDIO_PORT} PEER_V={KMS_VIDEO_PORT} PEER_IP={KMS_PUBLIC_IP} \
 SELF_PATH="{PATH_TO_VIDEO_FILE}" \
 SELF_A=5006 SELF_ASSRC=445566 \
 SELF_V=5004 SELF_VSSRC=112233 \
 bash -c 'gst-launch-1.0 -e \
-	rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-	filesrc location="$SELF_PATH" ! decodebin name=d \
-	d. ! queue ! audioconvert ! opusenc \
-		! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)$SELF_ASSRC" \
-		! r.send_rtp_sink_0 \
-	d. ! queue ! videoconvert ! x264enc tune=zerolatency \
-		! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)$SELF_VSSRC" \
-		! r.send_rtp_sink_1 \
-	r.send_rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_A bind-port=$SELF_A \
-	r.send_rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_A+1)) bind-port=$((SELF_A+1)) sync=false async=false \
-	udpsrc port=$((SELF_A+1)) ! r.recv_rtcp_sink_0 \
-	r.send_rtp_src_1 ! udpsink host=$PEER_IP port=$PEER_V bind-port=$SELF_V \
-	r.send_rtcp_src_1 ! udpsink host=$PEER_IP port=$((PEER_V+1)) bind-port=$((SELF_V+1)) sync=false async=false \
-	udpsrc port=$((SELF_V+1)) ! tee name=t \
-		t. ! queue ! r.recv_rtcp_sink_1 \
-		t. ! queue ! fakesink dump=true async=false'
-			</pre>
+  rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+  filesrc location="$SELF_PATH" ! decodebin name=d \
+  d. ! queue ! audioconvert ! opusenc \
+    ! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)$SELF_ASSRC" \
+    ! r.send_rtp_sink_0 \
+  d. ! queue ! videoconvert ! x264enc tune=zerolatency \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)$SELF_VSSRC" \
+    ! r.send_rtp_sink_1 \
+  r.send_rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_A bind-port=$SELF_A \
+  r.send_rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_A+1)) bind-port=$((SELF_A+1)) sync=false async=false \
+  udpsrc port=$((SELF_A+1)) ! r.recv_rtcp_sink_0 \
+  r.send_rtp_src_1 ! udpsink host=$PEER_IP port=$PEER_V bind-port=$SELF_V \
+  r.send_rtcp_src_1 ! udpsink host=$PEER_IP port=$((PEER_V+1)) bind-port=$((SELF_V+1)) sync=false async=false \
+  udpsrc port=$((SELF_V+1)) ! tee name=t \
+    t. ! queue ! r.recv_rtcp_sink_1 \
+    t. ! queue ! fakesink dump=true async=false'
+				</pre>
+			</p>
 		</div>
 
 		<div class="row">
@@ -187,40 +197,51 @@ bash -c 'gst-launch-1.0 -e \
 			<label class="control-label">Sample SRTP sender</label>
 			<br>
 			<p>
-				This sample GStreamer pipeline command includes the following features:<br>
-				- Sends SRTP and SRTCP packets to KMS (only for the Video stream).<br>
-				- Receives and prints Video SRTCP packets received from KMS.<br>
-				- Binds to specific output ports for automatic RTP/RTCP port discovery.<br>
+				This sample GStreamer pipeline command includes the following features:
+				<ul>
+					<li>Sends SRTP and SRTCP packets to KMS (only for the Video stream).</li>
+					<li>Receives and prints Video SRTCP packets received from KMS.</li>
+					<li>Binds to specific output ports for automatic RTP/RTCP port discovery.</li>
+				</ul>
 			</p>
-			<pre id="gstCommand">
+			<p>
+				To run this command, first copy it into a terminal and substitute all placeholders with the actual required values:
+				<ul>
+					<li><em>{KMS_VIDEO_PORT}</em>: Port where KMS listens for Video RTP packets.</li>
+					<li><em>{KMS_VIDEO_SSRC}</em>: SSRC identifier used by KMS for its Video RTCP reports.</li>
+					<li><em>{KMS_PUBLIC_IP}</em>: IP Address where KMS is running. It can be <em>127.0.0.1</em> if KMS is running in the same machine as the GStreamer command.</li>
+					<li><em>{PATH_TO_VIDEO_FILE}</em>: Path to the video file that will be streamed over RTP by GStreamer.</li>
+				</ul>
+				<pre id="gstCommand">
 PEER_V={KMS_VIDEO_PORT} PEER_VSSRC={KMS_VIDEO_SSRC} PEER_IP={KMS_PUBLIC_IP} \
 PEER_KEY="343332315A595857565554535251504F4E4D4C4B4A494847464544434241" \
 SELF_PATH="{PATH_TO_VIDEO_FILE}" \
 SELF_V=5004 SELF_VSSRC=112233 \
 SELF_KEY="4142434445464748494A4B4C4D4E4F505152535455565758595A31323334" \
 SRTP_CAPS="payload=(int)103,ssrc=(uint)$PEER_VSSRC,roc=(uint)0, \
-		srtp-key=(buffer)$PEER_KEY, \
-		srtp-cipher=(string)aes-128-icm,srtp-auth=(string)hmac-sha1-80, \
-		srtcp-cipher=(string)aes-128-icm,srtcp-auth=(string)hmac-sha1-80" \
+    srtp-key=(buffer)$PEER_KEY, \
+    srtp-cipher=(string)aes-128-icm,srtp-auth=(string)hmac-sha1-80, \
+    srtcp-cipher=(string)aes-128-icm,srtcp-auth=(string)hmac-sha1-80" \
 bash -c 'gst-launch-1.5 -e \
-	rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-	srtpenc name=e key="$SELF_KEY" \
-		rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
-		rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
-	srtpdec name=d \
-	filesrc location="$SELF_PATH" ! decodebin \
-		! x264enc tune=zerolatency \
-		! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SELF_VSSRC" \
-		! r.send_rtp_sink \
-	r.send_rtp_src ! e.rtp_sink_0 \
-		e.rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_V \
-	r.send_rtcp_src ! e.rtcp_sink_0 \
-		e.rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_V+1)) sync=false async=false \
-	udpsrc port=$((SELF_V+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
-		d.rtcp_src ! tee name=t \
-		t. ! queue ! r.recv_rtcp_sink \
-		t. ! queue ! fakesink dump=true async=false'
-			</pre>
+  rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+  srtpenc name=e key="$SELF_KEY" \
+    rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
+    rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
+  srtpdec name=d \
+  filesrc location="$SELF_PATH" ! decodebin \
+    ! x264enc tune=zerolatency \
+    ! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SELF_VSSRC" \
+    ! r.send_rtp_sink \
+  r.send_rtp_src ! e.rtp_sink_0 \
+    e.rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_V \
+  r.send_rtcp_src ! e.rtcp_sink_0 \
+    e.rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_V+1)) sync=false async=false \
+  udpsrc port=$((SELF_V+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
+    d.rtcp_src ! tee name=t \
+    t. ! queue ! r.recv_rtcp_sink \
+    t. ! queue ! fakesink dump=true async=false'
+				</pre>
+			</p>
 		</div>
 
 		<div class="row">
