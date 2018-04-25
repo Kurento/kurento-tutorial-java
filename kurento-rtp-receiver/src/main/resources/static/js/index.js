@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-const ws = new WebSocket('wss://' + location.host + '/player');
-let video;
-let webRtcPeer;
-let state = null;
+const ws = new WebSocket('wss://' + location.host + '/rtpreceiver');
 
-const I_CAN_START = 0;
-const I_CAN_STOP = 1;
-const I_AM_STARTING = 2;
+let videoRtp;
+let webRtcPeer;
+
+// UI
+let uiState = null;
+const UI_IDLE = 0;
+const UI_STARTING = 1;
+const UI_STARTED = 2;
 
 window.onload = function()
 {
   console = new Console();
-  console.log('Page loaded');
-  video = document.getElementById('video');
-  setState(I_CAN_START);
+  console.log("Page loaded");
+  videoRtp = document.getElementById('videoRtp');
+  uiSetState(UI_IDLE);
 }
 
 window.onbeforeunload = function()
@@ -36,63 +38,22 @@ window.onbeforeunload = function()
   ws.close();
 }
 
-ws.onmessage = function(message)
+function explainUserMediaError(err)
 {
-  const parsedMessage = JSON.parse(message.data);
-  console.log('[onmessage] Received message: ' + message.data);
-
-  switch (parsedMessage.id) {
-    case 'startResponse':
-      startResponse(parsedMessage);
-      break;
-    case 'error':
-      if (state == I_AM_STARTING) {
-        setState(I_CAN_START);
-      }
-      console.error('[onmessage] Error message from server: ' + parsedMessage.message);
-      break;
-    case 'playEnd':
-      playEnd();
-      break;
-    case 'iceCandidate':
-      webRtcPeer.addIceCandidate(parsedMessage.candidate, function(error) {
-        if (error) {
-          console.error('[onmessage] Error adding candidate: ' + error);
-          return;
-        }
-      });
-      break;
-    case 'msgConnInfo':
-      document.getElementById("msgConnInfo").value = parsedMessage.text;
-      break;
-    case 'msgSdpText':
-      document.getElementById("msgSdpText").value = parsedMessage.text;
-      break;
-    default:
-      if (state == I_AM_STARTING) {
-        setState(I_CAN_START);
-      }
-      console.error('[onmessage] Unrecognized message: ', parsedMessage);
-      break;
-  }
-}
-
-function explainUserMediaError(error)
-{
-  const n = error.name;
-  if (n == 'NotFoundError' || n == 'DevicesNotFoundError') {
+  const n = err.name;
+  if (n === 'NotFoundError' || n === 'DevicesNotFoundError') {
     return "Missing webcam for required tracks";
   }
-  else if (n == 'NotReadableError' || n == 'TrackStartError') {
+  else if (n === 'NotReadableError' || n === 'TrackStartError') {
     return "Webcam is already in use";
   }
-  else if (n == 'OverconstrainedError' || n == 'ConstraintNotSatisfiedError') {
+  else if (n === 'OverconstrainedError' || n === 'ConstraintNotSatisfiedError') {
     return "Webcam doesn't provide required tracks";
   }
-  else if (n == 'NotAllowedError' || n == 'PermissionDeniedError') {
+  else if (n === 'NotAllowedError' || n === 'PermissionDeniedError') {
     return "Webcam permission has been denied by the user";
   }
-  else if (n == 'TypeError') {
+  else if (n === 'TypeError') {
     return "No media tracks have been requested";
   }
   else {
@@ -100,144 +61,238 @@ function explainUserMediaError(error)
   }
 }
 
-function start()
+function sendMessage(message)
 {
-  console.log('[start] Update UI');
-
-  // Disable start button
-  setState(I_AM_STARTING);
-  showSpinner(video);
-
-  console.log('[start] Create WebRtcPeer');
-
-  const options = {
-    remoteVideo: video,
-    mediaConstraints: { audio: true, video: true },
-    onicecandidate: onIceCandidate
-  };
-  webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
-      function(error) {
-        if (error) {
-          console.error('[WebRtcPeer] Error in constructor: ' + explainUserMediaError(error));
-          return;
-        }
-
-        console.log('[WebRtcPeer] Generate SDP Offer');
-        webRtcPeer.generateOffer(onOffer);
-      });
+  const jsonMessage = JSON.stringify(message);
+  console.log("[sendMessage] message: " + jsonMessage);
+  ws.send(jsonMessage);
 }
 
-function onOffer(error, offerSdp)
+
+
+/* ============================= */
+/* ==== WebSocket signaling ==== */
+/* ============================= */
+
+ws.onmessage = function(message)
 {
-  if (error) {
-    console.error('[onOffer] Error generating SDP Offer: ' + error);
-    return;
+  const jsonMessage = JSON.parse(message.data);
+  console.log("[onmessage] Received message: " + message.data);
+
+  switch (jsonMessage.id) {
+    case 'PROCESS_SDP_ANSWER':
+      handleProcessSdpAnswer(jsonMessage);
+      break;
+    case 'ADD_ICE_CANDIDATE':
+      handleAddIceCandidate(jsonMessage);
+      break;
+    case 'SHOW_CONN_INFO':
+      handleShowConnInfo(jsonMessage);
+      break;
+    case 'SHOW_SDP_ANSWER':
+      handleShowSdpAnswer(jsonMessage);
+      break;
+    case 'END_PLAYBACK':
+      handleEndPlayback(jsonMessage);
+      break;
+    case 'ERROR':
+      handleError(jsonMessage);
+      break;
+    default:
+    error("[onmessage] Invalid message, id: " + jsonMessage.id);
+      break;
   }
-
-  console.log('[onOffer] Received SDP Offer; send message to Kurento Client at ' + location.host);
-
-  const message = {
-    id: 'start',
-    sdpOffer: offerSdp,
-    useComedia: document.getElementById('useComedia').checked,
-    useSrtp: document.getElementById('useSrtp').checked,
-  };
-
-  console.info('[onOffer] COMEDIA checkbox is: ' + message.useComedia);
-  console.info('[onOffer] SRTP checkbox is: ' + message.useSrtp);
-
-  sendMessage(message);
 }
 
-function onIceCandidate(candidate)
-{
-  console.log('[onIceCandidate] Local candidate: ' + JSON.stringify(candidate));
+// PROCESS_SDP_ANSWER ----------------------------------------------------------
 
-  const message = {
-    id: 'onIceCandidate',
-    candidate: candidate
-  };
-  sendMessage(message);
+function handleProcessSdpAnswer(jsonMessage)
+{
+  console.log("[handleProcessSdpAnswer] SDP Answer received from Kurento Client; process in Kurento Peer");
+
+  webRtcPeer.processAnswer(jsonMessage.sdpAnswer, (err) => {
+    if (err) {
+      console.error("[handleProcessSdpAnswer] " + err);
+      return;
+    }
+
+    console.log("[handleProcessSdpAnswer] SDP Answer ready; start remote video");
+    startVideo(videoRtp);
+
+    uiSetState(UI_STARTED);
+  });
 }
 
-function startResponse(message)
+// ADD_ICE_CANDIDATE -----------------------------------------------------------
+
+function handleAddIceCandidate(jsonMessage)
 {
-  setState(I_CAN_STOP);
-
-  console.log('[startResponse] SDP Answer received from Kurento Client; process in WebRtcPeer');
-
-  webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
-    if (error) {
-      console.error('[startResponse] Error processing SDP Answer: ' + error);
+  webRtcPeer.addIceCandidate(jsonMessage.candidate, (err) => {
+    if (err) {
+      console.error("[handleAddIceCandidate] " + err);
       return;
     }
   });
 }
 
+// SHOW_CONN_INFO --------------------------------------------------------------
+
+function handleShowConnInfo(jsonMessage)
+{
+  document.getElementById("msgConnInfo").value = jsonMessage.text;
+}
+
+// SHOW_SDP_ANSWER -------------------------------------------------------------
+
+function handleShowSdpAnswer(jsonMessage)
+{
+  document.getElementById("msgSdpText").value = jsonMessage.text;
+}
+
+// END_PLAYBACK ----------------------------------------------------------------
+
+function handleEndPlayback(jsonMessage)
+{
+  uiSetState(UI_IDLE);
+  hideSpinner(videoRtp);
+}
+
+// ERROR -----------------------------------------------------------------------
+
+function error(errMessage)
+{
+  console.error("[error] " + errMessage);
+  if (uiState == UI_STARTING) {
+    uiSetState(UI_IDLE);
+  }
+}
+
+function handleError(jsonMessage)
+{
+  const errMessage = jsonMessage.message;
+  error(errMessage);
+}
+
+
+
+/* ==================== */
+/* ==== UI actions ==== */
+/* ==================== */
+
+// start -----------------------------------------------------------------------
+
+function start()
+{
+  console.log("[start] Create WebRtcPeerRecvonly");
+  uiSetState(UI_STARTING);
+  showSpinner(videoRtp);
+
+  const options = {
+    localVideo: null,
+    remoteVideo: videoRtp,
+    mediaConstraints: { audio: true, video: true },
+    onicecandidate: (candidate) => sendMessage({
+      id: 'ADD_ICE_CANDIDATE',
+      candidate: candidate,
+    }),
+  };
+
+  webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
+      function(err)
+  {
+    if (err) {
+      console.error("[start/WebRtcPeerRecvonly] Error in constructor: "
+          + explainUserMediaError(err));
+      return;
+    }
+
+    console.log("[start/WebRtcPeerRecvonly] Created; generate SDP Offer");
+    webRtcPeer.generateOffer((err, sdpOffer) => {
+      if (err) {
+        console.error("[start/WebRtcPeerRecvonly/generateOffer] " + err);
+        return;
+      }
+
+      const useComedia = document.getElementById('useComedia').checked;
+      const useSrtp = document.getElementById('useSrtp').checked;
+
+      console.log("[start/WebRtcPeerRecvonly/generateOffer] Use COMEDIA: "
+          + useComedia);
+      console.log("[start/WebRtcPeerRecvonly/generateOffer] Use SRTP: "
+          + useSrtp);
+
+      sendMessage({
+        id: 'PROCESS_SDP_OFFER',
+        sdpOffer: sdpOffer,
+        useComedia: useComedia,
+        useSrtp: useSrtp,
+      });
+
+      console.log("[start/WebRtcPeerRecvonly/generateOffer] Done!");
+      uiSetState(UI_STARTED);
+    });
+  });
+}
+
+// stop ------------------------------------------------------------------------
+
 function stop()
 {
-  console.log('[stop] Stop video playback');
+  console.log("[stop]");
 
-  setState(I_CAN_START);
+  sendMessage({
+    id: 'STOP',
+  });
+
   if (webRtcPeer) {
     webRtcPeer.dispose();
     webRtcPeer = null;
-
-    const message = {
-      id: 'stop'
-    };
-    sendMessage(message);
   }
-  hideSpinner(video);
+
+  uiSetState(UI_IDLE);
+  hideSpinner(videoRtp);
 }
 
-function playEnd()
-{
-  setState(I_CAN_START);
-  hideSpinner(video);
-}
 
-function setState(nextState)
+
+/* ================== */
+/* ==== UI state ==== */
+/* ================== */
+
+function uiSetState(nextState)
 {
   switch (nextState) {
-    case I_CAN_START:
-      enableButton('#start', 'start()');
-      disableButton('#stop');
+    case UI_IDLE:
+      uiEnableElement('#start', 'start()');
+      uiDisableElement('#stop');
       break;
-    case I_CAN_STOP:
-      disableButton('#start');
-      enableButton('#stop', 'stop()');
+    case UI_STARTING:
+      uiDisableElement('#start');
+      uiDisableElement('#stop');
       break;
-    case I_AM_STARTING:
-      disableButton('#start');
-      disableButton('#stop');
+    case UI_STARTED:
+      uiDisableElement('#start');
+      uiEnableElement('#stop', 'stop()');
       break;
     default:
-      console.error('[setState] Unknown state: ' + nextState);
+      console.error("[setState] Unknown state: " + nextState);
       return;
   }
-  state = nextState;
+  uiState = nextState;
 }
 
-function sendMessage(message)
+function uiEnableElement(id, onclickHandler)
 {
-  const jsonMessage = JSON.stringify(message);
-  console.log('[sendMessage] message: ' + jsonMessage);
-  ws.send(jsonMessage);
+  $(id).attr('disabled', false);
+  if (onclickHandler) {
+    $(id).attr('onclick', onclickHandler);
+  }
 }
 
-function disableButton(id)
+function uiDisableElement(id)
 {
   $(id).attr('disabled', true);
   $(id).removeAttr('onclick');
-}
-
-function enableButton(id, functionName)
-{
-  $(id).attr('disabled', false);
-  if (functionName) {
-    $(id).attr('onclick', functionName);
-  }
 }
 
 function showSpinner()
@@ -255,6 +310,22 @@ function hideSpinner()
     arguments[i].poster = './img/webrtc.png';
     arguments[i].style.background = '';
   }
+}
+
+function startVideo(video)
+{
+  // Manually start the <video> HTML element
+  // This is used instead of the 'autoplay' attribute, because iOS Safari
+  //  requires a direct user interaction in order to play a video with audio.
+  // Ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
+  video.play().catch((err) => {
+    if (err.name === 'NotAllowedError') {
+      console.error("[start] Browser doesn't allow playing video: " + err);
+    }
+    else {
+      console.error("[start] Error in video.play(): " + err);
+    }
+  });
 }
 
 /**

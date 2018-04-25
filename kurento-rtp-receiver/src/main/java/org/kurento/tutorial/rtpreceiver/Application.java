@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kurento.tutorial.player;
+package org.kurento.tutorial.rtpreceiver;
 
 import org.kurento.client.KurentoClient;
 import org.springframework.boot.SpringApplication;
@@ -32,9 +32,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class Application implements WebSocketConfigurer
 {
   @Bean
-  public PlayerHandler handler()
+  public Handler handler()
   {
-    return new PlayerHandler();
+    return new Handler();
   }
 
   @Bean
@@ -46,7 +46,7 @@ public class Application implements WebSocketConfigurer
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry)
   {
-    registry.addHandler(handler(), "/player");
+    registry.addHandler(handler(), "/rtpreceiver");
   }
 
   public static void main(String[] args) throws Exception

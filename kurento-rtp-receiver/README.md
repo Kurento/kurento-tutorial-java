@@ -7,8 +7,8 @@
 
 Copyright 2017 Kurento (https://www.kurento.org). Licensed under the [Apache License, Version 2.0].
 
-Kurento Java Tutorial - RTP Player
-==================================
+Kurento Java Tutorial - RTP Receiver
+====================================
 
 Play an RTP stream.
 
@@ -124,4 +124,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
 
-[instructions]: http://www.kurento.org/docs/current/tutorials/java/tutorial-player.html
+[instructions]: https://doc-kurento.readthedocs.io/en/stable/tutorials/java/tutorial-rtp-receiver.html

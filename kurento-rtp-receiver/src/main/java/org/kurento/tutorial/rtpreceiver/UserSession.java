@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kurento.tutorial.player;
+package org.kurento.tutorial.rtpreceiver;
 
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.RtpEndpoint;

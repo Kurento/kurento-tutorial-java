@@ -12,6 +12,7 @@
 	<artifactId>kurento-hello-world</artifactId>
 	<packaging>jar</packaging>
 
+	<!-- Project-level information -->
 	<name>Kurento Java Tutorial - Hello World</name>
 	<description>Hello World (WebRTC in loopback)</description>
 
@@ -19,7 +20,7 @@
 
 	<properties>
 		<demo.port>8443</demo.port>
-		<start-class>org.kurento.tutorial.helloworld.HelloWorldApp</start-class>
+		<start-class>org.kurento.tutorial.helloworld.Application</start-class>
 	</properties>
 
 	<dependencies>

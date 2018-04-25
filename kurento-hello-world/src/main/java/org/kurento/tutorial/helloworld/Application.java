@@ -29,12 +29,12 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  */
 @SpringBootApplication
 @EnableWebSocket
-public class HelloWorldApp implements WebSocketConfigurer
+public class Application implements WebSocketConfigurer
 {
   @Bean
-  public HelloWorldHandler handler()
+  public Handler handler()
   {
-    return new HelloWorldHandler();
+    return new Handler();
   }
 
   @Bean
@@ -51,6 +51,6 @@ public class HelloWorldApp implements WebSocketConfigurer
 
   public static void main(String[] args) throws Exception
   {
-    SpringApplication.run(HelloWorldApp.class, args);
+    SpringApplication.run(Application.class, args);
   }
 }

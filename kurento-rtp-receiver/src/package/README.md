@@ -3,8 +3,8 @@
 [![Docker badge](https://img.shields.io/docker/pulls/fiware/orion.svg)](https://hub.docker.com/r/fiware/stream-oriented-kurento/)
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/kurento)
 
-Kurento Java Tutorial - RTP Player
-==================================
+Kurento Java Tutorial - RTP Receiver
+====================================
 
 Play an RTP stream.
 

@@ -91,11 +91,16 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- spring-boot-maven-plugin
-				Generates an executable JAR during the 'package' phase.
-				The original package is still generated as "<Name>.jar", and
-				the executable one is generated as "<Name>-exec.jar".
+				<!--
+				Goal: spring-boot:run
+				Allows running the project from Maven.
+				Use this command: `mvn clean spring-boot:run`.
 
+				Goal: spring-boot:repackage
+				Runs automatically during the Maven's 'package' goal.
+				The parameter 'executable=true' generates an executable JAR during
+				the 'package' phase. The original package is still generated as
+				"<Name>.jar", and the executable one is generated as "<Name>-exec.jar".
 				It also supports the service actions start/stop/status, so it
 				can be linked into "/etc/init.d/" to be used as system service.
 
