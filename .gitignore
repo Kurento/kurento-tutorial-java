@@ -9,7 +9,10 @@ target/
 .classpath
 .project
 .settings
-.springBeans
 
 # IDE: Visual Studio Code
 .vscode/
+
+# Java Spring
+.springBeans
+.sts4-cache/
