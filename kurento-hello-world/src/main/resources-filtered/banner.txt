@@ -6,5 +6,5 @@
    |   |_|\_\_,_|_| \___|_||_\__\___/   |
    |                                    |
    '------------------------------------'
-       ${project.name}
-       Version ${project.version}
+       @project.name@
+       Version @project.version@

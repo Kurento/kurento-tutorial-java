@@ -70,8 +70,10 @@ public class Handler extends TextWebSocketHandler
   public void afterConnectionClosed(final WebSocketSession session,
       CloseStatus status) throws Exception
   {
-    log.debug("[Handler::afterConnectionClosed] status: {}, sessionId: {}",
-        status, session.getId());
+    if (!status.equalsCode(CloseStatus.NORMAL)) {
+      log.warn("[Handler::afterConnectionClosed] status: {}, sessionId: {}",
+          status, session.getId());
+    }
 
     stop(session);
   }
@@ -80,17 +82,18 @@ public class Handler extends TextWebSocketHandler
   protected void handleTextMessage(WebSocketSession session,
       TextMessage message) throws Exception
   {
+    final String sessionId = session.getId();
     JsonObject jsonMessage = gson.fromJson(message.getPayload(),
         JsonObject.class);
-    String sessionId = session.getId();
 
     log.debug("[Handler::handleTextMessage] {}, sessionId: {}",
         jsonMessage, sessionId);
 
     try {
-      String messageId = jsonMessage.get("id").getAsString();
+      final String messageId = jsonMessage.get("id").getAsString();
       switch (messageId) {
         case "PROCESS_SDP_OFFER":
+          // Start: Create user session and process SDP Offer
           handleProcessSdpOffer(session, jsonMessage);
           break;
         case "ADD_ICE_CANDIDATE":
@@ -99,14 +102,19 @@ public class Handler extends TextWebSocketHandler
         case "STOP":
           handleStop(session, jsonMessage);
           break;
+        case "ERROR":
+          handleError(session, jsonMessage);
+          break;
         default:
-          sendError(session, "Invalid message, id: " + messageId);
+          // Ignore the message
+          log.warn("[Handler::handleTextMessage] Skip, invalid message, id: {}",
+              messageId);
           break;
       }
     } catch (Throwable ex) {
       log.error("[Handler::handleTextMessage] Exception: {}, sessionId: {}",
           ex, sessionId);
-      sendError(session, "Exception: " + ex.getMessage());
+      sendError(session, "[Kurento] Exception: " + ex.getMessage());
     }
   }
 
@@ -118,12 +126,48 @@ public class Handler extends TextWebSocketHandler
         ex, session.getId());
   }
 
+  private synchronized void sendMessage(final WebSocketSession session,
+      String message)
+  {
+    log.debug("[Handler::sendMessage] {}", message);
+
+    if (!session.isOpen()) {
+      log.warn("[Handler::sendMessage] Skip, WebSocket session isn't open");
+      return;
+    }
+
+    final String sessionId = session.getId();
+    if (!users.containsKey(sessionId)) {
+      log.warn("[Handler::sendMessage] Skip, unknown user, id: {}",
+          sessionId);
+      return;
+    }
+
+    try {
+      session.sendMessage(new TextMessage(message));
+    } catch (IOException ex) {
+      log.error("[Handler::sendMessage] Exception: {}", ex.getMessage());
+    }
+  }
+
+  private void sendError(final WebSocketSession session, String errMsg)
+  {
+    log.error(errMsg);
+
+    if (users.containsKey(session.getId())) {
+      JsonObject message = new JsonObject();
+      message.addProperty("id", "ERROR");
+      message.addProperty("message", errMsg);
+      sendMessage(session, message.toString());
+    }
+  }
+
   // START ---------------------------------------------------------------------
 
-  private void addBaseEventListeners(final WebSocketSession session,
+  private void initBaseEventListeners(final WebSocketSession session,
       BaseRtpEndpoint baseRtpEp, final String className)
   {
-    log.info("[Handler::addBaseEventListeners] name: {}, class: {}, sessionId: {}",
+    log.info("[Handler::initBaseEventListeners] name: {}, class: {}, sessionId: {}",
         baseRtpEp.getName(), className, session.getId());
 
     // Event: Some error happened
@@ -133,6 +177,8 @@ public class Handler extends TextWebSocketHandler
         log.error("[{}::{}] source: {}, timestamp: {}, tags: {}, description: {}, errorCode: {}",
             className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
             ev.getTags(), ev.getDescription(), ev.getErrorCode());
+
+        sendError(session, "[Kurento] " + ev.getDescription());
         stop(session);
       }
     });
@@ -193,10 +239,10 @@ public class Handler extends TextWebSocketHandler
     });
   }
 
-  private void addWebRtcEventListeners(final WebSocketSession session,
+  private void initWebRtcEventListeners(final WebSocketSession session,
       final WebRtcEndpoint webRtcEp)
   {
-    log.info("[Handler::addWebRtcEventListeners] name: {}, sessionId: {}",
+    log.info("[Handler::initWebRtcEventListeners] name: {}, sessionId: {}",
         webRtcEp.getName(), session.getId());
 
     // Event: The ICE backend found a local candidate during Trickle ICE
@@ -206,11 +252,10 @@ public class Handler extends TextWebSocketHandler
       public void onEvent(IceCandidateFoundEvent ev) {
         log.debug("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, candidate: {}",
             ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
-            ev.getTags(), JsonUtils.toJsonObject(ev.getCandidate()));
+            ev.getTags(), JsonUtils.toJson(ev.getCandidate()));
 
         JsonObject message = new JsonObject();
         message.addProperty("id", "ADD_ICE_CANDIDATE");
-        message.addProperty("webRtcEpId", webRtcEp.getId());
         message.add("candidate", JsonUtils.toJsonObject(ev.getCandidate()));
         sendMessage(session, message.toString());
       }
@@ -232,7 +277,7 @@ public class Handler extends TextWebSocketHandler
         new EventListener<IceGatheringDoneEvent>() {
       @Override
       public void onEvent(IceGatheringDoneEvent ev) {
-        log.debug("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}",
+        log.info("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}",
             ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
             ev.getTags());
       }
@@ -255,8 +300,12 @@ public class Handler extends TextWebSocketHandler
   private void initWebRtcEndpoint(final WebSocketSession session,
       final WebRtcEndpoint webRtcEp, String sdpOffer)
   {
-    addBaseEventListeners(session, webRtcEp, "WebRtcEndpoint");
-    addWebRtcEventListeners(session, webRtcEp);
+    initBaseEventListeners(session, webRtcEp, "WebRtcEndpoint");
+    initWebRtcEventListeners(session, webRtcEp);
+
+    final String sessionId = session.getId();
+    final String name = "user" + sessionId + "_webrtcendpoint";
+    webRtcEp.setName(name);
 
     /*
     OPTIONAL: Force usage of an Application-specific STUN server.
@@ -270,13 +319,13 @@ public class Handler extends TextWebSocketHandler
     webRtcEp.setStunServerPort(3478);
     */
 
-    // Process the SDP Offer to generate an SDP Answer
-    String sdpAnswer = webRtcEp.processOffer(sdpOffer);
+    // Continue the SDP Negotiation: Generate an SDP Answer
+    final String sdpAnswer = webRtcEp.processOffer(sdpOffer);
 
     log.info("[Handler::initWebRtcEndpoint] name: {}, SDP Offer from browser to KMS:\n{}",
-        webRtcEp.getName(), sdpOffer);
+        name, sdpOffer);
     log.info("[Handler::initWebRtcEndpoint] name: {}, SDP Answer from KMS to browser:\n{}",
-        webRtcEp.getName(), sdpAnswer);
+        name, sdpAnswer);
 
     JsonObject message = new JsonObject();
     message.addProperty("id", "PROCESS_SDP_ANSWER");
@@ -288,7 +337,7 @@ public class Handler extends TextWebSocketHandler
   {
     // Calling gatherCandidates() is when the Endpoint actually starts working.
     // In this tutorial, this is emphasized for demonstration purposes by
-    // leaving the ICE candidate gathering in its own method.
+    // launching the ICE candidate gathering in its own method.
     webRtcEp.gatherCandidates();
   }
 
@@ -297,7 +346,7 @@ public class Handler extends TextWebSocketHandler
   {
     // ---- Session handling
 
-    String sessionId = session.getId();
+    final String sessionId = session.getId();
 
     log.info("[Handler::handleStart] User count: {}", users.size());
     log.info("[Handler::handleStart] New user: {}", sessionId);
@@ -309,25 +358,32 @@ public class Handler extends TextWebSocketHandler
     // ---- Media pipeline
 
     log.info("[Handler::handleStart] Create Media Pipeline");
+
     final MediaPipeline pipeline = kurento.createMediaPipeline();
     user.setMediaPipeline(pipeline);
 
     final WebRtcEndpoint webRtcEp =
         new WebRtcEndpoint.Builder(pipeline).build();
     user.setWebRtcEndpoint(webRtcEp);
+    webRtcEp.connect(webRtcEp);
 
 
     // ---- Endpoint configuration
 
-    webRtcEp.connect(webRtcEp);
-
     String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
     initWebRtcEndpoint(session, webRtcEp, sdpOffer);
+
+    log.info("[Handler::handleStart] New WebRtcEndpoint: {}",
+        webRtcEp.getName());
+
+
+    // ---- Endpoint startup
+
     startWebRtcEndpoint(webRtcEp);
 
 
     // ---- Debug
-    // String pipelineDot = pipeline.getGstreamerDot();
+    // final String pipelineDot = pipeline.getGstreamerDot();
     // try (PrintWriter out = new PrintWriter("pipeline.dot")) {
     //   out.println(pipelineDot);
     // } catch (IOException ex) {
@@ -340,42 +396,31 @@ public class Handler extends TextWebSocketHandler
   private void handleAddIceCandidate(final WebSocketSession session,
       JsonObject jsonMessage)
   {
-    String sessionId = session.getId();
-    UserSession user = users.get(sessionId);
-
-    if (user != null) {
-      JsonObject jsonCandidate = jsonMessage.get("candidate").getAsJsonObject();
-      IceCandidate candidate =
-          new IceCandidate(jsonCandidate.get("candidate").getAsString(),
-          jsonCandidate.get("sdpMid").getAsString(),
-          jsonCandidate.get("sdpMLineIndex").getAsInt());
-
-      WebRtcEndpoint webRtcEp = user.getWebRtcEndpoint();
-      webRtcEp.addIceCandidate(candidate);
+    final String sessionId = session.getId();
+    if (!users.containsKey(sessionId)) {
+      log.warn("[Handler::handleAddIceCandidate] Skip, unknown user, id: {}",
+          sessionId);
+      return;
     }
+
+    final UserSession user = users.get(sessionId);
+    final JsonObject jsonCandidate =
+        jsonMessage.get("candidate").getAsJsonObject();
+    final IceCandidate candidate =
+        new IceCandidate(jsonCandidate.get("candidate").getAsString(),
+        jsonCandidate.get("sdpMid").getAsString(),
+        jsonCandidate.get("sdpMLineIndex").getAsInt());
+
+    WebRtcEndpoint webRtcEp = user.getWebRtcEndpoint();
+    webRtcEp.addIceCandidate(candidate);
   }
 
   // STOP ----------------------------------------------------------------------
 
-  public void sendPlayEnd(final WebSocketSession session)
-  {
-    if (users.containsKey(session.getId())) {
-      JsonObject message = new JsonObject();
-      message.addProperty("id", "END_PLAYBACK");
-      sendMessage(session, message.toString());
-    }
-  }
-
   private void stop(final WebSocketSession session)
   {
-    log.info("[Handler::stop]");
-
-    // Update the UI
-    sendPlayEnd(session);
-
     // Remove the user session and release all resources
-    String sessionId = session.getId();
-    UserSession user = users.remove(sessionId);
+    final UserSession user = users.remove(session.getId());
     if (user != null) {
       MediaPipeline mediaPipeline = user.getMediaPipeline();
       if (mediaPipeline != null) {
@@ -391,30 +436,17 @@ public class Handler extends TextWebSocketHandler
     stop(session);
   }
 
+  // ERROR ---------------------------------------------------------------------
+
+  private void handleError(final WebSocketSession session,
+      JsonObject jsonMessage)
+  {
+    final String errMsg = jsonMessage.get("message").getAsString();
+    log.error("Browser error: " + errMsg);
+
+    log.info("Assume that the other side stops after an error...");
+    stop(session);
+  }
+
   // ---------------------------------------------------------------------------
-
-  private void sendError(final WebSocketSession session, String errMsg)
-  {
-    if (users.containsKey(session.getId())) {
-      JsonObject message = new JsonObject();
-      message.addProperty("id", "ERROR");
-      message.addProperty("message", errMsg);
-      sendMessage(session, message.toString());
-    }
-  }
-
-  private synchronized void sendMessage(final WebSocketSession session,
-      String message)
-  {
-    if (!session.isOpen()) {
-      log.error("[Handler::sendMessage] WebSocket session is closed");
-      return;
-    }
-
-    try {
-      session.sendMessage(new TextMessage(message));
-    } catch (IOException ex) {
-      log.error("[Handler::sendMessage] Exception: {}", ex.getMessage());
-    }
-  }
 }

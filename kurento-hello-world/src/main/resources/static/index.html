@@ -70,26 +70,19 @@
     <div class="row">
       <div class="col-md-5">
         <h3>Local stream</h3>
-        <video id="videoInput" playsinline
+        <video id="videoInput" playsinline muted
             width="480px" height="360px" poster="/img/webrtc.png"></video>
       </div>
       <div class="col-md-2">
-        <a id="start" href="#" class="btn btn-success">
+        <a id="uiStartBtn" href="#" class="btn btn-success">
           <span class="glyphicon glyphicon-play"></span>Start</a>
         <br>
         <br>
-        <a id="stop" href="#" class="btn btn-danger">
+        <a id="uiStopBtn" href="#" class="btn btn-danger">
           <span class="glyphicon glyphicon-stop"></span>Stop</a>
       </div>
       <div class="col-md-5">
-        <div class="row">
-          <div class="col-md-6">
-            <h3>Remote stream</h3>
-          </div>
-          <div class="col-md-6">
-              (Safari might take up to 30 seconds)
-          </div>
-        </div>
+        <h3>Remote stream</h3>
         <video id="videoOutput" playsinline
             width="480px" height="360px" poster="/img/webrtc.png"></video>
       </div>
@@ -99,9 +92,7 @@
         <label class="control-label" for="console">Console</label>
         <br>
         <br>
-        <div id="console" class="democonsole">
-          <ul></ul>
-        </div>
+        <div id="console" class="democonsole"><ul></ul></div>
       </div>
     </div>
   </div>
@@ -114,18 +105,18 @@
         <div class="row">
           <div class="col-md-4">
             <a href="https://www.urjc.es/">
-              <img src="/img/urjc.gif" alt="Universidad Rey Juan Carlos"
-                  height="50px">
+              <img src="/img/urjc.gif" height="50px"
+                  alt="Universidad Rey Juan Carlos">
             </a>
           </div>
           <div class="col-md-4">
             <a href="https://www.kurento.org/">
-              <img src="/img/kurento.png" alt="Kurento" height="50px">
+              <img src="/img/kurento.png" height="50px" alt="Kurento">
             </a>
           </div>
           <div class="col-md-4">
             <a href="https://www.naevatec.com/">
-              <img src="/img/naevatec.png" alt="Naevatec" height="50px">
+              <img src="/img/naevatec.png" height="50px" alt="Naevatec">
             </a>
           </div>
         </div>

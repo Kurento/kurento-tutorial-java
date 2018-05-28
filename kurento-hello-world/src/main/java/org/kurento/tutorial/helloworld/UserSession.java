@@ -28,22 +28,14 @@ public class UserSession
   {}
 
   public MediaPipeline getMediaPipeline()
-  {
-    return mediaPipeline;
-  }
+  { return mediaPipeline; }
 
   public void setMediaPipeline(MediaPipeline mediaPipeline)
-  {
-    this.mediaPipeline = mediaPipeline;
-  }
+  { this.mediaPipeline = mediaPipeline; }
 
   public WebRtcEndpoint getWebRtcEndpoint()
-  {
-    return webRtcEndpoint;
-  }
+  { return webRtcEndpoint; }
 
   public void setWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint)
-  {
-    this.webRtcEndpoint = webRtcEndpoint;
-  }
+  { this.webRtcEndpoint = webRtcEndpoint; }
 }

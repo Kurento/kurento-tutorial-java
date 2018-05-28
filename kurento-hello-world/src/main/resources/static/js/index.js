@@ -59,12 +59,27 @@ function explainUserMediaError(err)
     return "No media tracks have been requested";
   }
   else {
-    return "Unknown error";
+    return "Unknown error: " + err;
   }
+}
+
+function sendError(message)
+{
+  console.error(message);
+
+  sendMessage({
+    id: 'ERROR',
+    message: message,
+  });
 }
 
 function sendMessage(message)
 {
+  if (ws.readyState !== ws.OPEN) {
+    console.warn("[sendMessage] Skip, WebSocket session isn't open");
+    return;
+  }
+
   const jsonMessage = JSON.stringify(message);
   console.log("[sendMessage] message: " + jsonMessage);
   ws.send(jsonMessage);
@@ -88,14 +103,12 @@ ws.onmessage = function(message)
     case 'ADD_ICE_CANDIDATE':
       handleAddIceCandidate(jsonMessage);
       break;
-    case 'END_PLAYBACK':
-      handleEndPlayback(jsonMessage);
-      break;
     case 'ERROR':
       handleError(jsonMessage);
       break;
     default:
-    error("[onmessage] Invalid message, id: " + jsonMessage.id);
+      // Ignore the message
+      console.warn("[onmessage] Invalid message, id: " + jsonMessage.id);
       break;
   }
 }
@@ -104,11 +117,17 @@ ws.onmessage = function(message)
 
 function handleProcessSdpAnswer(jsonMessage)
 {
-  console.log("[handleProcessSdpAnswer] SDP Answer received from Kurento Client; process in Kurento Peer");
+  console.log("[handleProcessSdpAnswer] SDP Answer from Kurento, process in WebRTC Peer");
+
+  if (webRtcPeer == null) {
+    console.warn("[handleProcessSdpAnswer] Skip, no WebRTC Peer");
+    return;
+  }
 
   webRtcPeer.processAnswer(jsonMessage.sdpAnswer, (err) => {
     if (err) {
-      console.error("[handleProcessSdpAnswer] " + err);
+      sendError("[handleProcessSdpAnswer] Error: " + err);
+      stop();
       return;
     }
 
@@ -123,6 +142,11 @@ function handleProcessSdpAnswer(jsonMessage)
 
 function handleAddIceCandidate(jsonMessage)
 {
+  if (webRtcPeer == null) {
+    console.warn("[handleAddIceCandidate] Skip, no WebRTC Peer");
+    return;
+  }
+
   webRtcPeer.addIceCandidate(jsonMessage.candidate, (err) => {
     if (err) {
       console.error("[handleAddIceCandidate] " + err);
@@ -131,28 +155,39 @@ function handleAddIceCandidate(jsonMessage)
   });
 }
 
-// END_PLAYBACK ----------------------------------------------------------------
+// STOP ------------------------------------------------------------------------
 
-function handleEndPlayback(jsonMessage)
+function stop()
 {
+  console.log("[stop]");
+
+  if (uiState == UI_IDLE) {
+    console.log("[stop] Skip, already stopped");
+    return;
+  }
+
+  if (webRtcPeer) {
+    webRtcPeer.dispose();
+    webRtcPeer = null;
+  }
+
   uiSetState(UI_IDLE);
   hideSpinner(videoInput, videoOutput);
+
+  sendMessage({
+    id: 'STOP',
+  });
 }
 
 // ERROR -----------------------------------------------------------------------
 
-function error(errMessage)
-{
-  console.error("[error] " + errMessage);
-  if (uiState == UI_STARTING) {
-    uiSetState(UI_IDLE);
-  }
-}
-
 function handleError(jsonMessage)
 {
   const errMessage = jsonMessage.message;
-  error(errMessage);
+  console.error("Kurento error: " + errMessage);
+
+  console.log("Assume that the other side stops after an error...");
+  stop();
 }
 
 
@@ -161,9 +196,9 @@ function handleError(jsonMessage)
 /* ==== UI actions ==== */
 /* ==================== */
 
-// start -----------------------------------------------------------------------
+// Start -----------------------------------------------------------------------
 
-function start()
+function uiStart()
 {
   console.log("[start] Create WebRtcPeerSendrecv");
   uiSetState(UI_STARTING);
@@ -173,6 +208,7 @@ function start()
     localVideo: videoInput,
     remoteVideo: videoOutput,
     mediaConstraints: { audio: true, video: true },
+    //J mediaConstraints: { audio: false, video: true },
     onicecandidate: (candidate) => sendMessage({
       id: 'ADD_ICE_CANDIDATE',
       candidate: candidate,
@@ -183,8 +219,9 @@ function start()
       function(err)
   {
     if (err) {
-      console.error("[start/WebRtcPeerSendrecv] Error in constructor: "
+      sendError("[start/WebRtcPeerSendrecv] Error in constructor: "
           + explainUserMediaError(err));
+      stop();
       return;
     }
 
@@ -194,7 +231,8 @@ function start()
     console.log("[start/WebRtcPeerSendrecv] Generate SDP Offer");
     webRtcPeer.generateOffer((err, sdpOffer) => {
       if (err) {
-        console.error("[start/WebRtcPeerSendrecv/generateOffer] " + err);
+        sendError("[start/WebRtcPeerSendrecv/generateOffer] Error: " + err);
+        stop();
         return;
       }
 
@@ -209,24 +247,14 @@ function start()
   });
 }
 
-// stop ------------------------------------------------------------------------
+// Stop ------------------------------------------------------------------------
 
-function stop()
+function uiStop()
 {
-  console.log("[stop]");
-
-  sendMessage({
-    id: 'STOP',
-  });
-
-  if (webRtcPeer) {
-    webRtcPeer.dispose();
-    webRtcPeer = null;
-  }
-
-  uiSetState(UI_IDLE);
-  hideSpinner(videoInput, videoOutput);
+  stop();
 }
+
+// -----------------------------------------------------------------------------
 
 
 
@@ -238,19 +266,19 @@ function uiSetState(newState)
 {
   switch (newState) {
     case UI_IDLE:
-      uiEnableElement('#start', 'start()');
-      uiDisableElement('#stop');
+      uiEnableElement('#uiStartBtn', 'uiStart()');
+      uiDisableElement('#uiStopBtn');
       break;
     case UI_STARTING:
-      uiDisableElement('#start');
-      uiDisableElement('#stop');
+      uiDisableElement('#uiStartBtn');
+      uiDisableElement('#uiStopBtn');
       break;
     case UI_STARTED:
-      uiDisableElement('#start');
-      uiEnableElement('#stop', 'stop()');
+      uiDisableElement('#uiStartBtn');
+      uiEnableElement('#uiStopBtn', 'uiStop()');
       break;
     default:
-      console.error("[setState] Unknown state: " + newState);
+      console.warn("[setState] Skip, invalid state: " + newState);
       return;
   }
   uiState = newState;
@@ -291,7 +319,7 @@ function startVideo(video)
 {
   // Manually start the <video> HTML element
   // This is used instead of the 'autoplay' attribute, because iOS Safari
-  //  requires a direct user interaction in order to play a video with audio.
+  // requires a direct user interaction in order to play a video with audio.
   // Ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
   video.play().catch((err) => {
     if (err.name === 'NotAllowedError') {
