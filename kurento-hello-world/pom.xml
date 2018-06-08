@@ -35,16 +35,12 @@
 		</dependency>
 
 		<!-- Development -->
-		<dependency>
+		<!-- Do "mvn compile" to trigger the automatic application restart -->
+		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
-			<!-- Do "mvn compile" to trigger the automatic application restart -->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-		</dependency>
+		</dependency> -->
 
 		<!-- WebJars -->
 		<dependency>
@@ -89,12 +85,13 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+
 					<!-- Development -->
-					<addResources>false</addResources>
+					<!-- <addResources>false</addResources>
 					<folders>
 						<folder>src/main/resources</folder>
-					</folders>
-					<!-- <fork>true</fork> -->
+					</folders> -->
+
 				</configuration>
 			</plugin>
 		</plugins>
