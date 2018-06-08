@@ -19,6 +19,9 @@ package org.kurento.tutorial.helloworld;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
 
+/**
+ * Kurento Java Tutorial - Per-user session state.
+ */
 public class UserSession
 {
   private MediaPipeline mediaPipeline;

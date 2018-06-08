@@ -25,7 +25,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 /**
- * Kurento Java Tutorial - Main Application class.
+ * Kurento Java Tutorial - Application entry point.
  */
 @SpringBootApplication
 @EnableWebSocket

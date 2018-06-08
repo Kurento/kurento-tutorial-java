@@ -16,11 +16,11 @@
 
 const ws = new WebSocket('wss://' + location.host + '/helloworld');
 
-let videoInput;
-let videoOutput;
 let webRtcPeer;
 
 // UI
+let uiLocalVideo;
+let uiRemoteVideo;
 let uiState = null;
 const UI_IDLE = 0;
 const UI_STARTING = 1;
@@ -30,13 +30,14 @@ window.onload = function()
 {
   console = new Console();
   console.log("Page loaded");
-  videoInput = document.getElementById('videoInput');
-  videoOutput = document.getElementById('videoOutput');
+  uiLocalVideo = document.getElementById('uiLocalVideo');
+  uiRemoteVideo = document.getElementById('uiRemoteVideo');
   uiSetState(UI_IDLE);
 }
 
 window.onbeforeunload = function()
 {
+  console.log("Page unload - Close WebSocket");
   ws.close();
 }
 
@@ -132,7 +133,7 @@ function handleProcessSdpAnswer(jsonMessage)
     }
 
     console.log("[handleProcessSdpAnswer] SDP Answer ready; start remote video");
-    startVideo(videoOutput);
+    startVideo(uiRemoteVideo);
 
     uiSetState(UI_STARTED);
   });
@@ -159,12 +160,12 @@ function handleAddIceCandidate(jsonMessage)
 
 function stop()
 {
-  console.log("[stop]");
-
   if (uiState == UI_IDLE) {
     console.log("[stop] Skip, already stopped");
     return;
   }
+
+  console.log("[stop]");
 
   if (webRtcPeer) {
     webRtcPeer.dispose();
@@ -172,7 +173,7 @@ function stop()
   }
 
   uiSetState(UI_IDLE);
-  hideSpinner(videoInput, videoOutput);
+  hideSpinner(uiLocalVideo, uiRemoteVideo);
 
   sendMessage({
     id: 'STOP',
@@ -202,13 +203,12 @@ function uiStart()
 {
   console.log("[start] Create WebRtcPeerSendrecv");
   uiSetState(UI_STARTING);
-  showSpinner(videoInput, videoOutput);
+  showSpinner(uiLocalVideo, uiRemoteVideo);
 
   const options = {
-    localVideo: videoInput,
-    remoteVideo: videoOutput,
+    localVideo: uiLocalVideo,
+    remoteVideo: uiRemoteVideo,
     mediaConstraints: { audio: true, video: true },
-    //J mediaConstraints: { audio: false, video: true },
     onicecandidate: (candidate) => sendMessage({
       id: 'ADD_ICE_CANDIDATE',
       candidate: candidate,
@@ -219,14 +219,14 @@ function uiStart()
       function(err)
   {
     if (err) {
-      sendError("[start/WebRtcPeerSendrecv] Error in constructor: "
+      sendError("[start/WebRtcPeerSendrecv] Error: "
           + explainUserMediaError(err));
       stop();
       return;
     }
 
     console.log("[start/WebRtcPeerSendrecv] Created; start local video");
-    startVideo(videoInput);
+    startVideo(uiLocalVideo);
 
     console.log("[start/WebRtcPeerSendrecv] Generate SDP Offer");
     webRtcPeer.generateOffer((err, sdpOffer) => {

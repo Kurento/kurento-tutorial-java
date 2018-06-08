@@ -53,12 +53,12 @@ import org.kurento.client.NewCandidatePairSelectedEvent;
 
 
 /**
- * Kurento Java Tutorial - Handler class.
+ * Kurento Java Tutorial - WebSocket message handler.
  */
 public class Handler extends TextWebSocketHandler
 {
-  private final Logger log = LoggerFactory.getLogger(Handler.class);
-  private final Gson gson = new GsonBuilder().create();
+  private static final Logger log = LoggerFactory.getLogger(Handler.class);
+  private static final Gson gson = new GsonBuilder().create();
 
   private final ConcurrentHashMap<String, UserSession> users =
       new ConcurrentHashMap<>();
@@ -66,7 +66,25 @@ public class Handler extends TextWebSocketHandler
   @Autowired
   private KurentoClient kurento;
 
-  @Override
+  /**
+	 * Invoked after WebSocket negotiation has succeeded and the WebSocket connection is
+	 * opened and ready for use.
+	 */
+	@Override
+  public void afterConnectionEstablished(WebSocketSession session)
+      throws Exception
+  {
+    log.info("[Handler::afterConnectionEstablished] New WebSocket connection, sessionId: {}",
+        session.getId());
+	}
+
+  /**
+	 * Invoked after the WebSocket connection has been closed by either side, or after a
+	 * transport error has occurred. Although the session may technically still be open,
+	 * depending on the underlying implementation, sending messages at this point is
+	 * discouraged and most likely will not succeed.
+	 */
+	@Override
   public void afterConnectionClosed(final WebSocketSession session,
       CloseStatus status) throws Exception
   {
@@ -78,7 +96,10 @@ public class Handler extends TextWebSocketHandler
     stop(session);
   }
 
-  @Override
+  /**
+	 * Invoked when a new WebSocket message arrives.
+	 */
+	@Override
   protected void handleTextMessage(WebSocketSession session,
       TextMessage message) throws Exception
   {
@@ -86,7 +107,7 @@ public class Handler extends TextWebSocketHandler
     JsonObject jsonMessage = gson.fromJson(message.getPayload(),
         JsonObject.class);
 
-    log.debug("[Handler::handleTextMessage] {}, sessionId: {}",
+    log.info("[Handler::handleTextMessage] message: {}, sessionId: {}",
         jsonMessage, sessionId);
 
     try {
@@ -118,12 +139,17 @@ public class Handler extends TextWebSocketHandler
     }
   }
 
-  @Override
-  public void handleTransportError(WebSocketSession session, Throwable ex)
-      throws Exception
+  /**
+	 * Handle an error from the underlying WebSocket message transport.
+	 */
+	@Override
+  public void handleTransportError(WebSocketSession session,
+      Throwable exception) throws Exception
   {
     log.error("[Handler::handleTransportError] Exception: {}, sessionId: {}",
-        ex, session.getId());
+        exception, session.getId());
+
+    session.close(CloseStatus.SERVER_ERROR);
   }
 
   private synchronized void sendMessage(final WebSocketSession session,
@@ -162,7 +188,7 @@ public class Handler extends TextWebSocketHandler
     }
   }
 
-  // START ---------------------------------------------------------------------
+  // PROCESS_SDP_OFFER ---------------------------------------------------------
 
   private void initBaseEventListeners(final WebSocketSession session,
       BaseRtpEndpoint baseRtpEp, final String className)
@@ -174,9 +200,9 @@ public class Handler extends TextWebSocketHandler
     baseRtpEp.addErrorListener(new EventListener<ErrorEvent>() {
       @Override
       public void onEvent(ErrorEvent ev) {
-        log.error("[{}::{}] source: {}, timestamp: {}, tags: {}, description: {}, errorCode: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
-            ev.getTags(), ev.getDescription(), ev.getErrorCode());
+        log.error("[{}::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
+            className, ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
+            ev.getTimestamp(), ev.getTags(), ev.getDescription());
 
         sendError(session, "[Kurento] " + ev.getDescription());
         stop(session);
@@ -349,10 +375,10 @@ public class Handler extends TextWebSocketHandler
     final String sessionId = session.getId();
 
     log.info("[Handler::handleStart] User count: {}", users.size());
-    log.info("[Handler::handleStart] New user: {}", sessionId);
+    log.info("[Handler::handleStart] New user, id: {}", sessionId);
 
     final UserSession user = new UserSession();
-    users.put(session.getId(), user);
+    users.put(sessionId, user);
 
 
     // ---- Media pipeline
