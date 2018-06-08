@@ -67,24 +67,24 @@ public class Handler extends TextWebSocketHandler
   private KurentoClient kurento;
 
   /**
-	 * Invoked after WebSocket negotiation has succeeded and the WebSocket connection is
-	 * opened and ready for use.
-	 */
-	@Override
+   * Invoked after WebSocket negotiation has succeeded and the WebSocket connection is
+   * opened and ready for use.
+   */
+  @Override
   public void afterConnectionEstablished(WebSocketSession session)
       throws Exception
   {
     log.info("[Handler::afterConnectionEstablished] New WebSocket connection, sessionId: {}",
         session.getId());
-	}
+  }
 
   /**
-	 * Invoked after the WebSocket connection has been closed by either side, or after a
-	 * transport error has occurred. Although the session may technically still be open,
-	 * depending on the underlying implementation, sending messages at this point is
-	 * discouraged and most likely will not succeed.
-	 */
-	@Override
+   * Invoked after the WebSocket connection has been closed by either side, or after a
+   * transport error has occurred. Although the session may technically still be open,
+   * depending on the underlying implementation, sending messages at this point is
+   * discouraged and most likely will not succeed.
+   */
+  @Override
   public void afterConnectionClosed(final WebSocketSession session,
       CloseStatus status) throws Exception
   {
@@ -97,9 +97,9 @@ public class Handler extends TextWebSocketHandler
   }
 
   /**
-	 * Invoked when a new WebSocket message arrives.
-	 */
-	@Override
+   * Invoked when a new WebSocket message arrives.
+   */
+  @Override
   protected void handleTextMessage(WebSocketSession session,
       TextMessage message) throws Exception
   {
@@ -140,9 +140,9 @@ public class Handler extends TextWebSocketHandler
   }
 
   /**
-	 * Handle an error from the underlying WebSocket message transport.
-	 */
-	@Override
+   * Handle an error from the underlying WebSocket message transport.
+   */
+  @Override
   public void handleTransportError(WebSocketSession session,
       Throwable exception) throws Exception
   {
