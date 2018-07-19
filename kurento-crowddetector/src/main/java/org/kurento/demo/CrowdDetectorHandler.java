@@ -152,7 +152,9 @@ public class CrowdDetectorHandler extends TextWebSocketHandler {
     JsonObject response = new JsonObject();
     response.addProperty("id", "startResponse");
     response.addProperty("sdpAnswer", sdpAnswer);
-    response.addProperty("feedUrl", this.pipeline.getFeedUrl());
+    String feedUrl = this.pipeline.getFeedUrl();
+    log.info("Using feed URL {}", feedUrl);
+    response.addProperty("feedUrl", feedUrl);
     response.addProperty("rois", gson.toJson(this.pipeline.getRois()));
     synchronized (session) {
       session.sendMessage(new TextMessage(response.toString()));

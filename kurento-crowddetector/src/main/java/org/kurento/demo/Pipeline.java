@@ -146,8 +146,8 @@ public class Pipeline {
       @Override
       public void onEvent(ErrorEvent event) {
         synchronized (this) {
-          log.error("Error received from Media server" + event.getDescription() + " "
-              + event.getErrorCode() + " " + event.getType());
+          log.error("Error received from Media server: {} (code {}, type {})",
+              event.getDescription(), event.getErrorCode(), event.getType());
           if (Pipeline.this.playing) {
             Pipeline.this.playing = false;
             log.error("Timer added to create the player again");
