@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.kurento.tutorial</groupId>
 		<artifactId>kurento-tutorial</artifactId>
-		<version>6.8.0</version>
+		<version>6.9.0</version>
 	</parent>
 	<artifactId>kurento-show-data-channel</artifactId>
 	<packaging>jar</packaging>
