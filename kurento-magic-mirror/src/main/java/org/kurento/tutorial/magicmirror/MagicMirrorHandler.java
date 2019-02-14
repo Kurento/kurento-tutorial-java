@@ -121,8 +121,9 @@ public class MagicMirrorHandler extends TextWebSocketHandler {
       // Media logic
       FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(pipeline).build();
 
-      String appServerUrl = System.getProperty("app.server.url",
-          MagicMirrorApp.DEFAULT_APP_SERVER_URL);
+      //String appServerUrl = System.getProperty("app.server.url",
+      //    MagicMirrorApp.DEFAULT_APP_SERVER_URL);
+      String appServerUrl = "http://files.openvidu.io";
       faceOverlayFilter.setOverlayedImage(appServerUrl + "/img/mario-wings.png", -0.35F, -1.2F,
           1.6F, 1.6F);
 

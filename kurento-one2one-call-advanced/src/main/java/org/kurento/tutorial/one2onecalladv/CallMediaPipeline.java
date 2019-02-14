@@ -58,8 +58,9 @@ public class CallMediaPipeline {
     recorderCallee = new RecorderEndpoint.Builder(pipeline, RECORDING_PATH + to + RECORDING_EXT)
         .build();
 
-    String appServerUrl = System.getProperty("app.server.url",
-        One2OneCallAdvApp.DEFAULT_APP_SERVER_URL);
+    // String appServerUrl = System.getProperty("app.server.url",
+    //    One2OneCallAdvApp.DEFAULT_APP_SERVER_URL);
+    String appServerUrl = "http://files.openvidu.io";
     FaceOverlayFilter faceOverlayFilterCaller = new FaceOverlayFilter.Builder(pipeline).build();
     faceOverlayFilterCaller.setOverlayedImage(appServerUrl + "/img/mario-wings.png", -0.35F, -1.2F,
         1.6F, 1.6F);
