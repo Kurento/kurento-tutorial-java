@@ -105,8 +105,9 @@
 				can be linked into "/etc/init.d/" to be used as system service.
 
 				Ref:
+				- https://stackoverflow.com/questions/21503883/spring-boot-application-as-a-service/30497095#30497095
+				- https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment-service
 				- https://docs.spring.io/spring-boot/docs/current/maven-plugin/index.html
-				- https://docs.spring.io/spring-boot/docs/1.4.1.RELEASE/reference/htmlsingle/#deployment-service
 				-->
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
