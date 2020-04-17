@@ -183,6 +183,13 @@ function stop() {
 	hideSpinner(video);
 }
 
+function debugDot() {
+	console.log('Generate debug DOT file ...');
+	sendMessage({
+		id: 'debugDot'
+	});
+}
+
 function playEnd() {
 	setState(I_CAN_START);
 	hideSpinner(video);
@@ -226,6 +233,7 @@ function setState(nextState) {
 		enableButton('#start', 'start()');
 		disableButton('#pause');
 		disableButton('#stop');
+		disableButton('#debugDot');
 		enableButton('#videourl');
 		enableButton("[name='mode']");
 		disableButton('#getPosition');
@@ -236,6 +244,7 @@ function setState(nextState) {
 		disableButton('#start');
 		enableButton('#pause', 'pause()');
 		enableButton('#stop', 'stop()');
+		enableButton('#debugDot', 'debugDot()');
 		disableButton('#videourl');
 		disableButton("[name='mode']");
 		break;
@@ -244,6 +253,7 @@ function setState(nextState) {
 		disableButton('#start');
 		disableButton('#pause');
 		disableButton('#stop');
+		disableButton('#debugDot');
 		disableButton('#videourl');
 		disableButton('#getPosition');
 		disableButton('#doSeek');

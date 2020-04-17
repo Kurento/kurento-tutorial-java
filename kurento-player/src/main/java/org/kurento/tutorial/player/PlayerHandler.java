@@ -18,6 +18,7 @@
 package org.kurento.tutorial.player;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kurento.client.EndOfStreamEvent;
@@ -30,6 +31,7 @@ import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaState;
 import org.kurento.client.MediaStateChangedEvent;
 import org.kurento.client.PlayerEndpoint;
+import org.kurento.client.ServerManager;
 import org.kurento.client.VideoInfo;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.commons.exception.KurentoException;
@@ -83,6 +85,9 @@ public class PlayerHandler extends TextWebSocketHandler {
         case "resume":
           resume(session);
           break;
+        case "debugDot":
+          debugDot(session);
+          break;
         case "doSeek":
           doSeek(session, jsonMessage);
           break;
@@ -135,8 +140,12 @@ public class PlayerHandler extends TextWebSocketHandler {
       }
     });
 
+    // Continue the SDP Negotiation: Generate an SDP Answer
     String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
     String sdpAnswer = webRtcEndpoint.processOffer(sdpOffer);
+
+    log.info("[Handler::start] SDP Offer from browser to KMS:\n{}", sdpOffer);
+    log.info("[Handler::start] SDP Answer from KMS to browser:\n{}", sdpAnswer);
 
     JsonObject response = new JsonObject();
     response.addProperty("id", "startResponse");
@@ -214,6 +223,30 @@ public class PlayerHandler extends TextWebSocketHandler {
     if (user != null) {
       user.release();
     }
+  }
+
+  private void debugDot(final WebSocketSession session) {
+    UserSession user = users.get(session.getId());
+
+    if (user != null) {
+      final String pipelineDot = user.getMediaPipeline().getGstreamerDot();
+      try (PrintWriter out = new PrintWriter("player.dot")) {
+        out.println(pipelineDot);
+      } catch (IOException ex) {
+        log.error("[Handler::debugDot] Exception: {}", ex.getMessage());
+      }
+      final String playerDot = user.getPlayerEndpoint().getElementGstreamerDot();
+      try (PrintWriter out = new PrintWriter("player-decoder.dot")) {
+        out.println(playerDot);
+      } catch (IOException ex) {
+        log.error("[Handler::debugDot] Exception: {}", ex.getMessage());
+      }
+    }
+
+    ServerManager sm = kurento.getServerManager();
+    log.warn("[Handler::debugDot] CPU COUNT: {}", sm.getCpuCount());
+    log.warn("[Handler::debugDot] CPU USAGE: {}", sm.getUsedCpu(1000));
+    log.warn("[Handler::debugDot] RAM USAGE: {}", sm.getUsedMemory());
   }
 
   private void doSeek(final WebSocketSession session, JsonObject jsonMessage) {
