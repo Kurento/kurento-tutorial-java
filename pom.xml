@@ -107,7 +107,7 @@
 				Ref:
 				- https://stackoverflow.com/questions/21503883/spring-boot-application-as-a-service/30497095#30497095
 				- https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment-service
-				- https://docs.spring.io/spring-boot/docs/current/maven-plugin/index.html
+				- https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/html/
 				-->
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
