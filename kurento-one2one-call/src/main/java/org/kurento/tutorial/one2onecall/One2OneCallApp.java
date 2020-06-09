@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 /**
  * Video call 1 to 1 demo (main).
@@ -49,6 +50,13 @@ public class One2OneCallApp implements WebSocketConfigurer {
   @Bean
   public KurentoClient kurentoClient() {
     return KurentoClient.create();
+  }
+
+  @Bean
+  public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
+    ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+    container.setMaxTextMessageBufferSize(32768);
+    return container;
   }
 
   @Override

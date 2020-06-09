@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 /**
  * CrowdDetector with RTSP media source (application and media logic).
@@ -75,6 +76,13 @@ public class CrowdDetectorApp implements WebSocketConfigurer {
   @Bean
   public CrowdDetectorHandler handler() {
     return new CrowdDetectorHandler();
+  }
+
+  @Bean
+  public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
+    ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+    container.setMaxTextMessageBufferSize(32768);
+    return container;
   }
 
   @Override
