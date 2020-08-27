@@ -135,7 +135,7 @@
         GStreamer commands:
       </p>
       <pre id="gstCommand">
-sudo apt-get install \
+sudo apt-get update && sudo apt-get install --no-install-recommends --yes \
     gstreamer1.0-{tools,libav} gstreamer1.0-plugins-{base,good,bad,ugly} \
     gstreamer1.5-{tools,libav} gstreamer1.5-plugins-{base,good,bad,ugly}
       </pre>
@@ -156,22 +156,32 @@ SELF_PATH="{PATH_TO_VIDEO_FILE}" \
 SELF_A=5006 SELF_ASSRC=445566 \
 SELF_V=5004 SELF_VSSRC=112233 \
 bash -c 'gst-launch-1.0 -e \
-  rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-  filesrc location="$SELF_PATH" ! decodebin name=d \
-  d. ! queue ! audioconvert ! opusenc \
-    ! rtpopuspay ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)$SELF_ASSRC" \
-    ! r.send_rtp_sink_0 \
-  d. ! queue ! videoconvert ! x264enc tune=zerolatency \
-    ! rtph264pay ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)$SELF_VSSRC" \
-    ! r.send_rtp_sink_1 \
-  r.send_rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_A bind-port=$SELF_A \
-  r.send_rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_A+1)) bind-port=$((SELF_A+1)) sync=false async=false \
-  udpsrc port=$((SELF_A+1)) ! r.recv_rtcp_sink_0 \
-  r.send_rtp_src_1 ! udpsink host=$PEER_IP port=$PEER_V bind-port=$SELF_V \
-  r.send_rtcp_src_1 ! udpsink host=$PEER_IP port=$((PEER_V+1)) bind-port=$((SELF_V+1)) sync=false async=false \
-  udpsrc port=$((SELF_V+1)) ! tee name=t \
-    t. ! queue ! r.recv_rtcp_sink_1 \
-    t. ! queue ! fakesink dump=true async=false'
+    rtpbin name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+    uridecodebin uri="file://$SELF_PATH" name=d \
+    d. ! queue \
+        ! audioconvert ! audioresample ! opusenc \
+        ! rtpopuspay \
+        ! "application/x-rtp,payload=(int)96,clock-rate=(int)48000,ssrc=(uint)$SELF_ASSRC" \
+        ! r.send_rtp_sink_0 \
+    d. ! queue \
+        ! videoconvert ! x264enc tune=zerolatency \
+        ! rtph264pay \
+        ! "application/x-rtp,payload=(int)103,clock-rate=(int)90000,ssrc=(uint)$SELF_VSSRC" \
+        ! r.send_rtp_sink_1 \
+    r.send_rtp_src_0 \
+        ! udpsink host=$PEER_IP port=$PEER_A bind-port=$SELF_A \
+    r.send_rtcp_src_0 \
+        ! udpsink host=$PEER_IP port=$((PEER_A+1)) bind-port=$((SELF_A+1)) sync=false async=false \
+    udpsrc port=$((SELF_A+1)) \
+        ! r.recv_rtcp_sink_0 \
+    r.send_rtp_src_1 \
+        ! udpsink host=$PEER_IP port=$PEER_V bind-port=$SELF_V \
+    r.send_rtcp_src_1 \
+        ! udpsink host=$PEER_IP port=$((PEER_V+1)) bind-port=$((SELF_V+1)) sync=false async=false \
+    udpsrc port=$((SELF_V+1)) \
+        ! tee name=t \
+        t. ! queue ! r.recv_rtcp_sink_1 \
+        t. ! queue ! fakesink dump=true async=false'
       </pre>
     </div>
     <div class="row">
@@ -195,23 +205,31 @@ SRTP_CAPS="payload=(int)103,ssrc=(uint)$PEER_VSSRC,roc=(uint)0, \
     srtp-cipher=(string)aes-128-icm,srtp-auth=(string)hmac-sha1-80, \
     srtcp-cipher=(string)aes-128-icm,srtcp-auth=(string)hmac-sha1-80" \
 bash -c 'gst-launch-1.5 -e \
-  rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
-  srtpenc name=e key="$SELF_KEY" \
-    rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
-    rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
-  srtpdec name=d \
-  filesrc location="$SELF_PATH" ! decodebin \
-    ! x264enc tune=zerolatency \
-    ! rtph264pay ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SELF_VSSRC" \
-    ! r.send_rtp_sink \
-  r.send_rtp_src ! e.rtp_sink_0 \
-    e.rtp_src_0 ! udpsink host=$PEER_IP port=$PEER_V \
-  r.send_rtcp_src ! e.rtcp_sink_0 \
-    e.rtcp_src_0 ! udpsink host=$PEER_IP port=$((PEER_V+1)) sync=false async=false \
-  udpsrc port=$((SELF_V+1)) ! "application/x-srtcp,$SRTP_CAPS" ! d.rtcp_sink \
-    d.rtcp_src ! tee name=t \
-    t. ! queue ! r.recv_rtcp_sink \
-    t. ! queue ! fakesink dump=true async=false'
+    rtpsession name=r sdes="application/x-rtp-source-sdes,cname=(string)\"user\@example.com\"" \
+    srtpenc name=e key="$SELF_KEY" \
+        rtp-cipher="aes-128-icm" rtp-auth="hmac-sha1-80" \
+        rtcp-cipher="aes-128-icm" rtcp-auth="hmac-sha1-80" \
+    srtpdec name=d \
+    uridecodebin uri="file://$SELF_PATH" \
+        ! videoconvert ! x264enc tune=zerolatency \
+        ! rtph264pay \
+        ! "application/x-rtp,payload=(int)103,ssrc=(uint)$SELF_VSSRC" \
+        ! r.send_rtp_sink \
+    r.send_rtp_src \
+        ! e.rtp_sink_0 \
+    e.rtp_src_0 \
+        ! udpsink host=$PEER_IP port=$PEER_V \
+    r.send_rtcp_src \
+        ! e.rtcp_sink_0 \
+    e.rtcp_src_0 \
+        ! udpsink host=$PEER_IP port=$((PEER_V+1)) sync=false async=false \
+    udpsrc port=$((SELF_V+1)) \
+        ! "application/x-srtcp,$SRTP_CAPS" \
+        ! d.rtcp_sink \
+    d.rtcp_src \
+        ! tee name=t \
+        t. ! queue ! r.recv_rtcp_sink \
+        t. ! queue ! fakesink dump=true async=false'
       </pre>
     </div>
     <div class="row">
