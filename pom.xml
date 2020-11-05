@@ -46,7 +46,6 @@
 		<module>kurento-group-call</module>
 		<module>kurento-hello-world</module>
 		<module>kurento-hello-world-recording</module>
-		<module>kurento-hello-world-repository</module>
 		<module>kurento-magic-mirror</module>
 		<module>kurento-metadata-example</module>
 		<module>kurento-one2many-call</module>
