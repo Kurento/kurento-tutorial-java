@@ -124,4 +124,4 @@ Before asking for support, please read first the [Kurento Netiquette Guidelines]
 [Open API specification]: http://kurento.github.io/doc-kurento/
 [apiary.io]: http://docs.streamoriented.apiary.io/
 
-[instructions]: https://doc-kurento.readthedocs.io/en/stable/tutorials/java/tutorial-rtp-receiver.html
+[instructions]: https://doc-kurento.readthedocs.io/en/latest/tutorials/java/tutorial-rtp-receiver.html
