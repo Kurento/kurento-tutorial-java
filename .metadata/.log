@@ -1,0 +1,75 @@
+!SESSION 2021-01-04 22:24:22.392 -----------------------------------------------
+eclipse.buildId=4.14.0.I20191210-0610
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ko_KR
+Framework arguments:  -product org.eclipse.epp.package.jee.product
+Command-line arguments:  -data C:\testWork\kurento-tutorial-java -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.jee.product
+
+!ENTRY org.eclipse.egit.ui 2 0 2021-01-04 22:25:00.933
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\tjrco'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:47.666
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:49.634
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:51.577
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:52.795
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:54.694
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:55.935
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:57.171
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:58.419
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:27:59.675
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:28:01.056
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:28:02.366
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:28:04.307
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2021-01-04 22:28:05.396
+!MESSAGE IPackageFragmentRoot is missing, skipping javadoc/source attachment for project P/kurento-magic-mirror
+
+!ENTRY org.eclipse.m2e.core 4 -1 2021-01-04 22:28:05.401
+!MESSAGE Could not lookup required component
+!STACK 0
+org.codehaus.plexus.component.repository.exception.ComponentLookupException: java.util.NoSuchElementException
+      role: org.apache.maven.execution.MavenExecutionRequestPopulator
+  roleHint: 
+	at org.codehaus.plexus.DefaultPlexusContainer.lookup(DefaultPlexusContainer.java:267)
+	at org.codehaus.plexus.DefaultPlexusContainer.lookup(DefaultPlexusContainer.java:255)
+	at org.codehaus.plexus.DefaultPlexusContainer.lookup(DefaultPlexusContainer.java:249)
+	at org.eclipse.m2e.core.internal.embedder.MavenImpl.lookup(MavenImpl.java:1293)
+	at org.eclipse.m2e.core.internal.embedder.MavenImpl.createExecutionRequest(MavenImpl.java:239)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.newExecutionRequest(MavenExecutionContext.java:94)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:127)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:101)
+	at org.eclipse.m2e.core.internal.embedder.MavenImpl.execute(MavenImpl.java:1375)
+	at org.eclipse.m2e.jdt.internal.DownloadSourcesJob.run(DownloadSourcesJob.java:161)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+Caused by: java.util.NoSuchElementException
+	at java.base/java.util.Collections$EmptyIterator.next(Collections.java:4210)
+	at org.codehaus.plexus.DefaultPlexusContainer.lookup(DefaultPlexusContainer.java:263)
+	... 10 more

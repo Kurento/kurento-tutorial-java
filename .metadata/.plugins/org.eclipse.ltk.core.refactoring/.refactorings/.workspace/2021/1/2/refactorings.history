@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete 17 resources" deleteContents="false" description="Delete 17 resources" element1="/kurento-chroma" element10="/kurento-one2one-call-advanced" element11="/kurento-one2one-call-recording" element12="/kurento-platedetector" element13="/kurento-player" element14="/kurento-pointerdetector" element15="/kurento-rtp-receiver" element16="/kurento-send-data-channel" element17="/kurento-show-data-channel" element2="/kurento-crowddetector" element3="/kurento-group-call" element4="/kurento-hello-world" element5="/kurento-hello-world-recording" element6="/kurento-magic-mirror" element7="/kurento-metadata-example" element8="/kurento-one2many-call" element9="/kurento-one2one-call" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="17" stamp="1609766867002"/>
+</session>

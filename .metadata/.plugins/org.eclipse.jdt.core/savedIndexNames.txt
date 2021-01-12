@@ -1,0 +1,2 @@
+INDEX VERSION 1.131+C:\testWork\kurento-tutorial-java\.metadata\.plugins\org.eclipse.jdt.core
+3069088580.index
