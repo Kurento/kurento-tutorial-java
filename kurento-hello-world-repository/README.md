@@ -10,6 +10,12 @@ Copyright © 2013-2016 [Kurento]. Licensed under [Apache 2.0 License].
 kurento-hello-world-repository
 ==============================
 
+> :warning: **Warning**
+>
+> This tutorial is not actively maintained. It was written to showcase the use of [Kurento Repository Server][repository], which itself if not maintained either.
+>
+> All content here is available for legacy reasons, but no support is provided at all, and you'll be on your own if you decide to use it.
+
 Kurento Java Tutorial: Hello World (WebRTC in loopback) with recording and
 storage of media in the kurento-repository-server through the
 kurento-repository-client (i.e. the Java API to handle the Repository Server).
@@ -36,7 +42,7 @@ Running the tutorial
 
 In order to run this tutorial, please read the following [instructions].
 
-After cloning the tutorial, it can be executed directly from the terminal by 
+After cloning the tutorial, it can be executed directly from the terminal by
 using Maven's `exec` plugin (`[...]` are optional):
 
 ```
@@ -48,8 +54,8 @@ $ mvn -U clean spring-boot:run [-Drepository.uri=http://localhost:7676] \
 
 ### Dependencies ###
 
-If using a *SNAPSHOT* version (e.g. latest commit from **master** branch), the 
-project `kurento-java` is also required to exist (built and installed) in the 
+If using a *SNAPSHOT* version (e.g. latest commit from **master** branch), the
+project `kurento-java` is also required to exist (built and installed) in the
 local Maven repository.
 
 ```
