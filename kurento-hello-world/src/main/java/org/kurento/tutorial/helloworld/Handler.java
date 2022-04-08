@@ -43,7 +43,7 @@ import org.kurento.jsonrpc.JsonUtils;
 import org.kurento.client.ConnectionStateChangedEvent;
 import org.kurento.client.ErrorEvent;
 import org.kurento.client.IceCandidateFoundEvent;
-import org.kurento.client.IceComponentStateChangeEvent;
+import org.kurento.client.IceComponentStateChangedEvent;
 import org.kurento.client.IceGatheringDoneEvent;
 import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaFlowOutStateChangeEvent;
@@ -202,7 +202,7 @@ public class Handler extends TextWebSocketHandler
       public void onEvent(ErrorEvent ev) {
         log.error("[{}::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
             className, ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
-            ev.getTimestamp(), ev.getTags(), ev.getDescription());
+            ev.getTimestampMillis(), ev.getTags(), ev.getDescription());
 
         sendError(session, "[Kurento] " + ev.getDescription());
         stop(session);
@@ -215,7 +215,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(MediaFlowInStateChangeEvent ev) {
         log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, padName: {}, mediaType: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            className, ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getState(), ev.getPadName(), ev.getMediaType());
       }
     });
@@ -226,7 +226,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(MediaFlowOutStateChangeEvent ev) {
         log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, padName: {}, mediaType: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            className, ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getState(), ev.getPadName(), ev.getMediaType());
       }
     });
@@ -237,7 +237,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(ConnectionStateChangedEvent ev) {
         log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, oldState: {}, newState: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            className, ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getOldState(), ev.getNewState());
       }
     });
@@ -248,7 +248,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(MediaStateChangedEvent ev) {
         log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, oldState: {}, newState: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            className, ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getOldState(), ev.getNewState());
       }
     });
@@ -259,7 +259,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(MediaTranscodingStateChangeEvent ev) {
         log.info("[{}::{}] source: {}, timestamp: {}, tags: {}, state: {}, binName: {}, mediaType: {}",
-            className, ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            className, ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getState(), ev.getBinName(), ev.getMediaType());
       }
     });
@@ -277,7 +277,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(IceCandidateFoundEvent ev) {
         log.debug("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, candidate: {}",
-            ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), JsonUtils.toJson(ev.getCandidate()));
 
         JsonObject message = new JsonObject();
@@ -288,12 +288,12 @@ public class Handler extends TextWebSocketHandler
     });
 
     // Event: The ICE backend changed state
-    webRtcEp.addIceComponentStateChangeListener(
-        new EventListener<IceComponentStateChangeEvent>() {
+    webRtcEp.addIceComponentStateChangedListener(
+        new EventListener<IceComponentStateChangedEvent>() {
       @Override
-      public void onEvent(IceComponentStateChangeEvent ev) {
+      public void onEvent(IceComponentStateChangedEvent ev) {
         log.debug("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}, streamId: {}, componentId: {}, state: {}",
-            ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags(), ev.getStreamId(), ev.getComponentId(), ev.getState());
       }
     });
@@ -304,7 +304,7 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(IceGatheringDoneEvent ev) {
         log.info("[WebRtcEndpoint::{}] source: {}, timestamp: {}, tags: {}",
-            ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
+            ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
             ev.getTags());
       }
     });
@@ -315,8 +315,8 @@ public class Handler extends TextWebSocketHandler
       @Override
       public void onEvent(NewCandidatePairSelectedEvent ev) {
         log.info("[WebRtcEndpoint::{}] name: {}, timestamp: {}, tags: {}, streamId: {}, local: {}, remote: {}",
-            ev.getType(), ev.getSource().getName(), ev.getTimestamp(),
-            ev.getTags(), ev.getCandidatePair().getStreamID(),
+            ev.getType(), ev.getSource().getName(), ev.getTimestampMillis(),
+            ev.getTags(), ev.getCandidatePair().getStreamId(),
             ev.getCandidatePair().getLocalCandidate(),
             ev.getCandidatePair().getRemoteCandidate());
       }

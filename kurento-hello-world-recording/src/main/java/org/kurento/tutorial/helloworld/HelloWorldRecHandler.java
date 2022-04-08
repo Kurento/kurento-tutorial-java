@@ -138,7 +138,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         public void onEvent(ErrorEvent ev) {
           log.error("[MediaPipeline::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
               ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
-              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+              ev.getTimestampMillis(), ev.getTags(), ev.getDescription());
             sendError(session, "[MediaPipeline] " + ev.getDescription());
         }
       });
@@ -147,7 +147,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         public void onEvent(ErrorEvent ev) {
           log.error("[WebRtcEndpoint::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
               ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
-              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+              ev.getTimestampMillis(), ev.getTags(), ev.getDescription());
             sendError(session, "[WebRtcEndpoint] " + ev.getDescription());
         }
       });
@@ -156,7 +156,7 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
         public void onEvent(ErrorEvent ev) {
           log.error("[RecorderEndpoint::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
               ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
-              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+              ev.getTimestampMillis(), ev.getTags(), ev.getDescription());
             sendError(session, "[RecorderEndpoint] " + ev.getDescription());
         }
       });
