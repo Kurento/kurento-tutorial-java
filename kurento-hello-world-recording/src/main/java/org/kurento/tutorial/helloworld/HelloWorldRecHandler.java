@@ -132,6 +132,35 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
       RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, RECORDER_FILE_PATH)
       .withMediaProfile(profile).build();
 
+      // Error listeners.
+      pipeline.addErrorListener(new EventListener<ErrorEvent>() {
+        @Override
+        public void onEvent(ErrorEvent ev) {
+          log.error("[MediaPipeline::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
+              ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
+              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+            sendError(session, "[MediaPipeline] " + ev.getDescription());
+        }
+      });
+      webRtcEndpoint.addErrorListener(new EventListener<ErrorEvent>() {
+        @Override
+        public void onEvent(ErrorEvent ev) {
+          log.error("[WebRtcEndpoint::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
+              ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
+              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+            sendError(session, "[WebRtcEndpoint] " + ev.getDescription());
+        }
+      });
+      recorder.addErrorListener(new EventListener<ErrorEvent>() {
+        @Override
+        public void onEvent(ErrorEvent ev) {
+          log.error("[RecorderEndpoint::ErrorEvent] Error code {}: '{}', source: {}, timestamp: {}, tags: {}, description: {}",
+              ev.getErrorCode(), ev.getType(), ev.getSource().getName(),
+              ev.getTimestamp(), ev.getTags(), ev.getDescription());
+            sendError(session, "[RecorderEndpoint] " + ev.getDescription());
+        }
+      });
+
       recorder.addRecordingListener(new EventListener<RecordingEvent>() {
 
         @Override
@@ -348,11 +377,14 @@ public class HelloWorldRecHandler extends TextWebSocketHandler {
   }
 
   private void sendError(WebSocketSession session, String message) {
+    JsonObject response = new JsonObject();
+    response.addProperty("id", "error");
+    response.addProperty("message", message);
+
     try {
-      JsonObject response = new JsonObject();
-      response.addProperty("id", "error");
-      response.addProperty("message", message);
-      session.sendMessage(new TextMessage(response.toString()));
+      synchronized (session) {
+        session.sendMessage(new TextMessage(response.toString()));
+      }
     } catch (IOException e) {
       log.error("Exception sending message", e);
     }
