@@ -20,8 +20,8 @@
 	</description>
 	<scm>
 		<url>https://github.com/Kurento/kurento-tutorial-java</url>
-		<connection>scm:git:git://github.com/Kurento/kurento-tutorial-java.git</connection>
-		<developerConnection>scm:git:git@github.com:Kurento/kurento-tutorial-java.git</developerConnection>
+		<connection>scm:git:https://github.com/Kurento/kurento-tutorial-java.git</connection>
+		<developerConnection>scm:git:ssh://github.com/Kurento/kurento-tutorial-java.git</developerConnection>
 	</scm>
 
 	<!-- Project configuration -->
