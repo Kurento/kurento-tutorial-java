@@ -184,7 +184,7 @@ public class PlayerHandler extends TextWebSocketHandler {
     playerEndpoint.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
-        log.info("EndOfStreamEvent: {}", event.getTimestamp());
+        log.info("EndOfStreamEvent: {}", event.getTimestampMillis());
         sendPlayEnd(session);
       }
     });
