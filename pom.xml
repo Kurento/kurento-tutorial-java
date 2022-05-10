@@ -25,20 +25,6 @@
 
 	<!-- Project configuration -->
 
-	<properties>
-		<version.kurento-datachannelexample>6.18.0-SNAPSHOT</version.kurento-datachannelexample>
-	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.kurento.module</groupId>
-				<artifactId>datachannelexample</artifactId>
-				<version>${version.kurento-datachannelexample}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<modules>
 		<module>kurento-chroma</module>
 		<module>kurento-crowddetector</module>

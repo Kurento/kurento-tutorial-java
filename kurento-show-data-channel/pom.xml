@@ -71,6 +71,7 @@
 		<dependency>
 			<groupId>org.kurento.module</groupId>
 			<artifactId>datachannelexample</artifactId>
+			<version>6.15.0</version>
 		</dependency>
 	</dependencies>
 
