@@ -9,18 +9,18 @@
 #/ Arguments
 #/ =========
 #/
-#/ <Version>
+#/ <BaseVersion>
 #/
-#/   Base version number to set. When '--release' is used, this version will
-#/   be used as-is; otherwise, a nightly/snapshot indicator will be appended.
+#/   Base version number to use. When '--release' is used, this string will
+#/   be set as-is; otherwise, a nightly/snapshot suffix is added.
 #/
-#/   <Version> should be in a format compatible with Semantic Versioning,
-#/   such as "1.2.3" or, in general terms, "<Major>.<Minor>.<Patch>".
+#/   <BaseVersion> must be in the Semantic Versioning format, such as "1.2.3"
+#/   ("<Major>.<Minor>.<Patch>").
 #/
 #/ --release
 #/
-#/   Use version numbers intended for Release builds, such as "1.2.3". If this
-#/   option is not given, a nightly/snapshot indicator is appended: "-dev".
+#/   Do not add nightly/snapshot suffix to the base version number.
+#/   The resulting value will be valid for a Release build.
 #/
 #/   Optional. Default: Disabled.
 #/
@@ -44,10 +44,6 @@ command -v mvn >/dev/null || {
     echo "ERROR: 'mvn' is not installed; please install it"
     exit 1
 }
-command -v xmlstarlet >/dev/null || {
-    log "ERROR: 'xmlstarlet' is not installed; please install it"
-    exit 1
-}
 
 # Trace all commands.
 set -o xtrace
@@ -65,6 +61,12 @@ while [[ $# -gt 0 ]]; do
     case "${1-}" in
         --release)
             CFG_RELEASE="true"
+            ;;
+        --kms-api)
+            # Ignore argument.
+            if [[ -n "${2-}" ]]; then
+                shift
+            fi
             ;;
         --git-add)
             CFG_GIT_ADD="true"
@@ -88,7 +90,7 @@ fi
 
 REGEX='^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
 [[ "$CFG_VERSION" =~ $REGEX ]] || {
-    echo "ERROR: '$CFG_VERSION' must be compatible with Semantic Versioning: <Major>.<Minor>.<Patch>"
+    echo "ERROR: '$CFG_VERSION' is not SemVer (<Major>.<Minor>.<Patch>)"
     exit 1
 }
 
@@ -102,9 +104,9 @@ echo "CFG_GIT_ADD=$CFG_GIT_ADD"
 # ==================
 
 if [[ "$CFG_RELEASE" == "true" ]]; then
-    VERSION="$CFG_VERSION"
+    VERSION_JAVA="$CFG_VERSION"
 else
-    VERSION="${CFG_VERSION}-SNAPSHOT"
+    VERSION_JAVA="${CFG_VERSION}-SNAPSHOT"
 fi
 
 
@@ -129,19 +131,23 @@ function git_add() {
 # Apply version
 # =============
 
+MVN_ARGS=()
+
 if [[ "$CFG_RELEASE" == "true" ]]; then
     MVN_ALLOW_SNAPSHOTS="false"
 else
     MVN_ALLOW_SNAPSHOTS="true"
+    MVN_ARGS+=(-U -Psnapshot)
 fi
 
 # Parent version: Update to latest available.
-mvn versions:update-parent \
+mvn "${MVN_ARGS[@]}" versions:update-parent \
     -DgenerateBackupPoms=false \
+    -DparentVersion="[$VERSION_JAVA,)" \
     -DallowSnapshots="$MVN_ALLOW_SNAPSHOTS"
 
 # Children versions: Make them inherit from parent.
-mvn versions:update-child-modules \
+mvn "${MVN_ARGS[@]}" versions:update-child-modules \
     -DgenerateBackupPoms=false \
     -DallowSnapshots="$MVN_ALLOW_SNAPSHOTS"
 
