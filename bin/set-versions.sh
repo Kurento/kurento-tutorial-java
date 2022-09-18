@@ -6,6 +6,22 @@
 #/ versions to the one provided as argument.
 #/
 #/
+#/ Notice
+#/ ======
+#/
+#/ This script does not use the Maven `versions` plugin (with goals such as
+#/ `versions:update-parent`, `versions:update-child-modules`, or `versions:set`)
+#/ because running Maven requires that the *current* versions are all correct
+#/ and existing (available for download or installed locally).
+#/
+#/ We have frequently found that this is a limitation, because some times it is
+#/ needed to update from an unexisting version (like if some component is
+#/ skipping a patch number, during separate development of different modules),
+#/ or when doing a Release (when the release version is not yet available).
+#/
+#/ It ends up being less troublesome to just edit the pom.xml directly.
+#/
+#/
 #/ Arguments
 #/ =========
 #/
@@ -40,8 +56,8 @@
 set -o errexit -o errtrace -o pipefail -o nounset
 
 # Check dependencies.
-command -v mvn >/dev/null || {
-    echo "ERROR: 'mvn' is not installed; please install it"
+command -v xmlstarlet >/dev/null || {
+    echo "ERROR: 'xmlstarlet' is not installed; please install it"
     exit 1
 }
 
@@ -131,25 +147,39 @@ function git_add() {
 # Apply version
 # =============
 
-MVN_ARGS=()
+# Parent: Update to the new version of kurento-java.
+xmlstarlet edit -S --inplace \
+        --update "/_:project/_:parent/_:version" \
+        --value "$VERSION_JAVA" \
+        pom.xml
 
-if [[ "$CFG_RELEASE" == "true" ]]; then
-    MVN_ALLOW_SNAPSHOTS="false"
-else
-    MVN_ALLOW_SNAPSHOTS="true"
-    MVN_ARGS+=(-U -Psnapshot)
-fi
-
-# Parent version: Update to latest available.
-mvn "${MVN_ARGS[@]}" versions:update-parent \
-    -DgenerateBackupPoms=false \
-    -DparentVersion="[$VERSION_JAVA,)" \
-    -DallowSnapshots="$MVN_ALLOW_SNAPSHOTS"
-
-# Children versions: Make them inherit from parent.
-mvn "${MVN_ARGS[@]}" versions:update-child-modules \
-    -DgenerateBackupPoms=false \
-    -DallowSnapshots="$MVN_ALLOW_SNAPSHOTS"
+# Children: Make them inherit from the new parent.
+CHILDREN=(
+    kurento-chroma
+    kurento-crowddetector
+    kurento-group-call
+    kurento-hello-world
+    kurento-hello-world-recording
+    kurento-hello-world-repository
+    kurento-magic-mirror
+    kurento-metadata-example
+    kurento-one2many-call
+    kurento-one2one-call
+    kurento-one2one-call-advanced
+    kurento-one2one-call-recording
+    kurento-platedetector
+    kurento-player
+    kurento-pointerdetector
+    kurento-rtp-receiver
+    kurento-send-data-channel
+    kurento-show-data-channel
+)
+for CHILD in "${CHILDREN[@]}"; do
+    find "$CHILD" -name pom.xml -print0 | xargs -0 -n1 \
+        xmlstarlet edit -S --inplace \
+            --update "/_:project/_:parent/_:version" \
+            --value "$VERSION_JAVA"
+done
 
 git_add \
     '*pom.xml'
